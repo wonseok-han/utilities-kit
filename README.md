@@ -23,3 +23,13 @@
 - [ ] `릴리즈 노트 포맷 생성기`: 텍스트만 입력하면 뾰로롱 마크다운 템플릿으로 변환해줄 내 귀찮음을 덜어줄 기능
 - [ ] `Diff 비교기`: 두 텍스트를 비교해서 변경된 라인만 하이라이팅하는 은근 국밥같은 기능
 - [ ] `StorageViewer`: 로컬스토리지, 세션스토리지 등 스토리지에서 key-value 읽어서 복사하기 쉽게 만들어줄 기능
+
+## Getting Started
+
+```bash
+# Module Install
+pnpm install
+
+# Server start
+pnpm run dev
+```

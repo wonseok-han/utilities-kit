@@ -10,6 +10,15 @@
     "lint": "next lint --fix --max-warnings 0",
     "check-types": "tsc --noEmit"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint",
+      "prettier --write"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
+  },
   "dependencies": {
     "@repo/ui": "workspace:*",
     "next": "^15.3.0",

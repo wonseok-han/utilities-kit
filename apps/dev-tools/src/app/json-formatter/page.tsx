@@ -1,38 +1,57 @@
 'use client';
 
+import { useJsonStore } from '@store/json-store';
 import { useState } from 'react';
 
+// 피드백 지속 시간 상수
+const FEEDBACK_DURATION = 2000;
+
 export default function JsonFormatterPage() {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [error, setError] = useState('');
+  const { clearAll, error, formatJson, input, minifyJson, output, setInput } =
+    useJsonStore();
 
-  const formatJson = () => {
+  const [isCopied, setIsCopied] = useState(false);
+  const [isFormatted, setIsFormatted] = useState(false);
+  const [isMinified, setIsMinified] = useState(false);
+  const [isCleared, setIsCleared] = useState(false);
+
+  const handleCopy = async () => {
+    if (isCopied) return; // debounce
+
     try {
-      const parsed = JSON.parse(input);
-      setOutput(JSON.stringify(parsed, null, 2));
-      setError('');
-    } catch (_) {
-      setError('잘못된 JSON 형식입니다.');
-      setOutput('');
+      await navigator.clipboard.writeText(output);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), FEEDBACK_DURATION);
+    } catch (err) {
+      console.error('복사 실패:', err);
     }
   };
 
-  const minifyJson = () => {
-    try {
-      const parsed = JSON.parse(input);
-      setOutput(JSON.stringify(parsed));
-      setError('');
-    } catch (_) {
-      setError('잘못된 JSON 형식입니다.');
-      setOutput('');
-    }
+  const handleFormat = () => {
+    if (isFormatted) return; // debounce
+    if (!input) return;
+
+    formatJson();
+    setIsFormatted(true);
+    setTimeout(() => setIsFormatted(false), FEEDBACK_DURATION);
   };
 
-  const clearAll = () => {
-    setInput('');
-    setOutput('');
-    setError('');
+  const handleMinify = () => {
+    if (isMinified) return; // debounce
+    if (!input) return;
+
+    minifyJson();
+    setIsMinified(true);
+    setTimeout(() => setIsMinified(false), FEEDBACK_DURATION);
+  };
+
+  const handleClear = () => {
+    if (isCleared) return; // debounce
+    if (!input) return;
+
+    clearAll();
+    setIsCleared(true);
+    setTimeout(() => setIsCleared(false), FEEDBACK_DURATION);
   };
 
   return (
@@ -40,7 +59,7 @@ export default function JsonFormatterPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">JSON 포맷터</h1>
         <p className="text-gray-400">
-          JSON 데이터를 예쁘게 포맷하거나 압축해보세요.
+          JSON 데이터를 예쁘게 정렬하거나 최소화해보세요.
         </p>
       </div>
 
@@ -53,22 +72,37 @@ export default function JsonFormatterPage() {
             </label>
             <div className="flex space-x-2">
               <button
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors cursor-pointer"
-                onClick={formatJson}
+                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
+                  isFormatted
+                    ? 'bg-blue-500 hover:bg-blue-600'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+                disabled={isFormatted}
+                onClick={handleFormat}
               >
-                포맷
+                {isFormatted ? '✓ 정렬 완료' : '정렬'}
               </button>
               <button
-                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors cursor-pointer"
-                onClick={minifyJson}
+                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
+                  isMinified
+                    ? 'bg-green-500 hover:bg-green-600'
+                    : 'bg-green-600 hover:bg-green-700'
+                }`}
+                disabled={isMinified}
+                onClick={handleMinify}
               >
-                최소화
+                {isMinified ? '✓ 압축 완료' : '압축'}
               </button>
               <button
-                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors cursor-pointer"
-                onClick={clearAll}
+                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
+                  isCleared
+                    ? 'bg-red-500 hover:bg-red-600'
+                    : 'bg-red-600 hover:bg-red-700'
+                }`}
+                disabled={isCleared}
+                onClick={handleClear}
               >
-                삭제
+                {isCleared ? '✓ 초기화 완료' : '초기화'}
               </button>
             </div>
           </div>
@@ -84,14 +118,19 @@ export default function JsonFormatterPage() {
         <div className="flex flex-col">
           <div className="flex items-center justify-between mb-3">
             <label className="text-sm font-medium text-gray-300">
-              출력 (포맷된 JSON)
+              출력 결과
             </label>
             {output && (
               <button
-                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded transition-colors cursor-pointer"
-                onClick={() => navigator.clipboard.writeText(output)}
+                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
+                  isCopied
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-gray-600 hover:bg-gray-700'
+                }`}
+                disabled={isCopied}
+                onClick={handleCopy}
               >
-                복사
+                {isCopied ? '✓ 복사 완료' : '복사'}
               </button>
             )}
           </div>

@@ -4,6 +4,7 @@ import type { PropsWithChildren } from 'react';
 
 import { DashboardLayout } from '@repo/ui';
 import { useRouter, usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 interface PageMetadata {
   title: string;
@@ -29,6 +30,10 @@ export function DashboardProvider({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const pageMetadata = getPageMetadata(pathname);
 
+  // 사이드바와 설정패널 토글 상태
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
+
   const handleMenuItemClick = (item: string) => {
     if (item === 'dashboard') {
       router.push('/');
@@ -37,16 +42,28 @@ export function DashboardProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  const toggleSettingsPanel = () => {
+    setIsSettingsPanelOpen((prev) => !prev);
+  };
+
   const handleSettingsPanelClose = () => {
-    console.log('Settings panel closed');
+    setIsSettingsPanelOpen(false);
   };
 
   return (
     <DashboardLayout
       activeMenuItem={pageMetadata.activeMenuItem}
       headerTitle={pageMetadata.title}
+      isSettingsPanelOpen={isSettingsPanelOpen}
+      isSidebarOpen={isSidebarOpen}
       onMenuItemClick={handleMenuItemClick}
       onSettingsPanelClose={handleSettingsPanelClose}
+      onToggleSettingsPanel={toggleSettingsPanel}
+      onToggleSidebar={toggleSidebar}
     >
       {children}
     </DashboardLayout>

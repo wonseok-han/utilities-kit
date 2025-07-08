@@ -18,39 +18,6 @@ export function DashboardContent() {
           <h1 className="text-4xl font-normal text-blue-400 mb-4">
             Welcome to Dev Tools
           </h1>
-
-          {/* 프롬프트 입력 영역 */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <div className="relative">
-              <textarea
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="개발에 필요한 도구를 선택하거나 질문을 입력하세요..."
-                rows={3}
-              />
-              <div className="flex items-center justify-between mt-3">
-                <div className="flex items-center space-x-2">
-                  <button className="p-2 text-gray-400 hover:text-white">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                  </button>
-                </div>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-                  Run →
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

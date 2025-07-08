@@ -1,13 +1,12 @@
 'use client';
 
-import React from 'react';
+import type { PropsWithChildren } from 'react';
 
 import { Header } from './header';
 import { SettingsPanel } from './settings-panel';
 import { Sidebar } from './sidebar';
 
 export interface DashboardLayoutProps {
-  children: React.ReactNode;
   headerTitle?: string;
   activeMenuItem?: string;
   showSettingsPanel?: boolean;
@@ -22,7 +21,7 @@ export function DashboardLayout({
   onMenuItemClick,
   onSettingsPanelClose,
   showSettingsPanel = true,
-}: DashboardLayoutProps) {
+}: PropsWithChildren<DashboardLayoutProps>) {
   return (
     <div className="flex min-h-screen bg-gray-900 text-white fixed inset-0">
       {/* 사이드바 */}

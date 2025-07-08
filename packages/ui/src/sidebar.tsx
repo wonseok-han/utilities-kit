@@ -1,7 +1,5 @@
 'use client';
 
-import React from 'react';
-
 export interface SidebarProps {
   activeItem?: string;
   onItemClick?: (item: string) => void;

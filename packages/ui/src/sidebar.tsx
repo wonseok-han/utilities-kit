@@ -192,17 +192,21 @@ export function Sidebar({
       >
         {/* 로고 */}
         <div className="p-4">
-          {isOpen || !isMobile ? (
+          {isOpen || isMobile ? (
             <div className="flex items-center justify-between">
-              <h1
-                className={`text-lg font-semibold text-white transition-all duration-300 delay-100 ${!isOpen && !isMobile ? 'hidden' : ''}`}
-              >
-                Dev Tools
-              </h1>
+              {(isOpen || isMobile) && (
+                <button
+                  className="text-lg font-semibold text-white hover:text-blue-400 transition-all duration-300 delay-100 cursor-pointer"
+                  onClick={() => onItemClick?.('dashboard')}
+                  title="대시보드로 이동"
+                >
+                  Dev Tools
+                </button>
+              )}
               <button
                 className="group relative p-2 text-gray-400 hover:text-white rounded-lg transition-all duration-200 hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-600 hover:shadow-lg cursor-pointer"
                 onClick={onToggle}
-                title="사이드바 접기"
+                title={isOpen ? '사이드바 접기' : '사이드바 펼치기'}
               >
                 <svg
                   className="w-4 h-4 transition-transform duration-200 group-hover:scale-110"
@@ -210,12 +214,21 @@ export function Sidebar({
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                  />
+                  {isOpen ? (
+                    <path
+                      d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    />
+                  ) : (
+                    <path
+                      d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    />
+                  )}
                 </svg>
                 {/* 호버시 나타나는 배경 효과 */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />

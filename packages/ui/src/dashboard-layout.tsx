@@ -12,6 +12,7 @@ export interface DashboardLayoutProps {
   activeMenuItem?: string;
   isSidebarOpen?: boolean;
   isSettingsPanelOpen?: boolean;
+  isMobile?: boolean;
   onMenuItemClick?: (item: string) => void;
   onSettingsPanelClose?: () => void;
   onToggleSidebar?: () => void;
@@ -22,6 +23,7 @@ export function DashboardLayout({
   activeMenuItem = 'chat',
   children,
   headerTitle = 'Chat Prompt',
+  isMobile = false,
   isSettingsPanelOpen = false,
   isSidebarOpen = true,
   onMenuItemClick,
@@ -34,6 +36,7 @@ export function DashboardLayout({
       {/* 사이드바 */}
       <Sidebar
         activeItem={activeMenuItem}
+        isMobile={isMobile}
         isOpen={isSidebarOpen}
         onItemClick={onMenuItemClick}
         onToggle={onToggleSidebar}
@@ -43,6 +46,7 @@ export function DashboardLayout({
       <div className="flex-1 flex flex-col transition-all duration-300">
         {/* 헤더 */}
         <Header
+          isMobile={isMobile}
           isSettingsPanelOpen={isSettingsPanelOpen}
           onToggleSettingsPanel={onToggleSettingsPanel}
           onToggleSidebar={onToggleSidebar}

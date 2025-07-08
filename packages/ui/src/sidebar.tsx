@@ -4,6 +4,7 @@ export interface SidebarProps {
   activeItem?: string;
   onItemClick?: (item: string) => void;
   isOpen?: boolean;
+  isMobile?: boolean;
   onToggle?: () => void;
 }
 
@@ -165,116 +166,133 @@ const getIcon = (iconType: string) => {
 
 export function Sidebar({
   activeItem = 'chat',
+  isMobile = false,
   isOpen = true,
   onItemClick,
   onToggle,
 }: SidebarProps) {
   return (
-    <div
-      className={`bg-gray-800 flex flex-col transition-all duration-300 ${
-        isOpen ? 'w-64' : 'w-16'
-      }`}
-    >
-      {/* 로고 */}
-      <div className="p-4">
-        {isOpen ? (
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-white transition-all duration-300 delay-100">
-              Dev Tools
-            </h1>
+    <>
+      {/* 모바일에서 사이드바가 열려있을 때 배경 오버레이 */}
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-40 z-40 transition-opacity duration-300"
+          onClick={onToggle}
+        />
+      )}
+
+      <div
+        className={`bg-gray-800 flex flex-col transition-all duration-300 ${
+          isMobile
+            ? `fixed left-0 top-0 h-full w-full z-50 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : isOpen
+              ? 'w-64'
+              : 'w-16'
+        }`}
+      >
+        {/* 로고 */}
+        <div className="p-4">
+          {isOpen || !isMobile ? (
+            <div className="flex items-center justify-between">
+              <h1
+                className={`text-lg font-semibold text-white transition-all duration-300 delay-100 ${!isOpen && !isMobile ? 'hidden' : ''}`}
+              >
+                Dev Tools
+              </h1>
+              <button
+                className="group relative p-2 text-gray-400 hover:text-white rounded-lg transition-all duration-200 hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-600 hover:shadow-lg cursor-pointer"
+                onClick={onToggle}
+                title="사이드바 접기"
+              >
+                <svg
+                  className="w-4 h-4 transition-transform duration-200 group-hover:scale-110"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                  />
+                </svg>
+                {/* 호버시 나타나는 배경 효과 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              </button>
+            </div>
+          ) : (
             <button
-              className="group relative p-2 text-gray-400 hover:text-white rounded-lg transition-all duration-200 hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-600 hover:shadow-lg cursor-pointer"
+              className="group relative w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 border border-blue-500/20 cursor-pointer"
               onClick={onToggle}
-              title="사이드바 접기"
+              title="사이드바 펼치기"
             >
               <svg
-                className="w-4 h-4 transition-transform duration-200 group-hover:scale-110"
+                className="w-4 h-4 text-white transition-transform duration-300 group-hover:scale-110 drop-shadow-sm"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path
-                  d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                  d="M4 6h16M4 12h16M4 18h16"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
+                  strokeWidth="2.5"
                 />
               </svg>
-              {/* 호버시 나타나는 배경 효과 */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              {/* 내부 글로우 효과 */}
+              <div className="absolute inset-0.5 bg-gradient-to-br from-white/15 to-transparent rounded-lg pointer-events-none" />
+              {/* 호버 시 펄스 효과 */}
+              <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
             </button>
-          </div>
-        ) : (
-          <button
-            className="group relative w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 border border-blue-500/20 cursor-pointer"
-            onClick={onToggle}
-            title="사이드바 펼치기"
-          >
-            <svg
-              className="w-4 h-4 text-white transition-transform duration-300 group-hover:scale-110 drop-shadow-sm"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                d="M4 6h16M4 12h16M4 18h16"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2.5"
-              />
-            </svg>
-            {/* 내부 글로우 효과 */}
-            <div className="absolute inset-0.5 bg-gradient-to-br from-white/15 to-transparent rounded-lg pointer-events-none" />
-            {/* 호버 시 펄스 효과 */}
-            <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
-          </button>
-        )}
-      </div>
+          )}
+        </div>
 
-      {/* 메뉴 */}
-      <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map((item) => (
-          <div
-            key={item.id}
-            className={`relative flex items-center rounded-lg cursor-pointer transition-colors group ${
-              isOpen ? 'px-3 py-2' : 'justify-center p-2'
-            } ${
-              activeItem === item.id
-                ? 'bg-gray-700 text-white'
-                : 'text-gray-300 hover:bg-gray-700'
-            }`}
-            onClick={() => onItemClick?.(item.id)}
-            title={!isOpen ? item.label : undefined}
-          >
-            <svg
-              className="w-5 h-5 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {getIcon(item.icon)}
-            </svg>
-
-            {/* 텍스트를 absolute로 배치하여 레이아웃에 영향 없음 */}
-            <span
-              className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${
-                isOpen
-                  ? 'opacity-100 transform scale-x-100 delay-100'
-                  : 'opacity-0 transform scale-x-0 origin-left pointer-events-none'
+        {/* 메뉴 */}
+        <nav className="flex-1 p-4 space-y-2">
+          {menuItems.map((item) => (
+            <div
+              key={item.id}
+              className={`relative flex items-center rounded-lg cursor-pointer transition-colors group ${
+                isOpen || isMobile ? 'px-3 py-2' : 'justify-center p-2'
+              } ${
+                activeItem === item.id
+                  ? 'bg-gray-700 text-white'
+                  : 'text-gray-300 hover:bg-gray-700'
               }`}
+              onClick={() => onItemClick?.(item.id)}
+              title={!isOpen && !isMobile ? item.label : undefined}
             >
-              {item.label}
-            </span>
+              <svg
+                className="w-5 h-5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {getIcon(item.icon)}
+              </svg>
 
-            {/* 툴팁 (접힌 상태일 때) */}
-            {!isOpen && (
-              <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+              {/* 텍스트를 absolute로 배치하여 레이아웃에 영향 없음 */}
+              <span
+                className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${
+                  isOpen || isMobile
+                    ? 'opacity-100 transform scale-x-100 delay-100'
+                    : 'opacity-0 transform scale-x-0 origin-left pointer-events-none'
+                }`}
+              >
                 {item.label}
-              </div>
-            )}
-          </div>
-        ))}
-      </nav>
-    </div>
+              </span>
+
+              {/* 툴팁 (접힌 상태일 때) */}
+              {!isOpen && !isMobile && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10 whitespace-nowrap">
+                  {item.label}
+                </div>
+              )}
+            </div>
+          ))}
+        </nav>
+      </div>
+    </>
   );
 }

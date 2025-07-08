@@ -48,15 +48,23 @@ export function SettingsPanel({
       {/* 배경 오버레이 - 설정패널 영역을 제외한 나머지 화면 */}
       {isOpen && (
         <div
-          className="fixed top-0 left-0 bottom-0 bg-black opacity-40 z-40 transition-opacity duration-300"
+          className="fixed top-0 left-0 bottom-0 bg-black opacity-40 z-40 transition-opacity duration-300 md:block hidden"
           onClick={onClose}
           style={{ right: '320px' }}
         />
       )}
 
+      {/* 모바일용 전체 화면 오버레이 */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-40 z-40 transition-opacity duration-300 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
       {/* 설정 패널 */}
       <div
-        className={`fixed right-0 top-0 h-full w-80 bg-gray-800 border-l border-gray-700 transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed right-0 top-0 h-full w-full md:w-80 bg-gray-800 md:border-l border-gray-700 transform transition-transform duration-300 ease-in-out z-50 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >

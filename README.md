@@ -55,3 +55,7 @@ utilities-kit/
 ├── turbo.json              # Turborepo 설정 파일
 └── pnpm-workspace.yaml     # pnpm 워크스페이스 설정
 ```
+
+## Reference
+
+- https://turborepo.com/docs/guides/tools/tailwind

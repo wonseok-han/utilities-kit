@@ -15,6 +15,21 @@ export default function JsonFormatterPage() {
     }
   };
 
+  const sampleData = [
+    {
+      label: '간단한 객체',
+      data: '{"name":"John","age":30,"city":"New York"}',
+    },
+    {
+      label: '배열 데이터',
+      data: '[{"id":1,"name":"John"},{"id":2,"name":"Jane"}]',
+    },
+    {
+      label: '중첩 객체',
+      data: '{"users":[{"id":1,"profile":{"name":"John","settings":{"theme":"dark","notifications":true}}}]}',
+    },
+  ];
+
   return (
     <div className="flex flex-col h-full p-6">
       <div className="mb-6">
@@ -97,32 +112,16 @@ export default function JsonFormatterPage() {
       <div className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
         <h3 className="text-sm font-medium text-gray-300 mb-2">샘플 데이터</h3>
         <div className="flex flex-wrap gap-2">
-          <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors cursor-pointer"
-            onClick={() =>
-              setInput('{"name":"John","age":30,"city":"New York"}')
-            }
-          >
-            간단한 객체
-          </button>
-          <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors cursor-pointer"
-            onClick={() =>
-              setInput('[{"id":1,"name":"John"},{"id":2,"name":"Jane"}]')
-            }
-          >
-            배열 데이터
-          </button>
-          <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors cursor-pointer"
-            onClick={() =>
-              setInput(
-                '{"users":[{"id":1,"profile":{"name":"John","settings":{"theme":"dark","notifications":true}}}]}'
-              )
-            }
-          >
-            중첩 객체
-          </button>
+          {sampleData.map((sample) => (
+            <ActionButton
+              key={sample.label}
+              feedbackText="로드 완료"
+              onClick={() => setInput(sample.data)}
+              variant="secondary"
+            >
+              {sample.label}
+            </ActionButton>
+          ))}
         </div>
       </div>
     </div>

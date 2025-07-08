@@ -53,22 +53,22 @@ export default function JsonFormatterPage() {
             </label>
             <div className="flex space-x-2">
               <button
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
+                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors cursor-pointer"
                 onClick={formatJson}
               >
                 포맷
               </button>
               <button
-                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors cursor-pointer"
                 onClick={minifyJson}
               >
-                압축
+                최소화
               </button>
               <button
-                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors cursor-pointer"
                 onClick={clearAll}
               >
-                지우기
+                삭제
               </button>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function JsonFormatterPage() {
             </label>
             {output && (
               <button
-                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded transition-colors"
+                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded transition-colors cursor-pointer"
                 onClick={() => navigator.clipboard.writeText(output)}
               >
                 복사
@@ -118,7 +118,7 @@ export default function JsonFormatterPage() {
         <h3 className="text-sm font-medium text-gray-300 mb-2">샘플 데이터</h3>
         <div className="flex flex-wrap gap-2">
           <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors cursor-pointer"
             onClick={() =>
               setInput('{"name":"John","age":30,"city":"New York"}')
             }
@@ -126,7 +126,7 @@ export default function JsonFormatterPage() {
             간단한 객체
           </button>
           <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors cursor-pointer"
             onClick={() =>
               setInput('[{"id":1,"name":"John"},{"id":2,"name":"Jane"}]')
             }
@@ -134,7 +134,7 @@ export default function JsonFormatterPage() {
             배열 데이터
           </button>
           <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
+            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors cursor-pointer"
             onClick={() =>
               setInput(
                 '{"users":[{"id":1,"profile":{"name":"John","settings":{"theme":"dark","notifications":true}}}]}'

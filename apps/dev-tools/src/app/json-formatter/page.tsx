@@ -1,6 +1,6 @@
 'use client';
 
-import { ActionButton } from '@repo/ui';
+import { ActionButton, CodeTextarea } from '@repo/ui';
 import { useJsonStore } from '@store/json-store';
 
 export default function JsonFormatterPage() {
@@ -56,9 +56,8 @@ export default function JsonFormatterPage() {
               </ActionButton>
             </div>
           </div>
-          <textarea
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-4 text-white font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            onChange={(e) => setInput(e.target.value)}
+          <CodeTextarea
+            onChange={setInput}
             placeholder='{"name": "John", "age": 30}'
             value={input}
           />
@@ -81,11 +80,7 @@ export default function JsonFormatterPage() {
             )}
           </div>
           <div className="flex-1 relative">
-            <textarea
-              readOnly
-              className="w-full h-full bg-gray-800 border border-gray-700 rounded-lg p-4 text-white font-mono text-sm resize-none focus:outline-none"
-              value={output}
-            />
+            <CodeTextarea readOnly className="h-full w-full" value={output} />
             {error && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-90 rounded-lg">
                 <div className="text-red-400 text-center">

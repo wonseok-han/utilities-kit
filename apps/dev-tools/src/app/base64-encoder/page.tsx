@@ -1,43 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { ActionButton, CodeTextarea, Tabs } from '@repo/ui';
+import { useBase64Store } from '@store/base64-store';
 
 export default function Base64EncoderPage() {
-  const [input, setInput] = useState('');
-  const [output, setOutput] = useState('');
-  const [mode, setMode] = useState<'encode' | 'decode'>('encode');
-  const [error, setError] = useState('');
+  const {
+    clearAll,
+    error,
+    input,
+    mode,
+    output,
+    processText,
+    setInput,
+    setMode,
+    swapMode,
+  } = useBase64Store();
 
-  const processText = () => {
+  const handleCopy = async () => {
     try {
-      if (mode === 'encode') {
-        setOutput(btoa(input));
-      } else {
-        setOutput(atob(input));
-      }
-      setError('');
-    } catch (_) {
-      setError(
-        mode === 'encode'
-          ? '인코딩에 실패했습니다.'
-          : '올바르지 않은 Base64 형식입니다.'
-      );
-      setOutput('');
+      await navigator.clipboard.writeText(output);
+    } catch (err) {
+      console.error('복사 실패:', err);
     }
   };
 
-  const clearAll = () => {
-    setInput('');
-    setOutput('');
-    setError('');
-  };
+  const tabItems = [
+    { id: 'encode', label: '인코딩' },
+    { id: 'decode', label: '디코딩' },
+  ];
 
-  const swapMode = () => {
-    setMode(mode === 'encode' ? 'decode' : 'encode');
-    setInput(output);
-    setOutput('');
-    setError('');
-  };
+  const sampleData = [
+    {
+      id: 1,
+      label: '기본 텍스트',
+      data: 'Hello World!',
+    },
+    {
+      id: 2,
+      label: '한글 텍스트',
+      data: '한글 텍스트 테스트',
+    },
+    {
+      id: 3,
+      label: 'JSON 데이터',
+      data: '{"name":"John","email":"john@example.com"}',
+    },
+    {
+      id: 4,
+      label: 'Base64 샘플',
+      data: 'SGVsbG8gV29ybGQh',
+    },
+  ];
 
   return (
     <div className="flex flex-col h-full p-6">
@@ -51,28 +64,11 @@ export default function Base64EncoderPage() {
       </div>
 
       <div className="mb-4 flex items-center space-x-4">
-        <div className="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
-          <button
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              mode === 'encode'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:text-white'
-            }`}
-            onClick={() => setMode('encode')}
-          >
-            인코딩
-          </button>
-          <button
-            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-              mode === 'decode'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:text-white'
-            }`}
-            onClick={() => setMode('decode')}
-          >
-            디코딩
-          </button>
-        </div>
+        <Tabs
+          items={tabItems}
+          onChange={(value) => setMode(value as 'encode' | 'decode')}
+          value={mode}
+        />
       </div>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -83,29 +79,34 @@ export default function Base64EncoderPage() {
               입력 ({mode === 'encode' ? '원본 텍스트' : 'Base64 텍스트'})
             </label>
             <div className="flex space-x-2">
-              <button
-                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
-                onClick={processText}
+              <ActionButton
+                disabled={!input}
+                feedbackText="완료"
+                onClick={() => input && processText()}
+                variant="primary"
               >
                 {mode === 'encode' ? '인코딩' : '디코딩'}
-              </button>
-              <button
-                className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded transition-colors"
-                onClick={swapMode}
+              </ActionButton>
+              <ActionButton
+                disabled={!output}
+                feedbackText="전환 완료"
+                onClick={() => output && swapMode()}
+                variant="success"
               >
                 ↔ 전환
-              </button>
-              <button
-                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
-                onClick={clearAll}
+              </ActionButton>
+              <ActionButton
+                disabled={!input && !output}
+                feedbackText="초기화 완료"
+                onClick={() => (input || output) && clearAll()}
+                variant="danger"
               >
-                지우기
-              </button>
+                초기화
+              </ActionButton>
             </div>
           </div>
-          <textarea
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg p-4 text-white font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            onChange={(e) => setInput(e.target.value)}
+          <CodeTextarea
+            onChange={setInput}
             placeholder={
               mode === 'encode' ? 'Hello World!' : 'SGVsbG8gV29ybGQh'
             }
@@ -120,20 +121,17 @@ export default function Base64EncoderPage() {
               출력 ({mode === 'encode' ? 'Base64 텍스트' : '원본 텍스트'})
             </label>
             {output && (
-              <button
-                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded transition-colors"
-                onClick={() => navigator.clipboard.writeText(output)}
+              <ActionButton
+                feedbackText="복사 완료"
+                onClick={handleCopy}
+                variant="secondary"
               >
                 복사
-              </button>
+              </ActionButton>
             )}
           </div>
           <div className="flex-1 relative">
-            <textarea
-              readOnly
-              className="w-full h-full bg-gray-800 border border-gray-700 rounded-lg p-4 text-white font-mono text-sm resize-none focus:outline-none"
-              value={output}
-            />
+            <CodeTextarea readOnly className="h-full w-full" value={output} />
             {error && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-90 rounded-lg">
                 <div className="text-red-400 text-center">
@@ -150,32 +148,23 @@ export default function Base64EncoderPage() {
       <div className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
         <h3 className="text-sm font-medium text-gray-300 mb-2">샘플 데이터</h3>
         <div className="flex flex-wrap gap-2">
-          <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
-            onClick={() => setInput('Hello World!')}
-          >
-            기본 텍스트
-          </button>
-          <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
-            onClick={() => setInput('한글 텍스트 테스트')}
-          >
-            한글 텍스트
-          </button>
-          <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
-            onClick={() =>
-              setInput('{"name":"John","email":"john@example.com"}')
-            }
-          >
-            JSON 데이터
-          </button>
-          <button
-            className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded transition-colors"
-            onClick={() => setInput('SGVsbG8gV29ybGQh')}
-          >
-            Base64 샘플
-          </button>
+          {sampleData.map((sample) => (
+            <ActionButton
+              key={sample.label}
+              feedbackText="로드 완료"
+              onClick={() => {
+                setInput(sample.data);
+                if (sample.id === 4) {
+                  setMode('decode');
+                } else {
+                  setMode('encode');
+                }
+              }}
+              variant="secondary"
+            >
+              {sample.label}
+            </ActionButton>
+          ))}
         </div>
       </div>
     </div>

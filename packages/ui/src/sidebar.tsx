@@ -179,7 +179,9 @@ export function Sidebar({
       <div className="p-4">
         {isOpen ? (
           <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-white">Dev Tools</h1>
+            <h1 className="text-lg font-semibold text-white transition-all duration-300 delay-100">
+              Dev Tools
+            </h1>
             <button
               className="group relative p-2 text-gray-400 hover:text-white rounded-lg transition-all duration-200 hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-600 hover:shadow-lg cursor-pointer"
               onClick={onToggle}
@@ -234,8 +236,8 @@ export function Sidebar({
         {menuItems.map((item) => (
           <div
             key={item.id}
-            className={`flex items-center rounded-lg cursor-pointer transition-colors group relative ${
-              isOpen ? 'space-x-3 px-3 py-2' : 'justify-center p-2'
+            className={`relative flex items-center rounded-lg cursor-pointer transition-colors group ${
+              isOpen ? 'px-3 py-2' : 'justify-center p-2'
             } ${
               activeItem === item.id
                 ? 'bg-gray-700 text-white'
@@ -252,7 +254,17 @@ export function Sidebar({
             >
               {getIcon(item.icon)}
             </svg>
-            {isOpen && <span>{item.label}</span>}
+
+            {/* 텍스트를 absolute로 배치하여 레이아웃에 영향 없음 */}
+            <span
+              className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${
+                isOpen
+                  ? 'opacity-100 transform scale-x-100 delay-100'
+                  : 'opacity-0 transform scale-x-0 origin-left pointer-events-none'
+              }`}
+            >
+              {item.label}
+            </span>
 
             {/* 툴팁 (접힌 상태일 때) */}
             {!isOpen && (

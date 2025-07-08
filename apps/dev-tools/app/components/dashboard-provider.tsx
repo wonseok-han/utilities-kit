@@ -4,7 +4,7 @@ import type { PropsWithChildren } from 'react';
 
 import { DashboardLayout } from '@repo/ui';
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PageMetadata {
   title: string;
@@ -25,6 +25,9 @@ const getPageMetadata = (pathname: string): PageMetadata => {
   }
 };
 
+// 모바일 브레이크포인트
+const MOBILE_BREAKPOINT = 768;
+
 export function DashboardProvider({ children }: PropsWithChildren) {
   const router = useRouter();
   const pathname = usePathname();
@@ -33,12 +36,48 @@ export function DashboardProvider({ children }: PropsWithChildren) {
   // 사이드바와 설정패널 토글 상태
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // 화면 크기 감지 및 사이드바 자동 토글
+  useEffect(() => {
+    const handleResize = () => {
+      const isNewMobile = window.innerWidth < MOBILE_BREAKPOINT;
+
+      if (isNewMobile !== isMobile) {
+        if (isNewMobile) {
+          // 모바일로 변경될 때: 사이드바가 열려있다면 닫기
+          if (isSidebarOpen) {
+            setIsSidebarOpen(false);
+          }
+        } else if (!isSidebarOpen) {
+          // 데스크톱으로 변경될 때: 사이드바가 닫혀있다면 열기
+          setIsSidebarOpen(true);
+        }
+        setIsMobile(isNewMobile);
+      }
+    };
+
+    // 초기 설정
+    handleResize();
+
+    // 리사이즈 이벤트 리스너
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMobile, isSidebarOpen]);
 
   const handleMenuItemClick = (item: string) => {
     if (item === 'dashboard') {
       router.push('/');
     } else {
       router.push(`/${item}`);
+    }
+
+    // 모바일에서 메뉴 클릭 시 사이드바 닫기
+    if (isMobile) {
+      setIsSidebarOpen(false);
     }
   };
 
@@ -58,6 +97,7 @@ export function DashboardProvider({ children }: PropsWithChildren) {
     <DashboardLayout
       activeMenuItem={pageMetadata.activeMenuItem}
       headerTitle={pageMetadata.title}
+      isMobile={isMobile}
       isSettingsPanelOpen={isSettingsPanelOpen}
       isSidebarOpen={isSidebarOpen}
       onMenuItemClick={handleMenuItemClick}

@@ -6,19 +6,43 @@ export interface HeaderProps {
   onToggleSidebar?: () => void;
   onToggleSettingsPanel?: () => void;
   isSettingsPanelOpen?: boolean;
+  isMobile?: boolean;
 }
 
 export function Header({
+  isMobile = false,
   isSettingsPanelOpen = false,
   onSettingsClick,
   onToggleSettingsPanel,
-  onToggleSidebar: _onToggleSidebar,
+  onToggleSidebar,
   title,
 }: HeaderProps) {
   return (
     <header className="bg-gray-800 px-6 py-4 border-b border-gray-700">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
+          {/* 모바일 햄버거 메뉴 버튼 */}
+          {isMobile && (
+            <button
+              className="p-2 mr-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+              onClick={onToggleSidebar}
+              title="메뉴 열기"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4 6h16M4 12h16M4 18h16"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                />
+              </svg>
+            </button>
+          )}
           <h2 className="text-lg font-medium text-white">{title}</h2>
         </div>
 

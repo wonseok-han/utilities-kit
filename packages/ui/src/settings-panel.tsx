@@ -64,7 +64,7 @@ export function SettingsPanel({
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-white">설정</h3>
             <button
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-400 hover:text-white transition-colors cursor-pointer"
               onClick={onClose}
             >
               <svg

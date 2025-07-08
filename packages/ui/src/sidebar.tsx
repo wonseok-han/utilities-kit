@@ -181,7 +181,7 @@ export function Sidebar({
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold text-white">Dev Tools</h1>
             <button
-              className="group relative p-2 text-gray-400 hover:text-white rounded-lg transition-all duration-200 hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-600 hover:shadow-lg"
+              className="group relative p-2 text-gray-400 hover:text-white rounded-lg transition-all duration-200 hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-600 hover:shadow-lg cursor-pointer"
               onClick={onToggle}
               title="사이드바 접기"
             >
@@ -204,7 +204,7 @@ export function Sidebar({
           </div>
         ) : (
           <button
-            className="group relative w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 border border-blue-500/20"
+            className="group relative w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 border border-blue-500/20 cursor-pointer"
             onClick={onToggle}
             title="사이드바 펼치기"
           >

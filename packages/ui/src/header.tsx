@@ -48,7 +48,7 @@ export function Header({
 
           {/* 설정패널 토글 버튼 */}
           <button
-            className={`p-2 rounded-md transition-colors ${
+            className={`p-2 rounded-md transition-colors cursor-pointer ${
               isSettingsPanelOpen
                 ? 'text-white bg-gray-700'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'

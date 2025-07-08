@@ -1,66 +1,25 @@
 'use client';
 
+import { ActionButton } from '@repo/ui';
 import { useJsonStore } from '@store/json-store';
-import { useState } from 'react';
-
-// 피드백 지속 시간 상수
-const FEEDBACK_DURATION = 2000;
 
 export default function JsonFormatterPage() {
   const { clearAll, error, formatJson, input, minifyJson, output, setInput } =
     useJsonStore();
 
-  const [isCopied, setIsCopied] = useState(false);
-  const [isFormatted, setIsFormatted] = useState(false);
-  const [isMinified, setIsMinified] = useState(false);
-  const [isCleared, setIsCleared] = useState(false);
-
   const handleCopy = async () => {
-    if (isCopied) return; // debounce
-
     try {
       await navigator.clipboard.writeText(output);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), FEEDBACK_DURATION);
     } catch (err) {
       console.error('복사 실패:', err);
     }
-  };
-
-  const handleFormat = () => {
-    if (isFormatted) return; // debounce
-    if (!input) return;
-
-    formatJson();
-    setIsFormatted(true);
-    setTimeout(() => setIsFormatted(false), FEEDBACK_DURATION);
-  };
-
-  const handleMinify = () => {
-    if (isMinified) return; // debounce
-    if (!input) return;
-
-    minifyJson();
-    setIsMinified(true);
-    setTimeout(() => setIsMinified(false), FEEDBACK_DURATION);
-  };
-
-  const handleClear = () => {
-    if (isCleared) return; // debounce
-    if (!input) return;
-
-    clearAll();
-    setIsCleared(true);
-    setTimeout(() => setIsCleared(false), FEEDBACK_DURATION);
   };
 
   return (
     <div className="flex flex-col h-full p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">JSON 포맷터</h1>
-        <p className="text-gray-400">
-          JSON 데이터를 예쁘게 정렬하거나 최소화해보세요.
-        </p>
+        <p className="text-gray-400">JSON 데이터를 구조화하고 최적화하세요.</p>
       </div>
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -71,39 +30,30 @@ export default function JsonFormatterPage() {
               입력 (JSON)
             </label>
             <div className="flex space-x-2">
-              <button
-                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
-                  isFormatted
-                    ? 'bg-blue-500 hover:bg-blue-600'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-                disabled={isFormatted}
-                onClick={handleFormat}
+              <ActionButton
+                disabled={!input}
+                feedbackText="정렬 완료"
+                onClick={() => input && formatJson()}
+                variant="primary"
               >
-                {isFormatted ? '✓ 정렬 완료' : '정렬'}
-              </button>
-              <button
-                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
-                  isMinified
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : 'bg-green-600 hover:bg-green-700'
-                }`}
-                disabled={isMinified}
-                onClick={handleMinify}
+                정렬
+              </ActionButton>
+              <ActionButton
+                disabled={!input}
+                feedbackText="압축 완료"
+                onClick={() => input && minifyJson()}
+                variant="success"
               >
-                {isMinified ? '✓ 압축 완료' : '압축'}
-              </button>
-              <button
-                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
-                  isCleared
-                    ? 'bg-red-500 hover:bg-red-600'
-                    : 'bg-red-600 hover:bg-red-700'
-                }`}
-                disabled={isCleared}
-                onClick={handleClear}
+                압축
+              </ActionButton>
+              <ActionButton
+                disabled={!input}
+                feedbackText="초기화 완료"
+                onClick={() => input && clearAll()}
+                variant="danger"
               >
-                {isCleared ? '✓ 초기화 완료' : '초기화'}
-              </button>
+                초기화
+              </ActionButton>
             </div>
           </div>
           <textarea
@@ -121,17 +71,13 @@ export default function JsonFormatterPage() {
               출력 결과
             </label>
             {output && (
-              <button
-                className={`px-3 py-1 text-white text-sm rounded transition-all cursor-pointer ${
-                  isCopied
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-gray-600 hover:bg-gray-700'
-                }`}
-                disabled={isCopied}
+              <ActionButton
+                feedbackText="복사 완료"
                 onClick={handleCopy}
+                variant="secondary"
               >
-                {isCopied ? '✓ 복사 완료' : '복사'}
-              </button>
+                복사
+              </ActionButton>
             )}
           </div>
           <div className="flex-1 relative">

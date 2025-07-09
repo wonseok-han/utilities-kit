@@ -18,6 +18,8 @@ const getPageMetadata = (pathname: string): PageMetadata => {
       return { title: '개발자 도구', activeMenuItem: 'dashboard' };
     case '/base64-encoder':
       return { title: 'Base64 인코더', activeMenuItem: 'base64-encoder' };
+    case '/jwt-encoder':
+      return { title: 'JWT 인코더', activeMenuItem: 'jwt-encoder' };
     case '/json-formatter':
       return { title: 'JSON 포맷터', activeMenuItem: 'json-formatter' };
     default:

@@ -12,7 +12,7 @@ const menuItems = [
   { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { id: 'json-formatter', label: 'JSON 포맷터', icon: 'json' },
   { id: 'base64-encoder', label: 'Base64 인코더', icon: 'encode' },
-  { id: 'jwt-decoder', label: 'JWT 디코더', icon: 'jwt' },
+  { id: 'jwt-encoder', label: 'JWT 인코더', icon: 'jwt' },
   { id: 'timestamp-converter', label: 'Timestamp 변환', icon: 'time' },
   { id: 'regex-tester', label: '정규식 테스트', icon: 'regex' },
   { id: 'type-generator', label: '타입 생성기', icon: 'type' },
@@ -50,7 +50,7 @@ const getIcon = (iconType: string) => {
     ),
     jwt: (
       <path
-        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2"

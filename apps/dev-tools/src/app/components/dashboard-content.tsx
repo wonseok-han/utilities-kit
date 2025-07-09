@@ -29,7 +29,7 @@ export function DashboardContent() {
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <ToolCard
             color="blue"
             description="JSON 데이터를 예쁘게 포맷하고 검증하세요"
@@ -72,6 +72,28 @@ export function DashboardContent() {
             }
             onClick={() => handleToolCardClick('base64-encoder')}
             title="Base64 인코더"
+          />
+
+          <ToolCard
+            color="red"
+            description="JWT 토큰을 생성하고 디코딩하여 분석하세요"
+            icon={
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                />
+              </svg>
+            }
+            onClick={() => handleToolCardClick('jwt-encoder')}
+            title="JWT 인코더"
           />
 
           <ToolCard

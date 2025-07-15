@@ -1,7 +1,7 @@
 'use client';
 
 export interface HeaderProps {
-  title: string;
+  title?: string;
   onSettingsClick?: () => void;
   onToggleSidebar?: () => void;
   onToggleSettingsPanel?: () => void;

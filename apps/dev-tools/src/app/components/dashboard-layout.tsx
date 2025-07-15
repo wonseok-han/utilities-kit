@@ -6,7 +6,6 @@ import React from 'react';
 
 export interface DashboardLayoutProps {
   children: React.ReactNode;
-  headerTitle?: string;
   activeMenuItem?: string;
   isSidebarOpen?: boolean;
   isSettingsPanelOpen?: boolean;
@@ -20,7 +19,6 @@ export interface DashboardLayoutProps {
 export function DashboardLayout({
   activeMenuItem = 'chat',
   children,
-  headerTitle = 'Dev Tools',
   isMobile = false,
   isSettingsPanelOpen = false,
   isSidebarOpen = true,
@@ -41,7 +39,7 @@ export function DashboardLayout({
         title={
           <div className="flex items-center space-x-2">
             <IconLogo />
-            <span>Dev Tools</span>
+            <span>Dev Kit</span>
           </div>
         }
       />
@@ -54,7 +52,6 @@ export function DashboardLayout({
           isSettingsPanelOpen={isSettingsPanelOpen}
           onToggleSettingsPanel={onToggleSettingsPanel}
           onToggleSidebar={onToggleSidebar}
-          title={headerTitle}
         />
 
         {/* 메인 영역 */}

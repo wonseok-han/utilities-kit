@@ -1,0 +1,18 @@
+{
+  "name": "@repo/shared",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "pnpm run build:utils",
+    "build:utils": "tsc --project tsconfig.json",
+    "dev": "pnpm run dev:utils",
+    "dev:utils": "tsc --project tsconfig.json --watch"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.13"
+  }
+}

@@ -9,16 +9,18 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@store/*": ["./src/store/*"]
+      "@assets/*": ["./public/assets/*"],
+      "@store/*": ["./src/store/*"],
+      "@typings/*": ["./src/types/*"]
     }
   },
   "include": [
+    "src/types/svgr.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
     "next.config.js",
-    ".next/types/**/*.ts",
-    "src"
+    ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

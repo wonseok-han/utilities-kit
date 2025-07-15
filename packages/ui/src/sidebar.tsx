@@ -1,11 +1,14 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 export interface SidebarProps {
   activeItem?: string;
   onItemClick?: (item: string) => void;
   isOpen?: boolean;
   isMobile?: boolean;
   onToggle?: () => void;
+  title?: ReactNode;
 }
 
 const menuItems = [
@@ -170,6 +173,7 @@ export function Sidebar({
   isOpen = true,
   onItemClick,
   onToggle,
+  title,
 }: SidebarProps) {
   return (
     <>
@@ -200,7 +204,7 @@ export function Sidebar({
                   onClick={() => onItemClick?.('dashboard')}
                   title="대시보드로 이동"
                 >
-                  Dev Tools
+                  {title}
                 </button>
               )}
               <button

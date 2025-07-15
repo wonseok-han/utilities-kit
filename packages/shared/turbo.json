@@ -1,0 +1,18 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["build:utils"]
+    },
+    "build:utils": {
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "with": ["dev:utils"]
+    },
+    "dev:utils": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

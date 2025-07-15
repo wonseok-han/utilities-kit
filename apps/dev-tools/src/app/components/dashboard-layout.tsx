@@ -55,7 +55,7 @@ export function DashboardLayout({
         />
 
         {/* 메인 영역 */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto p-2">{children}</main>
       </div>
 
       {/* 우측 설정 패널 */}

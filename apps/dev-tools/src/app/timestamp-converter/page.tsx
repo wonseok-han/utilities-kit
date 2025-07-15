@@ -9,7 +9,8 @@ import {
   type ParsedDateType,
 } from '@repo/shared';
 import { ActionButton, CodeTextarea } from '@repo/ui';
-import { useState } from 'react';
+import { useTimestampConverterStore } from '@store/timestamp-converter-store';
+import { useEffect, useState } from 'react';
 
 // 지원할 타임존 목록
 const TIMEZONES = [
@@ -35,6 +36,14 @@ const FORMATS = [
   { label: 'ISO 8601', value: 'YYYY-MM-DDTHH:mm:ssZ', icon: '' },
   { label: 'Unix Timestamp(초)', value: 'X', icon: '' },
   { label: 'Unix Timestamp(밀리초)', value: 'x', icon: '' },
+];
+
+// 샘플 데이터 목록
+const SAMPLE_DATA = [
+  { label: '날짜/시간', value: '2025-07-15 13:24:08' },
+  { label: 'Timestamp(초)', value: '1752585848' },
+  { label: 'Timestamp(밀리초)', value: '1752585848000' },
+  { label: 'ISO 8601', value: '2025-07-15T13:24:08Z' },
 ];
 
 // 상대적 시간 한글 표기 변환 함수
@@ -79,18 +88,19 @@ function Badge({
 }
 
 export default function TimestampConverterPage() {
-  const [input, setInput] = useState('');
+  // zustand store 사용
+  const {
+    clearAll,
+    input,
+    selectedFormats,
+    selectedTimezones,
+    setInput,
+    setSelectedFormats,
+    setSelectedTimezones,
+  } = useTimestampConverterStore();
   const [parsed, setParsed] = useState<Dayjs | null>(null);
   const [inputType, setInputType] = useState<ParsedDateType>('invalid');
   const [error, setError] = useState<string | null>(null);
-
-  // 타임존/포맷 선택 상태
-  const [selectedTimezones, setSelectedTimezones] = useState<string[]>(
-    TIMEZONES.map((t) => t.value)
-  );
-  const [selectedFormats, setSelectedFormats] = useState<string[]>(
-    FORMATS.map((f) => f.value)
-  );
 
   // 타임존 전체 선택/해제
   const isAllTimezonesSelected = selectedTimezones.length === TIMEZONES.length;
@@ -100,8 +110,10 @@ export default function TimestampConverterPage() {
     );
   };
   const handleTimezoneToggle = (value: string) => {
-    setSelectedTimezones((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    setSelectedTimezones(
+      selectedTimezones.includes(value)
+        ? selectedTimezones.filter((v) => v !== value)
+        : [...selectedTimezones, value]
     );
   };
 
@@ -111,14 +123,36 @@ export default function TimestampConverterPage() {
     setSelectedFormats(isAllFormatsSelected ? [] : FORMATS.map((f) => f.value));
   };
   const handleFormatToggle = (value: string) => {
-    setSelectedFormats((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    setSelectedFormats(
+      selectedFormats.includes(value)
+        ? selectedFormats.filter((v) => v !== value)
+        : [...selectedFormats, value]
     );
   };
 
   // 입력값 타입 자동 감지 및 파싱
   const handleInputChange = (v: string) => {
     setInput(v);
+  };
+
+  // 현재 시각 입력
+  const handleNow = () => {
+    const now = parseDateWithType(Date.now().toString());
+    setInput(Date.now().toString());
+    setParsed(now.date);
+    setInputType(now.type);
+    setError(null);
+  };
+
+  // 입력값, 결과 모두 초기화
+  const handleReset = () => {
+    clearAll();
+    setParsed(null);
+    setInputType('invalid');
+    setError(null);
+  };
+
+  const parseAndSet = (v: string) => {
     if (v.trim() === '') {
       setParsed(null);
       setInputType('invalid');
@@ -136,30 +170,9 @@ export default function TimestampConverterPage() {
     }
   };
 
-  // 현재 시각 입력
-  const handleNow = () => {
-    const now = parseDateWithType(Date.now().toString());
-    setInput(Date.now().toString());
-    setParsed(now.date);
-    setInputType(now.type);
-    setError(null);
-  };
-
-  // 입력값, 결과 모두 초기화
-  const handleReset = () => {
-    setInput('');
-    setParsed(null);
-    setInputType('invalid');
-    setError(null);
-  };
-
-  // 샘플 데이터 목록
-  const sampleData = [
-    { label: '날짜/시간', value: '2025-07-15 13:24:08' },
-    { label: 'Timestamp(초)', value: '1752585848' },
-    { label: 'Timestamp(밀리초)', value: '1752585848000' },
-    { label: 'ISO 8601', value: '2025-07-15T13:24:08Z' },
-  ];
+  useEffect(() => {
+    parseAndSet(input);
+  }, [input]);
 
   return (
     <div className="flex flex-col p-6">
@@ -181,7 +194,7 @@ export default function TimestampConverterPage() {
           onClick={handleNow}
           variant="primary"
         >
-          현재 시각 입력
+          현재 시간 입력
         </ActionButton>
         <ActionButton
           feedbackText="초기화 완료"
@@ -204,7 +217,7 @@ export default function TimestampConverterPage() {
       {/* 샘플 데이터 버튼 */}
       <div className="flex flex-wrap gap-2 mb-4 items-center">
         <span className="text-gray-400 text-sm mr-2">샘플 데이터:</span>
-        {sampleData.map((sample) => (
+        {SAMPLE_DATA.map((sample) => (
           <button
             key={sample.value}
             className="px-3 py-1 rounded-full border text-sm font-medium transition-colors cursor-pointer bg-gray-700 text-white border-gray-600 hover:bg-blue-700 hover:text-white"

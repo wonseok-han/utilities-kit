@@ -1,10 +1,8 @@
 'use client';
 
+import IconLogo from '@assets/icons/icon-logo.svg';
+import { Header, SettingsPanel, Sidebar } from '@repo/ui';
 import React from 'react';
-
-import { Header } from './header';
-import { SettingsPanel } from './settings-panel';
-import { Sidebar } from './sidebar';
 
 export interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -22,7 +20,7 @@ export interface DashboardLayoutProps {
 export function DashboardLayout({
   activeMenuItem = 'chat',
   children,
-  headerTitle = 'Chat Prompt',
+  headerTitle = 'Dev Tools',
   isMobile = false,
   isSettingsPanelOpen = false,
   isSidebarOpen = true,
@@ -40,6 +38,12 @@ export function DashboardLayout({
         isOpen={isSidebarOpen}
         onItemClick={onMenuItemClick}
         onToggle={onToggleSidebar}
+        title={
+          <div className="flex items-center space-x-2">
+            <IconLogo />
+            <span>Dev Tools</span>
+          </div>
+        }
       />
 
       {/* 메인 콘텐츠 */}

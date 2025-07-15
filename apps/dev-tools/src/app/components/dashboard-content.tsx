@@ -96,7 +96,8 @@ export function DashboardContent() {
             title="JWT 인코더"
           />
 
-          <ToolCard
+          {/* TODO: 추후 추가 예정 */}
+          {/* <ToolCard
             color="purple"
             description="URL을 안전하게 인코딩하고 디코딩하세요"
             icon={
@@ -116,9 +117,10 @@ export function DashboardContent() {
             }
             onClick={() => handleToolCardClick('url-encoder')}
             title="URL 인코더"
-          />
+          /> */}
 
-          <ToolCard
+          {/* TODO: 추후 추가 예정 */}
+          {/* <ToolCard
             color="orange"
             description="색상 코드 변환 및 팔레트 생성 도구"
             icon={
@@ -138,7 +140,7 @@ export function DashboardContent() {
             }
             onClick={() => handleToolCardClick('color-palette')}
             title="색상 팔레트"
-          />
+          /> */}
         </div>
       </div>
     </div>

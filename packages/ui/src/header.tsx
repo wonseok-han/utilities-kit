@@ -71,8 +71,9 @@ export function Header({
           )}
 
           {/* 설정패널 토글 버튼 */}
+          {/* TODO: 추후 추가 예정 */}
           <button
-            className={`p-2 rounded-md transition-colors cursor-pointer ${
+            className={`p-2 rounded-md transition-colors cursor-pointer invisible ${
               isSettingsPanelOpen
                 ? 'text-white bg-gray-700'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'

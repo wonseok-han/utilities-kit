@@ -77,7 +77,7 @@ function Badge({
 }) {
   return (
     <button
-      className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors cursor-pointer
+      className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors cursor-pointer min-w-fit
         ${selected ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-800 text-gray-300 border-gray-600 hover:bg-blue-900 hover:text-white'}`}
       onClick={onClick}
       type="button"
@@ -214,19 +214,61 @@ export default function TimestampConverterPage() {
           value={input}
         />
       </div>
-      {/* 샘플 데이터 버튼 */}
-      <div className="flex flex-wrap gap-2 mb-4 items-center">
-        <span className="text-gray-400 text-sm mr-2">샘플 데이터:</span>
-        {SAMPLE_DATA.map((sample) => (
-          <button
-            key={sample.value}
-            className="px-3 py-1 rounded-full border text-sm font-medium transition-colors cursor-pointer bg-gray-700 text-white border-gray-600 hover:bg-blue-700 hover:text-white"
-            onClick={() => handleInputChange(sample.value)}
-            type="button"
-          >
-            {sample.label}
-          </button>
-        ))}
+
+      {/* 샘플 데이터 */}
+      <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-4">
+        <h3 className="text-sm font-medium text-gray-300 mb-2">샘플 입력</h3>
+        <div className="flex flex-wrap gap-2">
+          {SAMPLE_DATA.map((sample) => (
+            <ActionButton
+              key={sample.label}
+              feedbackText="로드 완료"
+              onClick={() => handleInputChange(sample.value)}
+              variant="secondary"
+            >
+              {sample.label}
+            </ActionButton>
+          ))}
+        </div>
+      </div>
+
+      {/* 타임존/포맷 선택: 라벨+전체, 배지는 wrap, 간격 축소 */}
+      <div className="flex flex-col gap-1 mb-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-gray-400 text-xs min-w-fit">타임존 필터:</span>
+          <Badge onClick={handleTimezoneAll} selected={isAllTimezonesSelected}>
+            전체
+          </Badge>
+          <div className="flex gap-1 flex-wrap">
+            {TIMEZONES.map((tz) => (
+              <Badge
+                key={tz.value}
+                onClick={() => handleTimezoneToggle(tz.value)}
+                selected={selectedTimezones.includes(tz.value)}
+              >
+                {tz.label}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap mb-4">
+          <span className="text-gray-400 text-xs min-w-fit">포맷 필터:</span>
+          <Badge onClick={handleFormatAll} selected={isAllFormatsSelected}>
+            전체
+          </Badge>
+          <div className="flex gap-1 flex-wrap">
+            {FORMATS.map((fmt) => (
+              <Badge
+                key={fmt.value}
+                onClick={() => handleFormatToggle(fmt.value)}
+                selected={selectedFormats.includes(fmt.value)}
+              >
+                {fmt.label}
+              </Badge>
+            ))}
+          </div>
+        </div>
       </div>
 
       {error ? (
@@ -237,42 +279,6 @@ export default function TimestampConverterPage() {
       ) : (
         <>
           {/* 필터(배지) 영역 */}
-          <div className="flex flex-col md:flex-row gap-2 mb-4">
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-gray-400 text-sm mr-2">타임존 선택:</span>
-              <Badge
-                onClick={handleTimezoneAll}
-                selected={isAllTimezonesSelected}
-              >
-                전체
-              </Badge>
-              {TIMEZONES.map((tz) => (
-                <Badge
-                  key={tz.value}
-                  onClick={() => handleTimezoneToggle(tz.value)}
-                  selected={selectedTimezones.includes(tz.value)}
-                >
-                  {tz.label}
-                </Badge>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-gray-400 text-sm mr-2">포맷 선택:</span>
-              <Badge onClick={handleFormatAll} selected={isAllFormatsSelected}>
-                전체
-              </Badge>
-              {FORMATS.map((fmt) => (
-                <Badge
-                  key={fmt.value}
-                  onClick={() => handleFormatToggle(fmt.value)}
-                  selected={selectedFormats.includes(fmt.value)}
-                >
-                  {fmt.label}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
           {/* 결과 영역: 카드+테이블 스타일, 시인성 강화 */}
           {parsed && !error && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
@@ -289,7 +295,7 @@ export default function TimestampConverterPage() {
                       key={tz.value}
                       className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
                     >
-                      <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1">
+                      <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
                         {tz.icon} {tz.label}
                         <span className="text-gray-500 text-sm">
                           {`(${tz.value})`}
@@ -348,7 +354,7 @@ export default function TimestampConverterPage() {
                         key={fmt.value}
                         className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
                       >
-                        <span className="text-gray-400 font-medium min-w-[120px] flex items-center gap-1">
+                        <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
                           {fmt.icon} {fmt.label}
                         </span>
                         <span

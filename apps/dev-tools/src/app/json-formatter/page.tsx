@@ -110,7 +110,7 @@ export default function JsonFormatterPage() {
 
       {/* 샘플 데이터 */}
       <div className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
-        <h3 className="text-sm font-medium text-gray-300 mb-2">샘플 데이터</h3>
+        <h3 className="text-sm font-medium text-gray-300 mb-2">샘플 입력</h3>
         <div className="flex flex-wrap gap-2">
           {sampleData.map((sample) => (
             <ActionButton

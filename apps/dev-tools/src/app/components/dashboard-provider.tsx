@@ -2,9 +2,10 @@
 
 import type { PropsWithChildren } from 'react';
 
-import { DashboardLayout } from '@repo/ui';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
+
+import { DashboardLayout } from './dashboard-layout';
 
 interface PageMetadata {
   title: string;
@@ -98,7 +99,6 @@ export function DashboardProvider({ children }: PropsWithChildren) {
   return (
     <DashboardLayout
       activeMenuItem={pageMetadata.activeMenuItem}
-      headerTitle={pageMetadata.title}
       isMobile={isMobile}
       isSettingsPanelOpen={isSettingsPanelOpen}
       isSidebarOpen={isSidebarOpen}

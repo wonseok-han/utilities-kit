@@ -16,7 +16,7 @@ export function DashboardContent() {
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-normal text-blue-400 mb-4">
-            Welcome to Dev Tools
+            Welcome to Dev Kit
           </h1>
         </div>
       </div>

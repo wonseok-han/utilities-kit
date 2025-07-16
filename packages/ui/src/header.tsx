@@ -18,7 +18,7 @@ export function Header({
   title,
 }: HeaderProps) {
   return (
-    <header className="bg-gray-800 px-6 py-4 border-b border-gray-700">
+    <header className="bg-gray-800 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           {/* 모바일 햄버거 메뉴 버튼 */}

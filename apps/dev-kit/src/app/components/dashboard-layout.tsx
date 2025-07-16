@@ -28,7 +28,7 @@ export function DashboardLayout({
   onToggleSidebar,
 }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white fixed inset-0">
+    <div className="flex min-h-screen bg-gray-800 text-white fixed inset-0">
       {/* 사이드바 */}
       <Sidebar
         activeItem={activeMenuItem}
@@ -37,9 +37,17 @@ export function DashboardLayout({
         onItemClick={onMenuItemClick}
         onToggle={onToggleSidebar}
         title={
-          <div className="flex items-center space-x-2">
+          <div className="relative flex items-center space-x-2 ml-2 mt-2">
             <IconLogo />
-            <span>Dev Kit</span>
+            <span
+              className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${
+                isSidebarOpen || isMobile
+                  ? 'opacity-100 transform scale-x-100 delay-100'
+                  : 'opacity-0 transform scale-x-0 origin-left pointer-events-none'
+              }`}
+            >
+              Dev Kit
+            </span>
           </div>
         }
       />
@@ -55,7 +63,9 @@ export function DashboardLayout({
         />
 
         {/* 메인 영역 */}
-        <main className="flex-1 overflow-auto p-2">{children}</main>
+        <main className="flex-1 overflow-auto p-2 bg-gray-900 rounded-t-2xl">
+          {children}
+        </main>
       </div>
 
       {/* 우측 설정 패널 */}

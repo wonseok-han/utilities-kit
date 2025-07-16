@@ -307,7 +307,7 @@ export default function TimestampConverterPage() {
                           {`(${tz.value})`}
                         </span>
                       </span>
-                      <span className="font-mono text-lg text-white flex-1 text-right">
+                      <span className="font-mono text-sm text-white flex-1 text-right">
                         {formatDate(
                           parsed,
                           'YYYY-MM-DD HH:mm:ss',
@@ -364,7 +364,7 @@ export default function TimestampConverterPage() {
                           {fmt.icon} {fmt.label}
                         </span>
                         <span
-                          className={`font-mono text-lg flex-1 text-right ${value && value !== '-' ? 'text-white' : 'text-gray-500'}`}
+                          className={`font-mono text-sm flex-1 text-right ${value && value !== '-' ? 'text-white' : 'text-gray-500'}`}
                         >
                           {value || '-'}
                         </span>

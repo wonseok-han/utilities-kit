@@ -101,16 +101,17 @@ export function DashboardContent() {
             description="정규식 패턴을 테스트하고 매치 결과를 확인하세요"
             icon={
               <svg
-                className="w-5 h-5 text-white"
+                className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
+                strokeWidth={1.5}
                 viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  d="M9.75 3v5.25m4.5-5.25v5.25m-7.5 0h10.5M4.5 8.25h15m-1.5 0v7.636a2.25 2.25 0 01-.659 1.591l-2.25 2.25a2.25 2.25 0 01-1.591.659h-2.5a2.25 2.25 0 01-1.591-.659l-2.25-2.25A2.25 2.25 0 015 15.886V8.25"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth="2"
                 />
               </svg>
             }

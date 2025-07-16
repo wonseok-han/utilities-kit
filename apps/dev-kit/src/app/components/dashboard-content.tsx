@@ -96,6 +96,29 @@ export function DashboardContent() {
             title="JWT 인코더"
           />
 
+          <ToolCard
+            color="purple"
+            description="정규식 패턴을 테스트하고 매치 결과를 확인하세요"
+            icon={
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9.75 3v5.25m4.5-5.25v5.25m-7.5 0h10.5M4.5 8.25h15m-1.5 0v7.636a2.25 2.25 0 01-.659 1.591l-2.25 2.25a2.25 2.25 0 01-1.591.659h-2.5a2.25 2.25 0 01-1.591-.659l-2.25-2.25A2.25 2.25 0 015 15.886V8.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            }
+            onClick={() => handleToolCardClick('regex-tester')}
+            title="정규식 테스터"
+          />
+
           {/* TODO: 추후 추가 예정 */}
           {/* <ToolCard
             color="purple"

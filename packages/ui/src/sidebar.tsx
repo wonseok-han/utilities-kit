@@ -16,9 +16,9 @@ const menuItems = [
   { id: 'json-formatter', label: 'JSON 포맷터', icon: 'json' },
   { id: 'base64-encoder', label: 'Base64 인코더', icon: 'encode' },
   { id: 'jwt-encoder', label: 'JWT 인코더', icon: 'jwt' },
+  { id: 'regex-tester', label: '정규식 테스터', icon: 'regex' },
   { id: 'timestamp-converter', label: 'Timestamp 변환', icon: 'time' },
   // TODO: 추후 추가 예정
-  // { id: 'regex-tester', label: '정규식 테스트', icon: 'regex' },
   // { id: 'type-generator', label: '타입 생성기', icon: 'type' },
   // { id: 'release-generator', label: '릴리즈 노트 생성기', icon: 'release' },
   // { id: 'diff-checker', label: 'Diff 비교기', icon: 'diff' },
@@ -69,12 +69,20 @@ const getIcon = (iconType: string) => {
       />
     ),
     regex: (
-      <path
-        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
+      <svg
+        className="w-6 h-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M9.75 3v5.25m4.5-5.25v5.25m-7.5 0h10.5M4.5 8.25h15m-1.5 0v7.636a2.25 2.25 0 01-.659 1.591l-2.25 2.25a2.25 2.25 0 01-1.591.659h-2.5a2.25 2.25 0 01-1.591-.659l-2.25-2.25A2.25 2.25 0 015 15.886V8.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     ),
     type: (
       <path

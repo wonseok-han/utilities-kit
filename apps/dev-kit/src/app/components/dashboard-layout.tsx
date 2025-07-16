@@ -63,7 +63,7 @@ export function DashboardLayout({
         />
 
         {/* 메인 영역 */}
-        <main className="flex-1 overflow-auto p-2 bg-gray-900 rounded-t-2xl">
+        <main className="flex-1 overflow-auto p-2 m-2 bg-gray-900 rounded-t-2xl">
           {children}
         </main>
       </div>

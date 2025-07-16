@@ -23,6 +23,8 @@ const getPageMetadata = (pathname: string): PageMetadata => {
       return { title: 'JWT 인코더', activeMenuItem: 'jwt-encoder' };
     case '/json-formatter':
       return { title: 'JSON 포맷터', activeMenuItem: 'json-formatter' };
+    case '/regex-tester':
+      return { title: '정규식 테스터', activeMenuItem: 'regex-tester' };
     case '/timestamp-converter':
       return { title: 'Timestamp 변환', activeMenuItem: 'timestamp-converter' };
     default:

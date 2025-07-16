@@ -16,9 +16,9 @@ const menuItems = [
   { id: 'json-formatter', label: 'JSON 포맷터', icon: 'json' },
   { id: 'base64-encoder', label: 'Base64 인코더', icon: 'encode' },
   { id: 'jwt-encoder', label: 'JWT 인코더', icon: 'jwt' },
+  { id: 'regex-tester', label: '정규식 테스터', icon: 'regex' },
   { id: 'timestamp-converter', label: 'Timestamp 변환', icon: 'time' },
   // TODO: 추후 추가 예정
-  // { id: 'regex-tester', label: '정규식 테스트', icon: 'regex' },
   // { id: 'type-generator', label: '타입 생성기', icon: 'type' },
   // { id: 'release-generator', label: '릴리즈 노트 생성기', icon: 'release' },
   // { id: 'diff-checker', label: 'Diff 비교기', icon: 'diff' },

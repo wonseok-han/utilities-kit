@@ -2,6 +2,7 @@
 
 import { ActionButton, CodeTextarea } from '@repo/ui';
 import { useRegexStore } from '@store/regex-store';
+import { useEffect } from 'react';
 
 export default function RegexTesterPage() {
   const {
@@ -110,6 +111,12 @@ export default function RegexTesterPage() {
     },
   ];
 
+  useEffect(() => {
+    if (pattern && testString) {
+      testRegex();
+    }
+  }, [pattern, testString]);
+
   return (
     <div className="flex flex-col min-h-fit h-full p-6">
       <div className="mb-6">
@@ -169,14 +176,6 @@ export default function RegexTesterPage() {
 
       {/* 액션 버튼들 */}
       <div className="mb-4 flex justify-start space-x-2">
-        <ActionButton
-          disabled={!pattern || !testString}
-          feedbackText="테스트 완료"
-          onClick={testRegex}
-          variant="primary"
-        >
-          정규식 테스트
-        </ActionButton>
         <ActionButton
           disabled={!pattern && !testString && !matches}
           feedbackText="초기화 완료"

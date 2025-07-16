@@ -175,7 +175,7 @@ export default function TimestampConverterPage() {
   }, [input]);
 
   return (
-    <div className="flex flex-col p-6">
+    <div className="flex flex-col min-h-fit h-full p-6">
       {/* 헤더 영역 */}
       <div className="mb-6">
         <h1 className="mb-2 text-2xl font-bold text-white">

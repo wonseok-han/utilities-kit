@@ -67,7 +67,7 @@ export default function JwtEncoderPage() {
   ];
 
   return (
-    <div className="flex flex-col h-full p-6">
+    <div className="flex flex-col min-h-fit h-full p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">
           JWT 인코더/디코더

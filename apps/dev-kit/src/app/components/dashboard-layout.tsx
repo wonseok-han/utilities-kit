@@ -28,7 +28,7 @@ export function DashboardLayout({
   onToggleSidebar,
 }: DashboardLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-gray-800 text-white fixed inset-0">
+    <div className="flex h-[100dvh] bg-gray-800 text-white fixed inset-0">
       {/* 사이드바 */}
       <Sidebar
         activeItem={activeMenuItem}
@@ -63,7 +63,7 @@ export function DashboardLayout({
         />
 
         {/* 메인 영역 */}
-        <main className="flex-1 overflow-auto p-2 m-2 bg-gray-900 rounded-t-2xl">
+        <main className="flex-1 overflow-auto p-2 m-2 bg-gray-900 rounded-t-2xl min-h-0">
           {children}
         </main>
       </div>

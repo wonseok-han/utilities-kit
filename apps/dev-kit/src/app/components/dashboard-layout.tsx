@@ -1,65 +1,67 @@
 'use client';
 
-import IconLogo from '@assets/icons/icon-logo.svg';
-import { Header, SettingsPanel, Sidebar } from '@repo/ui';
-import React from 'react';
+import { useIsMobile } from '@hooks/use-media-query';
+import { useSettingStore } from '@store/setting-store';
+import { useSidebarStore } from '@store/sidebar-store';
+import { useRouter } from 'next/navigation';
+import React, { useEffect } from 'react';
+
+import { Header } from './header';
+import { LayoutSkeleton } from './layout-skeleton';
+import { SettingsPanel } from './settings-panel';
+import { Sidebar } from './sidebar/sidebar';
 
 export interface DashboardLayoutProps {
   children: React.ReactNode;
-  activeMenuItem?: string;
-  isSidebarOpen?: boolean;
-  isSettingsPanelOpen?: boolean;
-  isMobile?: boolean;
-  onMenuItemClick?: (item: string) => void;
-  onSettingsPanelClose?: () => void;
-  onToggleSidebar?: () => void;
-  onToggleSettingsPanel?: () => void;
 }
 
-export function DashboardLayout({
-  activeMenuItem = 'chat',
-  children,
-  isMobile = false,
-  isSettingsPanelOpen = false,
-  isSidebarOpen = true,
-  onMenuItemClick,
-  onSettingsPanelClose,
-  onToggleSettingsPanel,
-  onToggleSidebar,
-}: DashboardLayoutProps) {
+export function DashboardLayout({ children }: DashboardLayoutProps) {
+  const router = useRouter();
+  const {
+    close: closeSidebar,
+    hasHydrated,
+    isOpen: isSidebarOpen,
+    toggle: onToggleSidebar,
+  } = useSidebarStore();
+  const { isSettingsPanelOpen, toggleSettingsPanel } = useSettingStore();
+  const isMobile = useIsMobile();
+
+  const handleMenuItemClick = (path: string) => {
+    router.push(path);
+
+    // 모바일에서 메뉴 클릭 시 사이드바 닫기
+    if (isMobile) {
+      closeSidebar();
+    }
+  };
+
+  useEffect(() => {
+    if (isMobile && isSidebarOpen) {
+      // 모바일로 전환 시 사이드바 닫기
+      closeSidebar();
+    }
+  }, [isMobile]);
+
+  // localStorage hydration이 완료될 때까지 로딩 화면 표시
+  if (!hasHydrated) {
+    return <LayoutSkeleton />;
+  }
+
   return (
     <div className="flex h-[100dvh] bg-gray-800 text-white fixed inset-0">
       {/* 사이드바 */}
       <Sidebar
-        activeItem={activeMenuItem}
-        isMobile={isMobile}
         isOpen={isSidebarOpen}
-        onItemClick={onMenuItemClick}
+        onItemClick={handleMenuItemClick}
         onToggle={onToggleSidebar}
-        title={
-          <div className="relative flex items-center space-x-2 ml-2 mt-2">
-            <IconLogo />
-            <span
-              className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${
-                isSidebarOpen || isMobile
-                  ? 'opacity-100 transform scale-x-100 delay-100'
-                  : 'opacity-0 transform scale-x-0 origin-left pointer-events-none'
-              }`}
-            >
-              Dev Kit
-            </span>
-          </div>
-        }
       />
 
       {/* 메인 콘텐츠 */}
       <div className="flex-1 flex flex-col transition-all duration-300">
         {/* 헤더 */}
         <Header
-          isMobile={isMobile}
           isSettingsPanelOpen={isSettingsPanelOpen}
-          onToggleSettingsPanel={onToggleSettingsPanel}
-          onToggleSidebar={onToggleSidebar}
+          onToggleSettingsPanel={toggleSettingsPanel}
         />
 
         {/* 메인 영역 */}
@@ -71,7 +73,7 @@ export function DashboardLayout({
       {/* 우측 설정 패널 */}
       <SettingsPanel
         isOpen={isSettingsPanelOpen}
-        onClose={onSettingsPanelClose}
+        onClose={toggleSettingsPanel}
       />
     </div>
   );

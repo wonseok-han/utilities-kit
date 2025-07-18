@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: `wonseok-han's Dev Kit`,
+  title: `Dev Kit`,
   description: `Essential developer utilities and productivity tools`,
   icons: {
     icon: [

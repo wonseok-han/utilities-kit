@@ -75,7 +75,7 @@ export const useRegexStore = create<RegexStore>()(
       },
     }),
     {
-      name: 'regex-tester-storage',
+      name: 'regex-tester-store',
       partialize: (state) => ({
         pattern: state.pattern,
         testString: state.testString,

@@ -25,12 +25,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { isSettingsPanelOpen, toggleSettingsPanel } = useSettingStore();
   const isMobile = useIsMobile();
 
-  const handleMenuItemClick = (item: string) => {
-    if (item === 'dashboard') {
-      router.push('/');
-    } else {
-      router.push(`/${item}`);
-    }
+  const handleMenuItemClick = (path: string) => {
+    router.push(path);
 
     // 모바일에서 메뉴 클릭 시 사이드바 닫기
     if (isMobile) {

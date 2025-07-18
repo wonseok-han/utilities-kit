@@ -2,6 +2,7 @@
 
 import IconLogo from '@assets/icons/icon-logo.svg';
 import { useIsMobile } from '@hooks/use-media-query';
+import { getCurrentPageInfo } from '@utils/menu';
 import { usePathname } from 'next/navigation';
 import { memo } from 'react';
 
@@ -13,24 +14,13 @@ interface PageMetadata {
   activeMenuItem: string;
 }
 
-// 경로별 기본 메타데이터 매핑
+// 경로별 메타데이터를 자동으로 생성하는 함수
 const getPageMetadata = (pathname: string): PageMetadata => {
-  switch (pathname) {
-    case '/':
-      return { title: 'Dashboard', activeMenuItem: 'dashboard' };
-    case '/base64-encoder':
-      return { title: 'Base64 인코더', activeMenuItem: 'base64-encoder' };
-    case '/jwt-encoder':
-      return { title: 'JWT 인코더', activeMenuItem: 'jwt-encoder' };
-    case '/json-formatter':
-      return { title: 'JSON 포맷터', activeMenuItem: 'json-formatter' };
-    case '/regex-tester':
-      return { title: '정규식 테스터', activeMenuItem: 'regex-tester' };
-    case '/timestamp-converter':
-      return { title: 'Timestamp 변환', activeMenuItem: 'timestamp-converter' };
-    default:
-      return { title: 'Dashboard', activeMenuItem: 'dashboard' };
-  }
+  const pageInfo = getCurrentPageInfo(pathname);
+  return {
+    title: pageInfo.title,
+    activeMenuItem: pageInfo.activeMenuItem,
+  };
 };
 
 interface SidebarProps {

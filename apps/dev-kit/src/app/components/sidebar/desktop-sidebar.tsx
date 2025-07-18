@@ -32,7 +32,7 @@ export function DesktopSidebar({
           <div className="flex items-center justify-between">
             <button
               className="text-lg font-semibold text-white hover:text-blue-400 transition-all duration-300 delay-100 cursor-pointer"
-              onClick={() => onItemClick?.('dashboard')}
+              onClick={() => onItemClick?.('/')}
               title="대시보드로 이동"
             >
               {title}
@@ -98,7 +98,7 @@ export function DesktopSidebar({
                 ? 'bg-gray-700 text-white'
                 : 'text-gray-300 hover:bg-gray-700'
             }`}
-            onClick={() => onItemClick?.(item.id)}
+            onClick={() => onItemClick?.(item.path)}
             title={!isOpen ? item.label : undefined}
           >
             <svg

@@ -42,7 +42,7 @@ export function MobileSidebar({
           <div className="flex items-center justify-between">
             <button
               className="text-lg font-semibold text-white hover:text-blue-400 transition-colors cursor-pointer"
-              onClick={() => onItemClick?.('dashboard')}
+              onClick={() => onItemClick?.('/')}
               title="대시보드로 이동"
             >
               {title}
@@ -79,7 +79,7 @@ export function MobileSidebar({
                   ? 'bg-gray-700 text-white'
                   : 'text-gray-300 hover:bg-gray-700'
               }`}
-              onClick={() => onItemClick?.(item.id)}
+              onClick={() => onItemClick?.(item.path)}
             >
               <svg
                 className="w-5 h-5 mr-3 flex-shrink-0"

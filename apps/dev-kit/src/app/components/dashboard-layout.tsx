@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 import { Header } from './header';
+import { LayoutSkeleton } from './layout-skeleton';
 import { SettingsPanel } from './settings-panel';
 import { Sidebar } from './sidebar/sidebar';
 
@@ -43,14 +44,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // localStorage hydration이 완료될 때까지 로딩 화면 표시
   if (!hasHydrated) {
-    return (
-      <div className="flex h-[100dvh] bg-gray-800 text-white fixed inset-0 items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4" />
-          <p className="text-gray-300">로딩 중...</p>
-        </div>
-      </div>
-    );
+    return <LayoutSkeleton />;
   }
 
   return (

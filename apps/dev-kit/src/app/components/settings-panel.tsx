@@ -1,48 +1,24 @@
 'use client';
 
+import { useSettingStore } from '@store/setting-store';
+
 export interface SettingsPanelProps {
   isOpen?: boolean;
   onClose?: () => void;
-  theme?: 'light' | 'dark' | 'system';
-  language?: 'ko' | 'en';
-  fontSize?: number;
-  compactMode?: boolean;
-  onThemeChange?: (theme: 'light' | 'dark' | 'system') => void;
-  onLanguageChange?: (language: 'ko' | 'en') => void;
-  onFontSizeChange?: (size: number) => void;
-  onCodeThemeChange?: (theme: string) => void;
-  onAutoFormatChange?: (enabled: boolean) => void;
-  onAutoCopyChange?: (enabled: boolean) => void;
-  onAutoSaveChange?: (enabled: boolean) => void;
-  onShowNotificationsChange?: (enabled: boolean) => void;
-  onKeyboardShortcutsChange?: (enabled: boolean) => void;
-  onResultDisplayModeChange?: (mode: 'card' | 'list' | 'table') => void;
-  onMaxHistoryItemsChange?: (count: number) => void;
-  onDebugModeChange?: (enabled: boolean) => void;
-  onCompactModeChange?: (enabled: boolean) => void;
 }
 
-export function SettingsPanel({
-  compactMode = false,
-  fontSize = 14,
-  isOpen = true,
-  language = 'ko',
-  onAutoCopyChange,
-  onAutoFormatChange,
-  onAutoSaveChange,
-  onClose,
-  onCodeThemeChange,
-  onCompactModeChange,
-  onDebugModeChange,
-  onFontSizeChange,
-  onKeyboardShortcutsChange,
-  onLanguageChange,
-  onMaxHistoryItemsChange,
-  onResultDisplayModeChange,
-  onShowNotificationsChange,
-  onThemeChange,
-  theme = 'system',
-}: SettingsPanelProps) {
+export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
+  const {
+    compactMode: isCompactMode,
+    fontSize,
+    language,
+    resetSettings,
+    setCompactMode,
+    setFontSize,
+    setLanguage,
+    setTheme,
+    theme,
+  } = useSettingStore();
   return (
     <>
       {/* 배경 오버레이 - 설정패널 영역을 제외한 나머지 화면 */}
@@ -106,9 +82,7 @@ export function SettingsPanel({
                   <select
                     className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     onChange={(e) =>
-                      onThemeChange?.(
-                        e.target.value as 'light' | 'dark' | 'system'
-                      )
+                      setTheme(e.target.value as 'light' | 'dark' | 'system')
                     }
                     value={theme}
                   >
@@ -127,9 +101,7 @@ export function SettingsPanel({
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                     max="20"
                     min="10"
-                    onChange={(e) =>
-                      onFontSizeChange?.(parseInt(e.target.value))
-                    }
+                    onChange={(e) => setFontSize(parseInt(e.target.value))}
                     step="1"
                     type="range"
                     value={fontSize}
@@ -144,9 +116,9 @@ export function SettingsPanel({
                   <span className="text-sm text-gray-400">컴팩트 모드</span>
                   <button
                     className={`w-5 h-5 rounded-full transition-colors ${
-                      compactMode ? 'bg-blue-500' : 'bg-gray-600'
+                      isCompactMode ? 'bg-blue-500' : 'bg-gray-600'
                     }`}
-                    onClick={() => onCompactModeChange?.(!compactMode)}
+                    onClick={() => setCompactMode(!isCompactMode)}
                   />
                 </div>
               </div>
@@ -163,9 +135,7 @@ export function SettingsPanel({
                 </label>
                 <select
                   className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  onChange={(e) =>
-                    onLanguageChange?.(e.target.value as 'ko' | 'en')
-                  }
+                  onChange={(e) => setLanguage(e.target.value as 'ko' | 'en')}
                   value={language}
                 >
                   <option value="ko">🇰🇷 한국어</option>
@@ -180,19 +150,7 @@ export function SettingsPanel({
                 className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors text-sm"
                 onClick={() => {
                   // 모든 설정을 기본값으로 초기화
-                  onThemeChange?.('system');
-                  onLanguageChange?.('ko');
-                  onFontSizeChange?.(14);
-                  onCodeThemeChange?.('vs-dark');
-                  onAutoFormatChange?.(true);
-                  onAutoCopyChange?.(false);
-                  onAutoSaveChange?.(true);
-                  onShowNotificationsChange?.(true);
-                  onKeyboardShortcutsChange?.(true);
-                  onResultDisplayModeChange?.('card');
-                  onMaxHistoryItemsChange?.(50);
-                  onDebugModeChange?.(false);
-                  onCompactModeChange?.(false);
+                  resetSettings();
                 }}
               >
                 🔄 설정 초기화

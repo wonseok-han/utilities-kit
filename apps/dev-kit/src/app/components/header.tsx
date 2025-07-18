@@ -1,22 +1,24 @@
 'use client';
 
+import { useIsMobile } from '@hooks/use-media-query';
+import { useSidebarStore } from '@store/sidebar-store';
+
 export interface HeaderProps {
   title?: string;
   onSettingsClick?: () => void;
-  onToggleSidebar?: () => void;
   onToggleSettingsPanel?: () => void;
   isSettingsPanelOpen?: boolean;
-  isMobile?: boolean;
 }
 
 export function Header({
-  isMobile = false,
   isSettingsPanelOpen = false,
   onSettingsClick,
   onToggleSettingsPanel,
-  onToggleSidebar,
   title,
 }: HeaderProps) {
+  const isMobile = useIsMobile();
+  const { toggle: onToggleSidebar } = useSidebarStore();
+
   return (
     <header className="bg-gray-800 px-6 py-4">
       <div className="flex items-center justify-between">

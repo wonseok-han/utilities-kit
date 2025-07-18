@@ -64,7 +64,7 @@ export const useJsonStore = create<JsonState>()(
         }),
     }),
     {
-      name: 'json-formatter-storage', // localStorage key name
+      name: 'json-formatter-store', // localStorage key name
       partialize: (state) => ({
         input: state.input,
         output: state.output,

@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from 'react';
 
-import { DashboardProvider } from './components/dashboard-provider';
+import { DashboardLayout } from './components/dashboard-layout';
 
 export default function Template({ children }: PropsWithChildren) {
-  return <DashboardProvider>{children}</DashboardProvider>;
+  return <DashboardLayout>{children}</DashboardLayout>;
 }

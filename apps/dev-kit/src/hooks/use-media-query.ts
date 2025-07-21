@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 /**
  * 미디어 쿼리 상태를 관리하는 커스텀 훅
  * @param query - CSS 미디어 쿼리 문자열
- * @returns 미디어 쿼리 매치 여부
+ * @returns 미디어 쿼리 매치 여부 (hydration 전에는 undefined)
  */
-export function useMediaQuery(query: string): boolean {
-  const [isMatched, setIsMatched] = useState(false);
+export function useMediaQuery(query: string): boolean | undefined {
+  const [isMatched, setIsMatched] = useState<boolean | undefined>(undefined);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -26,9 +26,9 @@ export function useMediaQuery(query: string): boolean {
     };
   }, [query]);
 
-  // 하이드레이션 전까지는 기본값 반환
+  // 하이드레이션 전까지는 undefined 반환
   if (!hasMounted) {
-    return false;
+    return undefined;
   }
 
   return isMatched;
@@ -36,16 +36,16 @@ export function useMediaQuery(query: string): boolean {
 
 /**
  * 모바일 환경 감지를 위한 편의 훅
- * @returns 모바일 환경 여부
+ * @returns 모바일 환경 여부 (hydration 전에는 undefined)
  */
-export function useIsMobile(): boolean {
+export function useIsMobile(): boolean | undefined {
   return useMediaQuery('(max-width: 767px)');
 }
 
 /**
  * 데스크톱 환경 감지를 위한 편의 훅
- * @returns 데스크톱 환경 여부
+ * @returns 데스크톱 환경 여부 (hydration 전에는 undefined)
  */
-export function useIsDesktop(): boolean {
+export function useIsDesktop(): boolean | undefined {
   return useMediaQuery('(min-width: 768px)');
 }

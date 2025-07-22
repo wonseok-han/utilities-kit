@@ -58,6 +58,14 @@ export const getSidebarIcon = (iconType: string): ReactNode => {
         />
       </svg>
     ),
+    diff: (
+      <path
+        d="M5 13l4 4L19 7M5 7h6M13 17h6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    ),
   };
   return icons[iconType as keyof typeof icons] || icons.dashboard;
 };

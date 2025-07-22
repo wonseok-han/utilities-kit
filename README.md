@@ -62,3 +62,4 @@ utilities-kit/
 - https://turborepo.com/docs/guides/tools/tailwind
 - https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack
 - https://sihun.dev/blog/nextjs15_svgr_setting
+- https://github.com/microsoft/monaco-editor

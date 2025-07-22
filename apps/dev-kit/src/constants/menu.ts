@@ -24,6 +24,12 @@ export const SIDEBAR_MENU_ITEMS: MenuItemType[] = [
     icon: 'time',
     path: '/timestamp-converter',
   },
+  {
+    id: 'diff',
+    label: 'Diff 비교기',
+    icon: 'diff',
+    path: '/diff',
+  },
 ];
 
 // 경로별 메뉴 아이템을 빠르게 찾기 위한 맵

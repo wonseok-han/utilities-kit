@@ -119,6 +119,29 @@ export function DashboardContent() {
             title="정규식 테스터"
           />
 
+          <ToolCard
+            color="indigo"
+            description="두 텍스트의 차이점을 한눈에 비교하세요"
+            icon={
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                {/* 사이드바와 동일한 Diff 아이콘 */}
+                <path
+                  d="M5 13l4 4L19 7M5 7h6M13 17h6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                />
+              </svg>
+            }
+            onClick={() => handleToolCardClick('diff')}
+            title="Diff 비교기"
+          />
+
           {/* TODO: 추후 추가 예정 */}
           {/* <ToolCard
             color="purple"

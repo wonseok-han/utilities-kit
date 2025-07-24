@@ -1,8 +1,7 @@
 'use client';
 
 import IconLogo from '@assets/icons/icon-logo.svg';
-import { useIsMobile } from '@hooks/use-media-query';
-import { useSidebarStore } from '@store/sidebar-store';
+import { useDeviceStore } from '@store/device-store';
 import { getCurrentPageInfo } from '@utils/menu';
 import { usePathname } from 'next/navigation';
 import { memo } from 'react';
@@ -37,14 +36,8 @@ export const Sidebar = memo(function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const pageMetadata = getPageMetadata(pathname);
-  const { hasHydrated } = useSidebarStore();
 
-  const isMobile = useIsMobile();
-
-  // hydration 전에는 아무것도 렌더링하지 않음 (깜빡임 방지)
-  if (!hasHydrated || isMobile === undefined || isMobile === null) {
-    return null;
-  }
+  const { isMobile } = useDeviceStore();
 
   const Title = (
     <div className="relative flex items-center space-x-2 ml-2 mt-2">

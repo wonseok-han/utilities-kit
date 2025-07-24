@@ -1,0 +1,55 @@
+.diff-root {
+  .diff-removed-line {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.2) 100%) !important;
+  }
+
+  .diff-added-line {
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.2) 100%) !important;
+  }
+
+  .diff-removed-text {
+    color: #fecaca !important;
+    font-weight: 500 !important;
+  }
+
+  .diff-added-text {
+    color: #bbf7d0 !important;
+    font-weight: 500 !important;
+  }
+
+  .diff-inline-added {
+    background: rgba(34, 197, 94, 0.25) !important;
+    color: #22c55e !important;
+    border-radius: 2px !important;
+    padding: 0 1px !important;
+  }
+
+  .diff-inline-removed {
+    background: rgba(239, 68, 68, 0.25) !important;
+    color: #ef4444 !important;
+    border-radius: 2px !important;
+    padding: 0 1px !important;
+  }
+
+  .diff-gutter-removed::before {
+    content: '-';
+    color: #ef4444;
+    font-weight: bold;
+    font-size: 15px;
+    display: block;
+    text-align: center;
+    width: 100%;
+    line-height: 1.2;
+  }
+
+  .diff-gutter-added::before {
+    content: '+';
+    color: #22c55e;
+    font-weight: bold;
+    font-size: 15px;
+    display: block;
+    text-align: center;
+    width: 100%;
+    line-height: 1.2;
+  }
+}

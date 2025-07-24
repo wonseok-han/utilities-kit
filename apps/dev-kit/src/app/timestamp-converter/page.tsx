@@ -1,13 +1,13 @@
 'use client';
 
-import type { Dayjs } from '@repo/shared';
+import type { Dayjs } from '@repo/shared/date';
 
 import {
   formatDate,
   getRelative,
   parseDateWithType,
   type ParsedDateType,
-} from '@repo/shared';
+} from '@repo/shared/date';
 import { ActionButton, CodeTextarea } from '@repo/ui';
 import { useTimestampConverterStore } from '@store/timestamp-converter-store';
 import { useEffect, useState } from 'react';
@@ -159,13 +159,13 @@ export default function TimestampConverterPage() {
       setError(null);
       return;
     }
-    const { date, type } = parseDateWithType(v);
+    const { date: parsedDate, type } = parseDateWithType(v);
     setInputType(type);
-    if (!date.isValid()) {
+    if (!parsedDate.isValid()) {
       setParsed(null);
       setError('유효한 timestamp(초/밀리초) 또는 날짜/시간을 입력하세요.');
     } else {
-      setParsed(date);
+      setParsed(parsedDate);
       setError(null);
     }
   };

@@ -6,6 +6,20 @@
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./date": {
+      "import": "./dist/date.js",
+      "require": "./dist/date.js"
+    },
+    "./diff": {
+      "import": "./dist/diff.js",
+      "require": "./dist/diff.js"
+    }
+  },
   "scripts": {
     "build": "pnpm run build:utils",
     "build:utils": "tsc --project tsconfig.json",
@@ -13,6 +27,7 @@
     "dev:utils": "tsc --project tsconfig.json --watch"
   },
   "dependencies": {
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "diff": "^8.0.2"
   }
 }

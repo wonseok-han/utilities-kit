@@ -1,6 +1,8 @@
 'use client';
 
 import { useIsMobile } from '@hooks/use-media-query';
+import { usePrevious } from '@hooks/use-previous';
+import { useDeviceStore } from '@store/device-store';
 import { useSettingStore } from '@store/setting-store';
 import { useSidebarStore } from '@store/sidebar-store';
 import { useRouter } from 'next/navigation';
@@ -21,29 +23,47 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     close: closeSidebar,
     hasHydrated,
     isOpen: isSidebarOpen,
+    open: openSidebar,
     toggle: onToggleSidebar,
   } = useSidebarStore();
   const { isSettingsPanelOpen, toggleSettingsPanel } = useSettingStore();
   const isMobile = useIsMobile();
+  const {
+    hasHydrated: hasDeviceHydrated,
+    isMobile: isDeviceMobile,
+    setIsMobile,
+  } = useDeviceStore();
+  const usePrevIsDeviceMobile = usePrevious(isDeviceMobile);
 
   const handleMenuItemClick = (path: string) => {
     router.push(path);
 
     // 모바일에서 메뉴 클릭 시 사이드바 닫기
-    if (isMobile) {
+    if (isDeviceMobile) {
       closeSidebar();
     }
   };
 
   useEffect(() => {
-    if (isMobile && isSidebarOpen) {
+    if (isMobile !== undefined && isMobile !== null) {
+      setIsMobile(isMobile);
+    }
+
+    if (isMobile) {
       // 모바일로 전환 시 사이드바 닫기
       closeSidebar();
     }
-  }, [isMobile]);
+  }, [isMobile, setIsMobile, closeSidebar]);
+
+  useEffect(() => {
+    // 이전 값이 true(모바일)였고, 현재 false(데스크탑)로 바뀌는 순간만 실행
+    if (usePrevIsDeviceMobile === true && isDeviceMobile === false) {
+      openSidebar();
+    }
+  }, [isDeviceMobile, usePrevIsDeviceMobile, openSidebar]);
 
   // localStorage hydration이 완료될 때까지 로딩 화면 표시
-  if (!hasHydrated) {
+  if (!hasHydrated && !hasDeviceHydrated) {
     return <LayoutSkeleton />;
   }
 

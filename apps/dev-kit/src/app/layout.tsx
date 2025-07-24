@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { Analytics } from '@vercel/analytics/next';
 import localFont from 'next/font/local';
-import './globals.scss';
+import './globals.css';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',

@@ -1,11 +1,11 @@
 'use client';
 
 import type { Change } from '@repo/shared/diff';
-import type { IMonacoDecoration } from '@repo/ui/monaco-editor';
+import type { IMonacoDecoration } from '@repo/ui/components/monaco-editor';
 
 import { diffLines, diffWords } from '@repo/shared/diff';
 import { ActionButton } from '@repo/ui';
-import { MonacoEditor } from '@repo/ui/monaco-editor';
+import { MonacoEditor } from '@repo/ui';
 import { useDiffStore } from '@store/diff-store';
 import { useState, useMemo, useCallback } from 'react';
 

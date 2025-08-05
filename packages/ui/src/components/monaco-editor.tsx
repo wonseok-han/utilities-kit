@@ -24,6 +24,9 @@ export interface MonacoEditorProps {
   readOnly?: boolean;
   decorations?: IMonacoDecoration[];
   lineNumbers?: 'on' | 'off' | ((line: number) => string);
+  minimap?: { enabled: boolean };
+  glyphMargin?: boolean;
+  folding?: boolean;
 }
 
 // UI 패키지에서 사용할 수 있는 Monaco decoration 타입 정의
@@ -61,9 +64,12 @@ function toMonacoDecorations(
 
 export const MonacoEditor: FC<MonacoEditorProps> = ({
   decorations = [],
+  folding = false,
+  glyphMargin = false,
   height = 400,
   language,
   lineNumbers = 'on',
+  minimap = { enabled: true },
   onChange,
   readOnly = false,
   theme = 'custom-dark',
@@ -72,11 +78,17 @@ export const MonacoEditor: FC<MonacoEditorProps> = ({
   const editorRef = useRef<MonacoEditorNS.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
   const decorationIdsRef = useRef<string[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // 에디터 인스턴스 저장
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
     monacoRef.current = monaco;
+
+    // 마운트 직후 강제 layout 호출 (requestAnimationFrame 사용)
+    requestAnimationFrame(() => {
+      editor.layout();
+    });
 
     // 커스텀 테마 정의
     monaco.editor.defineTheme('custom-dark', {
@@ -154,6 +166,11 @@ export const MonacoEditor: FC<MonacoEditorProps> = ({
 
     // 커스텀 테마 적용
     monaco.editor.setTheme('custom-dark');
+
+    // 마운트 직후 강제 layout 호출
+    setTimeout(() => {
+      editor.layout();
+    }, 0);
   };
 
   // decorations가 변경될 때마다 적용
@@ -173,23 +190,46 @@ export const MonacoEditor: FC<MonacoEditorProps> = ({
     }
   }, [decorations]);
 
+  // ResizeObserver로 컨테이너 크기 변화 감지
+  useEffect(() => {
+    if (!containerRef.current || !editorRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (editorRef.current) {
+        editorRef.current.layout();
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   return (
-    <Editor
-      height={height}
-      language={language}
-      {...(onChange ? { onChange: (v) => onChange(v ?? '') } : {})}
-      onMount={handleEditorDidMount}
-      options={{
-        readOnly,
-        minimap: { enabled: false },
-        fontSize: 14,
-        wordWrap: 'on',
-        automaticLayout: true,
-        glyphMargin: true,
-        lineNumbers,
-      }}
-      theme={theme}
-      value={value}
-    />
+    <div
+      ref={containerRef}
+      style={{ height: typeof height === 'number' ? `${height}px` : height }}
+    >
+      <Editor
+        height="100%"
+        language={language}
+        {...(onChange ? { onChange: (v) => onChange(v ?? '') } : {})}
+        onMount={handleEditorDidMount}
+        options={{
+          readOnly,
+          minimap,
+          fontSize: 14,
+          wordWrap: 'on',
+          automaticLayout: true,
+          glyphMargin,
+          folding,
+          lineNumbers,
+        }}
+        theme={theme}
+        value={value}
+      />
+    </div>
   );
 };

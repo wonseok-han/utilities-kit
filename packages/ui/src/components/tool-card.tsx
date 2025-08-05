@@ -6,7 +6,7 @@ export interface ToolCardProps {
   title: string;
   description: string;
   icon: React.ReactNode;
-  color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo';
+  color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo' | 'emerald';
   onClick?: () => void;
 }
 
@@ -17,6 +17,7 @@ const colorMap = {
   orange: 'bg-orange-600',
   red: 'bg-red-600',
   indigo: 'bg-indigo-600',
+  emerald: 'bg-emerald-600',
 };
 
 export function ToolCard({

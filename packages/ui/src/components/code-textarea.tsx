@@ -32,7 +32,6 @@ export function CodeTextarea({
     text-white
     font-mono
     text-sm
-    resize-none
     focus:outline-none
   `
     .replace(/\s+/g, ' ')

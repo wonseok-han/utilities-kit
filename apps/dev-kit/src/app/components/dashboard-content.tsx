@@ -142,6 +142,30 @@ export function DashboardContent() {
             title="Diff 비교기"
           />
 
+          <ToolCard
+            color="emerald"
+            description="WYSIWYG 에디터로 손쉽게 문서를 작성하세요"
+            icon={
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16.862 3.487a2.25 2.25 0 113.182 3.182l-9.193 9.193a2 2 0 01-.707.464l-4.11 1.37a.5.5 0 01-.632-.632l1.37-4.11a2 2 0 01.464-.707l9.193-9.193zm2.121-2.121a4.25 4.25 0 00-6.01 0l-9.193 9.193a4 4 0 00-.928 1.414l-1.37 4.11A2.5 2.5 0 003.5 21.5l4.11-1.37a4 4 0 001.414-.928l9.193-9.193a4.25 4.25 0 000-6.01z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                />
+              </svg>
+            }
+            onClick={() => handleToolCardClick('web-editor')}
+            title="웹 에디터"
+          />
+
           {/* TODO: 추후 추가 예정 */}
           {/* <ToolCard
             color="purple"

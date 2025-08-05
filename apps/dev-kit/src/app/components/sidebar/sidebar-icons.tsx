@@ -66,6 +66,14 @@ export const getSidebarIcon = (iconType: string): ReactNode => {
         strokeWidth="2"
       />
     ),
+    webEditor: (
+      <path
+        d="M16.862 3.487a2.25 2.25 0 113.182 3.182l-9.193 9.193a2 2 0 01-.707.464l-4.11 1.37a.5.5 0 01-.632-.632l1.37-4.11a2 2 0 01.464-.707l9.193-9.193zm2.121-2.121a4.25 4.25 0 00-6.01 0l-9.193 9.193a4 4 0 00-.928 1.414l-1.37 4.11A2.5 2.5 0 003.5 21.5l4.11-1.37a4 4 0 001.414-.928l9.193-9.193a4.25 4.25 0 000-6.01z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+      />
+    ),
   };
   return icons[iconType as keyof typeof icons] || icons.dashboard;
 };

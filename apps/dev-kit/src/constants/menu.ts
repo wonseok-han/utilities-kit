@@ -30,6 +30,12 @@ export const SIDEBAR_MENU_ITEMS: MenuItemType[] = [
     icon: 'diff',
     path: '/diff',
   },
+  {
+    id: 'web-editor',
+    label: '웹 에디터',
+    icon: 'webEditor',
+    path: '/web-editor',
+  },
 ];
 
 // 경로별 메뉴 아이템을 빠르게 찾기 위한 맵

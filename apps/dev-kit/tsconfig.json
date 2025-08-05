@@ -8,9 +8,11 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@api/*": ["./src/api/*"],
       "@assets/*": ["./public/assets/*"],
       "@constants/*": ["./src/constants/*"],
       "@hooks/*": ["./src/hooks/*"],
+      "@services/*": ["./src/services/*"],
       "@store/*": ["./src/store/*"],
       "@typings/*": ["./src/types/*"],
       "@utils/*": ["./src/utils/*"],

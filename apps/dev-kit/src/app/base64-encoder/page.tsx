@@ -56,7 +56,7 @@ export default function Base64EncoderPage() {
     <div className="flex flex-col min-h-fit h-full p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">
-          Base64 인코더/디코더
+          Base64 Encoder/Decoder
         </h1>
         <p className="text-gray-400">
           텍스트를 Base64로 인코딩하거나 Base64를 디코딩해보세요.

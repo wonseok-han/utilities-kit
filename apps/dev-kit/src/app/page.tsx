@@ -1,5 +1,14 @@
+import { fetchRecentCVEs } from '@services/cve';
+
 import { DashboardContent } from './components/dashboard-content';
 
-export default function Home() {
-  return <DashboardContent />;
+export default async function Home() {
+  // 서버 사이드에서 최신 CVE 데이터 가져오기
+  const result = await fetchRecentCVEs(1, 6).catch(() => ({
+    cves: [],
+    pagination: { hasMore: false },
+  }));
+  const initialCVEs = result.cves;
+
+  return <DashboardContent initialCVEs={initialCVEs} />;
 }

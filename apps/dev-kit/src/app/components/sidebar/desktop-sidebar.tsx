@@ -23,7 +23,7 @@ export function DesktopSidebar({
   return (
     <div
       className={`bg-gray-800 flex flex-col transition-all duration-300 ${
-        isOpen ? 'w-64' : 'w-16'
+        isOpen ? 'min-w-64' : 'min-w-16'
       }`}
     >
       {/* 로고 */}

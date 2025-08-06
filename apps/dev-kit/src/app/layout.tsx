@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { SnackbarManager } from '@repo/ui';
 import { Analytics } from '@vercel/analytics/next';
 import localFont from 'next/font/local';
 import './globals.css';
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         {children}
         <Analytics />
+        <SnackbarManager maxSnackbars={5} />
       </body>
     </html>
   );

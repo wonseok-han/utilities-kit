@@ -70,7 +70,7 @@ export default function JwtEncoderPage() {
     <div className="flex flex-col min-h-fit h-full p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-2">
-          JWT 인코더/디코더
+          JWT Encoder/Decoder
         </h1>
         <p className="text-gray-400">
           JWT 토큰을 생성하거나 디코딩하여 Header와 Payload를 확인해보세요.

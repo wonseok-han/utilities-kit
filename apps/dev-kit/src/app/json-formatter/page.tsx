@@ -33,7 +33,7 @@ export default function JsonFormatterPage() {
   return (
     <div className="flex flex-col min-h-fit h-full p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">JSON 포맷터</h1>
+        <h1 className="text-2xl font-bold text-white mb-2">JSON Formatter</h1>
         <p className="text-gray-400">JSON 데이터를 구조화하고 최적화하세요.</p>
       </div>
 

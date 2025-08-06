@@ -37,10 +37,10 @@ export const SIDEBAR_MENU_ITEMS: MenuItemType[] = [
     path: '/web-editor',
   },
   {
-    id: 'cve-tracker',
-    label: 'CVE 추적기',
+    id: 'cve-viewer',
+    label: 'CVE 뷰어',
     icon: 'security',
-    path: '/cve-tracker',
+    path: '/cve-viewer',
   },
 ];
 

@@ -16,9 +16,6 @@ export async function GET(request: NextRequest) {
     const page = parseInt(pageParam) - 1;
     const startIndex = page * parseInt(limit);
 
-    // FIXME 에러일 때 테스트
-    return NextResponse.json({ error: `NVD API error: 404` }, { status: 404 });
-
     const params = new URLSearchParams({
       resultsPerPage: limit,
       startIndex: startIndex.toString(),

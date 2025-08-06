@@ -81,19 +81,19 @@ export function Snackbar({
   const getPositionStyles = () => {
     switch (position) {
       case 'top-left':
-        return 'top-10 left-10 transform-none';
+        return 'top-4 left-4 sm:top-10 sm:left-10 transform-none';
       case 'top-center':
-        return 'top-10 left-1/2 transform -translate-x-1/2';
+        return 'top-4 left-1/2 transform -translate-x-1/2 sm:top-10';
       case 'top-right':
-        return 'top-10 right-10 transform-none';
+        return 'top-4 right-4 sm:top-10 sm:right-10 transform-none';
       case 'bottom-left':
-        return 'bottom-10 left-10 transform-none';
+        return 'bottom-4 left-4 sm:bottom-10 sm:left-10 transform-none';
       case 'bottom-center':
-        return 'bottom-10 left-1/2 transform -translate-x-1/2';
+        return 'bottom-4 left-1/2 transform -translate-x-1/2 sm:bottom-10';
       case 'bottom-right':
-        return 'bottom-10 right-10 transform-none';
+        return 'bottom-4 right-4 sm:bottom-10 sm:right-10 transform-none';
       default:
-        return 'bottom-10 left-1/2 transform -translate-x-1/2';
+        return 'bottom-4 left-1/2 transform -translate-x-1/2 sm:bottom-10';
     }
   };
 
@@ -107,17 +107,17 @@ export function Snackbar({
       style={style}
     >
       <div
-        className={`px-4 py-3 rounded-lg border shadow-lg max-w-md mx-auto ${getTypeStyles()}`}
+        className={`px-3 py-2 sm:px-4 sm:py-3 rounded-lg border shadow-lg max-w-[280px] sm:max-w-md mx-auto ${getTypeStyles()}`}
       >
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm flex-1">{message}</p>
+          <p className="text-xs sm:text-sm flex-1">{message}</p>
           <button
             aria-label="닫기"
-            className="text-current hover:opacity-70 transition-opacity cursor-pointer"
+            className="text-current hover:opacity-70 transition-opacity cursor-pointer flex-shrink-0"
             onClick={handleClose}
           >
             <svg
-              className="w-4 h-4"
+              className="w-3 h-3 sm:w-4 sm:h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

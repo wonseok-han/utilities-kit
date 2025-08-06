@@ -120,7 +120,7 @@ export default function RegexTesterPage() {
   return (
     <div className="flex flex-col min-h-fit h-full p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">정규식 테스터</h1>
+        <h1 className="text-2xl font-bold text-white mb-2">Regex Tester</h1>
         <p className="text-gray-400">
           <strong>정규식(Regular Expression)</strong>은 문자열에서 원하는 패턴을
           찾거나 변환할 때 사용하는 특수한 문법입니다.

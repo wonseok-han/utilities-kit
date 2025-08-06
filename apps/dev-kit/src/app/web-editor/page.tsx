@@ -37,7 +37,7 @@ export default function WebEditorPage() {
     <div className="flex flex-col min-h-fit h-full p-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-blue-400 mb-2">
-          웹 에디터 (Tiptap)
+          Web Editor (Tiptap)
         </h1>
         <p className="text-gray-400">
           WYSIWYG 방식으로 HTML 콘텐츠를 작성할 수 있습니다.

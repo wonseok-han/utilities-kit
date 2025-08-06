@@ -253,7 +253,7 @@ export default function DiffPage() {
       className={`${styles['diff-root']} flex flex-col min-h-fit h-full p-6`}
     >
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-2">Diff 비교기</h1>
+        <h1 className="text-2xl font-bold text-white mb-2">Diff Comparator</h1>
         <p className="text-gray-400">
           Original(원본) 입력 후 변경이 불가능하며, Changed(변경본)에서만
           자유롭게 수정할 수 있습니다.

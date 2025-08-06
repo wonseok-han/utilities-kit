@@ -1,3 +1,5 @@
+import { apiFetch, createApiUrl } from '@utils/api-client';
+
 /**
  * 최근 CVE 데이터를 가져옵니다
  * @param page - 페이지 번호 (1부터 시작, 기본값: 1)
@@ -16,17 +18,12 @@ export async function fetchRecentCVEs(
     hasMore: boolean;
   };
 }> {
-  const params = new URLSearchParams({
+  const url = createApiUrl('/api/cve', {
     page: page.toString(),
     limit: limit.toString(),
   });
 
-  const response = await fetch(`/api/cve?${params}`);
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
+  const response = await apiFetch(url);
   return response.json();
 }
 
@@ -34,11 +31,7 @@ export async function fetchRecentCVEs(
  * 특정 CVE ID로 CVE 데이터를 가져옵니다
  */
 export async function fetchCVEById(id: string): Promise<CVEDataType | null> {
-  const response = await fetch(`/api/cve/${id}`);
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
+  const url = createApiUrl(`/api/cve/${id}`);
+  const response = await apiFetch(url);
   return response.json();
 }

@@ -47,4 +47,5 @@ type NVDVulnerabilityType = {
 
 type NVDResponseType = {
   vulnerabilities?: NVDVulnerabilityType[];
+  totalResults?: number;
 };

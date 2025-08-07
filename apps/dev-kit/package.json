@@ -32,6 +32,18 @@
       },
       {
         "watchPaths": [
+          "src/hooks",
+          "src/store"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
           "public/assets/icons"
         ],
         "fileExtensions": [

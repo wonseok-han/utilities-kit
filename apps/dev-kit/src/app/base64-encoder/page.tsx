@@ -1,4 +1,4 @@
-import PageWrapper from '@components/page-wrapper';
+import { PageWrapper } from '@components/page-wrapper';
 
 import { Base64EncoderClient, Base64EncoderHeader } from './components';
 

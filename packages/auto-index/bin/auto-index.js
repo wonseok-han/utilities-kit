@@ -12,6 +12,7 @@ const DEFAULT_CONFIG = {
   outputFile: 'index.ts',
   exportStyle: 'named',
   namingConvention: 'original',
+  fromWithExtension: false, // from 경로에 확장자를 포함할지 여부
 };
 
 /**
@@ -131,6 +132,13 @@ function generateIndex(folderPath, outputPath) {
     // 경로별 설정 적용
     const targetConfig = findTargetConfig(fullPath, config);
 
+    console.log('🔍 설정 정보:', {
+      folderPath,
+      targetConfig,
+      fileExtensions: targetConfig.fileExtensions,
+      fromWithExtension: targetConfig.fromWithExtension,
+    });
+
     const files = fs.readdirSync(fullPath);
     const componentFiles = files.filter((file) => {
       const filePath = path.join(fullPath, file);
@@ -149,26 +157,34 @@ function generateIndex(folderPath, outputPath) {
 
     componentFiles.forEach((file) => {
       const name = path.parse(file).name;
+      const extension = path.parse(file).ext;
       const exportName = transformFileName(name, targetConfig.namingConvention);
 
       // 파일 내용을 확인하여 default export가 있는지 체크
       const filePath = path.join(fullPath, file);
       const content = fs.readFileSync(filePath, 'utf-8');
 
+      // includeExtension 옵션에 따라 from 경로 결정
+      const fromPath = targetConfig.fromWithExtension
+        ? `./${name}${extension}`
+        : `./${name}`;
+
       if (content.includes('export default')) {
         // default export가 있으면 설정에 따라 처리
         if (targetConfig.exportStyle === 'default') {
-          exports.add(`export { default } from './${name}';`);
+          exports.add(`export { default } from '${fromPath}';`);
         } else {
-          exports.add(`export { default as ${exportName} } from './${name}';`);
+          exports.add(
+            `export { default as ${exportName} } from '${fromPath}';`
+          );
         }
       } else {
         // default export가 없으면 named export로 생성
         // namingConvention에 따라 export 이름 결정
         if (targetConfig.namingConvention === 'original') {
-          exports.add(`export * from './${name}';`);
+          exports.add(`export * from '${fromPath}';`);
         } else {
-          exports.add(`export * as ${exportName} from './${name}';`);
+          exports.add(`export * as ${exportName} from '${fromPath}';`);
         }
       }
     });

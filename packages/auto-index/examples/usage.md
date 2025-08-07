@@ -95,6 +95,18 @@ watcher.stop();
         "outputFile": "index.ts",
         "exportStyle": "named",
         "namingConvention": "camelCase"
+      },
+      {
+        "watchPaths": [
+          "public/assets/icons"
+        ],
+        "fileExtensions": [
+          ".svg"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "pascalCase",
+        "fromWithExtension": true
       }
     ]
   }
@@ -138,6 +150,20 @@ export default function Modal({ isOpen }: { isOpen: boolean }) {
 export { Button } from './Button';
 export { Input } from './Input';
 export { Modal } from './Modal';
+```
+
+### SVG 파일 폴더 구조
+```
+public/assets/icons/
+├── icon-logo.svg
+├── icon-menu.svg
+└── index.ts (자동 생성)
+```
+
+### 생성되는 index.ts (fromWithExtension: true)
+```typescript
+export { default as IconLogo } from './icon-logo.svg';
+export { default as IconMenu } from './icon-menu.svg';
 ```
 
 ## 6. Glob 패턴 사용 예시
@@ -213,6 +239,18 @@ export { default as Base64EncoderHeader } from './base64-encoder-header';
 export { default as base64EncoderHeader } from './base64-encoder-header';
 ```
 
+### fromWithExtension 옵션 예시
+
+**파일명**: `icon-logo.svg`
+
+```typescript
+// fromWithExtension: false (기본값)
+export { default as IconLogo } from './icon-logo';
+
+// fromWithExtension: true
+export { default as IconLogo } from './icon-logo.svg';
+```
+
 ## 8. 경로별 설정 예시
 
 ### 경로별 네이밍 규칙 적용
@@ -242,6 +280,15 @@ export { default as base64EncoderHeader } from './base64-encoder-header';
         ],
         "namingConvention": "camelCase",
         "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "public/assets/icons"
+        ],
+        "fileExtensions": [".svg"],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named",
+        "fromWithExtension": true
       }
     ]
   }
@@ -266,6 +313,12 @@ export { default as useAuth } from './useAuth';
 ```typescript
 // namingConvention: "camelCase" 적용
 export { default as dateHelper } from './dateHelper';
+```
+
+**public/assets/icons/icon-logo.svg**:
+```typescript
+// namingConvention: "pascalCase", fromWithExtension: true 적용
+export { default as IconLogo } from './icon-logo.svg';
 ```
 
 ## 9. 지원하는 Export 패턴
@@ -316,6 +369,15 @@ export { Component3 };
         ],
         "namingConvention": "pascalCase",
         "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "public/assets/icons"
+        ],
+        "fileExtensions": [".svg"],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named",
+        "fromWithExtension": true
       }
     ]
   }
@@ -414,6 +476,23 @@ export { Component3 };
 }
 ```
 
+### SVG/이미지 파일 전용 설정
+```json
+{
+  "autoIndex": {
+    "watchTargets": [
+      {
+        "watchPaths": ["public/assets/icons", "src/assets/images"],
+        "fileExtensions": [".svg", ".png", ".jpg", ".jpeg"],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named",
+        "fromWithExtension": true
+      }
+    ]
+  }
+}
+```
+
 ### 경로별 복합 설정
 ```json
 {
@@ -456,6 +535,15 @@ export { Component3 };
         "namingConvention": "pascalCase",
         "exportStyle": "named",
         "fileExtensions": [".tsx", ".ts"]
+      },
+      {
+        "watchPaths": [
+          "public/assets/icons"
+        ],
+        "fileExtensions": [".svg"],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named",
+        "fromWithExtension": true
       }
     ]
   }

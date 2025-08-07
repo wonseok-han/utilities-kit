@@ -31,6 +31,18 @@
         ],
         "outputFile": "index.ts",
         "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "public/assets/icons"
+        ],
+        "fileExtensions": [
+          ".svg"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "PascalCase",
+        "fromWithExtension": true
       }
     ]
   },

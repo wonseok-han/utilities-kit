@@ -160,6 +160,18 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
         "outputFile": "index.ts",
         "exportStyle": "named",
         "namingConvention": "camelCase"
+      },
+      {
+        "watchPaths": [
+          "public/assets/icons"
+        ],
+        "fileExtensions": [
+          ".svg"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "pascalCase",
+        "fromWithExtension": true
       }
     ]
   }
@@ -182,6 +194,7 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 | `outputFile` | `string` | `"index.ts"` | 생성할 파일명 |
 | `exportStyle` | `"named" \| "default"` | `"named"` | export 처리 방식 |
 | `namingConvention` | `"pascalCase" \| "camelCase" \| "original"` | `"original"` | 네이밍 변환 규칙 |
+| `fromWithExtension` | `boolean` | `false` | from 경로에 파일 확장자 포함 여부 |
 
 ### 네이밍 규칙 예시
 
@@ -192,6 +205,15 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 | `original` | `user_profile` | 기본값, 원본 파일명 유지 |
 | `pascalCase` | `UserProfile` | React 컴포넌트용 |
 | `camelCase` | `userProfile` | 유틸리티 함수용 |
+
+### fromWithExtension 옵션 예시
+
+**파일명**: `icon-logo.svg`
+
+| fromWithExtension | 결과 |
+|-------------------|------|
+| `false` | `export { default as IconLogo } from './icon-logo';` |
+| `true` | `export { default as IconLogo } from './icon-logo.svg';` |
 
 ## 예시
 
@@ -209,6 +231,20 @@ src/components/
 export { Button } from './Button';
 export { Input } from './Input';
 export { Modal } from './Modal';
+```
+
+### SVG 파일 폴더 구조
+```
+public/assets/icons/
+├── icon-logo.svg
+├── icon-menu.svg
+└── index.ts (자동 생성됨)
+```
+
+### 생성되는 index.ts (fromWithExtension: true)
+```typescript
+export { default as IconLogo } from './icon-logo.svg';
+export { default as IconMenu } from './icon-menu.svg';
 ```
 
 ## 설정
@@ -359,6 +395,23 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
         "fileExtensions": [".ts", ".tsx"],
         "namingConvention": "camelCase",
         "exportStyle": "named"
+      }
+    ]
+  }
+}
+```
+
+### SVG/이미지 파일용 설정
+```json
+{
+  "autoIndex": {
+    "watchTargets": [
+      {
+        "watchPaths": ["public/assets/icons"],
+        "fileExtensions": [".svg"],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named",
+        "fromWithExtension": true
       }
     ]
   }

@@ -13,6 +13,7 @@ const DEFAULT_CONFIG = {
   outputFile: 'index.ts',
   exportStyle: 'named',
   namingConvention: 'original',
+  fromWithExtension: false, // from 경로에 확장자를 포함할지 여부
 };
 
 /**

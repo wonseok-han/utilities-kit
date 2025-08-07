@@ -25,9 +25,7 @@
         ],
         "fileExtensions": [
           ".tsx",
-          ".ts",
-          ".jsx",
-          ".js"
+          ".ts"
         ],
         "outputFile": "index.ts",
         "exportStyle": "named"

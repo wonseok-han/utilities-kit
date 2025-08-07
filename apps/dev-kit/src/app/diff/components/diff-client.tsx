@@ -4,7 +4,7 @@ import type { Change } from '@repo/shared/diff';
 import type { IMonacoDecoration } from '@repo/ui';
 
 import { diffLines, diffWords } from '@repo/shared/diff';
-import { ActionButton, MonacoEditor } from '@repo/ui';
+import { ActionButton, MonacoEditor, useSnackbar } from '@repo/ui';
 import { useDiffStore } from '@store';
 import { useState, useMemo, useCallback } from 'react';
 
@@ -163,13 +163,22 @@ function getDiffDecorations(original: string, changed: string) {
 
 function useCopyToClipboard() {
   const [isCopied, setIsCopied] = useState(false);
+  const { showSnackbar } = useSnackbar();
+
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 1200);
-    } catch {
+    } catch (error) {
+      console.error('복사 실패:', error);
       setIsCopied(false);
+      showSnackbar({
+        message: '클립보드 복사에 실패했습니다. 다시 시도해주세요.',
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
     }
   };
   return [isCopied, copy] as const;
@@ -189,6 +198,9 @@ export function DiffClient({ initialData }: DiffClientProps) {
   const { changed, original, setBoth, setChanged, setOriginal } =
     useDiffStore();
   const [isOriginalLocked, setIsOriginalLocked] = useState(false);
+
+  // ===== 스낵바 훅 사용 =====
+  const { showSnackbar } = useSnackbar();
 
   // diff 계산 및 decoration 생성
   const { decorationsA, decorationsB } = useMemo(
@@ -243,10 +255,23 @@ export function DiffClient({ initialData }: DiffClientProps) {
   // Original 입력 완료 후 lock
   const handleOriginalLock = () => {
     setIsOriginalLocked(true);
+    showSnackbar({
+      message:
+        'Original 텍스트가 잠겼습니다. 이제 Changed 텍스트를 입력하세요.',
+      type: 'info',
+      position: 'bottom-right',
+      autoHideDuration: 4000,
+    });
   };
   // Original 다시 입력 가능하게
   const handleOriginalUnlock = () => {
     setIsOriginalLocked(false);
+    showSnackbar({
+      message: 'Original 텍스트 잠금이 해제되었습니다.',
+      type: 'info',
+      position: 'bottom-right',
+      autoHideDuration: 3000,
+    });
   };
 
   const [isCopiedOriginal, copyOriginal] = useCopyToClipboard();

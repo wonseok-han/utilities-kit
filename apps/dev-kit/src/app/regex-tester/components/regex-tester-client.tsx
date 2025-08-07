@@ -1,6 +1,6 @@
 'use client';
 
-import { ActionButton, CodeTextarea } from '@repo/ui';
+import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useRegexStore } from '@store/regex-store';
 import { useEffect } from 'react';
 
@@ -50,6 +50,9 @@ export function RegexTesterClient({ initialData }: RegexTesterClientProps) {
     testString,
   } = useRegexStore();
 
+  // ===== 스낵바 훅 사용 =====
+  const { showSnackbar } = useSnackbar();
+
   // ===== 복사 기능 =====
   const handleCopy = async (text: string) => {
     if (!text) return;
@@ -58,6 +61,12 @@ export function RegexTesterClient({ initialData }: RegexTesterClientProps) {
       await navigator.clipboard.writeText(text);
     } catch (err) {
       console.error('복사 실패:', err);
+      showSnackbar({
+        message: '클립보드 복사에 실패했습니다. 다시 시도해주세요.',
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
     }
   };
 

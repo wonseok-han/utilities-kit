@@ -1,6 +1,6 @@
 'use client';
 
-import { ActionButton, CodeTextarea, Tabs } from '@repo/ui';
+import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useJwtStore } from '@store';
 
 interface JwtEncoderClientProps {
@@ -53,6 +53,9 @@ export function JwtEncoderClient({ initialData }: JwtEncoderClientProps) {
   // ===== 현재 모드에 맞는 output 계산 =====
   const output = mode === 'encode' ? encodeOutput : decodeOutput;
 
+  // ===== 스낵바 훅 사용 =====
+  const { showSnackbar } = useSnackbar();
+
   // ===== 복사 기능 =====
   const handleCopy = async (text: string) => {
     if (!text) return; // 내용이 없으면 복사하지 않음
@@ -61,6 +64,12 @@ export function JwtEncoderClient({ initialData }: JwtEncoderClientProps) {
       await navigator.clipboard.writeText(text);
     } catch (err) {
       console.error('복사 실패:', err);
+      showSnackbar({
+        message: '클립보드 복사에 실패했습니다. 다시 시도해주세요.',
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
     }
   };
 

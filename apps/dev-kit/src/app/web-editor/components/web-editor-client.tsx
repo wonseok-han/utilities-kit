@@ -1,6 +1,6 @@
 'use client';
 
-import { MonacoEditor, TiptapEditor } from '@repo/ui';
+import { MonacoEditor, TiptapEditor, useSnackbar } from '@repo/ui';
 import { useEditorStore } from '@store/editor-store';
 import parserHtml from 'prettier/plugins/html';
 import prettier from 'prettier/standalone';
@@ -26,6 +26,9 @@ interface WebEditorClientProps {
 export function WebEditorClient({ initialData }: WebEditorClientProps) {
   const { content, setContent, setShouldIncludeStyles, shouldIncludeStyles } =
     useEditorStore();
+
+  // ===== 스낵바 훅 사용 =====
+  const { showSnackbar } = useSnackbar();
 
   // ===== 초기 데이터 설정 (컴포넌트 마운트 시 한 번만) =====
   React.useEffect(() => {
@@ -53,10 +56,17 @@ export function WebEditorClient({ initialData }: WebEditorClientProps) {
       });
       if (typeof result === 'string') return result;
       return content;
-    } catch (_) {
+    } catch (error) {
+      console.error('HTML 포맷팅 오류:', error);
+      showSnackbar({
+        message: 'HTML 포맷팅 중 오류가 발생했습니다.',
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
       return content;
     }
-  }, [content]);
+  }, [content, showSnackbar]);
 
   return (
     <div className="flex flex-col min-h-fit h-full p-8">

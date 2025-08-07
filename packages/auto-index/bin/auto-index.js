@@ -4,6 +4,32 @@ const fs = require('fs');
 const path = require('path');
 
 /**
+ * 기본 설정값
+ */
+const DEFAULT_CONFIG = {
+  exclude: ['node_modules', 'dist', '.git'],
+  fileExtensions: ['.tsx', '.ts', '.jsx', '.js'],
+  outputFile: 'index.ts',
+  exportStyle: 'named',
+  namingConvention: 'pascalCase',
+};
+
+/**
+ * 환경변수에서 설정을 읽어옵니다
+ */
+function getConfigFromEnv() {
+  const configStr = process.env.AUTO_INDEX_CONFIG;
+  if (configStr) {
+    try {
+      return JSON.parse(configStr);
+    } catch (error) {
+      console.error('설정 파싱 오류:', error.message);
+    }
+  }
+  return DEFAULT_CONFIG;
+}
+
+/**
  * 파일명을 유효한 JavaScript 변수명으로 변환
  */
 function toValidJSVariableName(str) {
@@ -22,11 +48,40 @@ function toPascalCase(str) {
 }
 
 /**
+ * 파일명을 CamelCase로 변환
+ */
+function toCamelCase(str) {
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+/**
+ * 네이밍 규칙에 따라 파일명을 변환
+ */
+function transformFileName(name, namingConvention) {
+  // 먼저 하이픈과 언더스코어를 제거하고 camelCase로 변환
+  const camelCaseName = name.replace(/[-_]([a-z])/g, (match, letter) =>
+    letter.toUpperCase()
+  );
+
+  switch (namingConvention) {
+    case 'camelCase':
+      return camelCaseName.charAt(0).toLowerCase() + camelCaseName.slice(1);
+    case 'original':
+      return toValidJSVariableName(name);
+    case 'pascalCase':
+    default:
+      return camelCaseName.charAt(0).toUpperCase() + camelCaseName.slice(1);
+  }
+}
+
+/**
  * 컴포넌트 폴더를 스캔하여 index.ts 파일을 생성합니다
  */
 function generateIndex(folderPath, outputPath) {
   try {
+    const config = getConfigFromEnv();
     const fullPath = path.resolve(folderPath);
+
     if (!fs.existsSync(fullPath)) {
       console.error(`폴더가 존재하지 않습니다: ${folderPath}`);
       return;
@@ -37,12 +92,12 @@ function generateIndex(folderPath, outputPath) {
       const filePath = path.join(fullPath, file);
       const stat = fs.statSync(filePath);
 
-      // 폴더는 제외하고 .tsx, .ts 파일만 포함
+      // 폴더는 제외하고 설정된 확장자 파일만 포함
       return (
         stat.isFile() &&
-        (file.endsWith('.tsx') || file.endsWith('.ts')) &&
-        file !== 'index.ts' &&
-        file !== 'index.tsx'
+        config.fileExtensions.some((ext) => file.endsWith(ext)) &&
+        file !== config.outputFile &&
+        !file.endsWith('.d.ts') // 타입 정의 파일 제외
       );
     });
 
@@ -50,15 +105,19 @@ function generateIndex(folderPath, outputPath) {
 
     componentFiles.forEach((file) => {
       const name = path.parse(file).name;
-      const exportName = toPascalCase(toValidJSVariableName(name));
+      const exportName = transformFileName(name, config.namingConvention);
 
       // 파일 내용을 확인하여 default export가 있는지 체크
       const filePath = path.join(fullPath, file);
       const content = fs.readFileSync(filePath, 'utf-8');
 
       if (content.includes('export default')) {
-        // default export가 있으면 default as named export로 생성
-        exports.add(`export { default as ${exportName} } from './${name}';`);
+        // default export가 있으면 설정에 따라 처리
+        if (config.exportStyle === 'default') {
+          exports.add(`export { default } from './${name}';`);
+        } else {
+          exports.add(`export { default as ${exportName} } from './${name}';`);
+        }
       } else {
         // default export가 없으면 named export로 생성
         exports.add(`export * from './${name}';`);
@@ -67,14 +126,17 @@ function generateIndex(folderPath, outputPath) {
 
     // index.ts 파일 생성 (기존 내용 완전 삭제 후 새로 생성)
     const indexContent = Array.from(exports).join('\n') + '\n';
-    const outputFilePath = outputPath || path.join(folderPath, 'index.ts');
+    const outputFilePath =
+      outputPath || path.join(folderPath, config.outputFile);
 
     // 기존 파일이 있으면 삭제하고 새로 생성
     if (fs.existsSync(outputFilePath)) {
       fs.unlinkSync(outputFilePath);
     }
     fs.writeFileSync(outputFilePath, indexContent, 'utf-8');
-    console.log(`✅ index.ts 파일이 생성되었습니다: ${outputFilePath}`);
+    console.log(
+      `✅ ${config.outputFile} 파일이 생성되었습니다: ${outputFilePath}`
+    );
     console.log(`📦 총 ${exports.size}개의 export가 추가되었습니다.`);
   } catch (error) {
     console.error('index.ts 생성 중 오류:', error);
@@ -100,42 +162,44 @@ function main() {
   const isWatch = args.includes('--watch');
 
   if (isWatch) {
-    // watch 모드
+    // 감시 모드
     const chokidar = require('chokidar');
     console.log(`🔍 파일 변경 감지 시작: ${folderPath}`);
 
     const watcher = chokidar.watch(folderPath, {
-      ignored: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/.git/**',
-        '**/index.ts',
-        '**/index.tsx',
-      ],
+      ignored: /(^|[\/\\])\../, // 숨김 파일 무시
       persistent: true,
     });
 
-    watcher
-      .on('add', (filePath) => {
-        console.log(`📝 파일 추가: ${path.basename(filePath)}`);
-        generateIndex(folderPath, outputPath);
-      })
-      .on('change', (filePath) => {
-        console.log(`📝 파일 변경: ${path.basename(filePath)}`);
-        generateIndex(folderPath, outputPath);
-      })
-      .on('unlink', (filePath) => {
-        console.log(`📝 파일 삭제: ${path.basename(filePath)}`);
-        generateIndex(folderPath, outputPath);
-      })
-      .on('error', (error) => console.error('Watcher 오류:', error));
+    watcher.on('add', (filePath) => {
+      const fileName = path.basename(filePath);
+      console.log(`📝 파일 추가: ${fileName}`);
+      generateIndex(folderPath, outputPath);
+    });
+
+    watcher.on('unlink', (filePath) => {
+      const fileName = path.basename(filePath);
+      console.log(`🗑️  파일 삭제: ${fileName}`);
+      generateIndex(folderPath, outputPath);
+    });
+
+    watcher.on('change', (filePath) => {
+      const fileName = path.basename(filePath);
+      console.log(`📝 파일 변경: ${fileName}`);
+      generateIndex(folderPath, outputPath);
+    });
+
+    // 프로세스 종료 시 감시 중지
+    process.on('SIGINT', () => {
+      watcher.close();
+      process.exit(0);
+    });
   } else {
     // 한 번만 실행
     generateIndex(folderPath, outputPath);
   }
 }
 
-// 스크립트가 직접 실행될 때만 main 함수 호출
 if (require.main === module) {
   main();
 }

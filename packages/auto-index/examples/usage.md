@@ -56,8 +56,29 @@ watcher.stop();
 {
   "scripts": {
     "generate:index": "auto-index src/components",
-    "dev:watch": "auto-index-watch-all \"src/**/components\" \"src/**/hooks\"",
-    "dev": "concurrently \"next dev\" \"auto-index-watch-all src/components \"src/app/**/components\"\""
+    "dev:watch": "auto-index-watch-all",
+    "dev": "concurrently \"next dev\" \"auto-index-watch-all\""
+  },
+  "autoIndex": {
+    "watchPaths": [
+      "src/components",
+      "src/app/**/components"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist",
+      ".git",
+      ".next"
+    ],
+    "fileExtensions": [
+      ".tsx",
+      ".ts",
+      ".jsx",
+      ".js"
+    ],
+    "outputFile": "index.ts",
+    "exportStyle": "named",
+    "namingConvention": "pascalCase"
   }
 }
 ```
@@ -147,7 +168,34 @@ src/
 
 모두 자동으로 생성됩니다.
 
-## 7. 지원하는 Export 패턴
+## 7. 네이밍 규칙 예시
+
+### 파일명 변환 예시
+
+**파일명**: `user-profile.tsx`
+
+| namingConvention | 결과 | 설명 |
+|------------------|------|------|
+| `pascalCase` | `UserProfile` | React 컴포넌트용 |
+| `camelCase` | `userProfile` | 유틸리티 함수용 |
+| `original` | `user_profile` | 원본 파일명 유지 |
+
+### 실제 변환 예시
+
+**파일명**: `base64-encoder-header.tsx`
+
+```typescript
+// namingConvention: "pascalCase"
+export { default as Base64EncoderHeader } from './base64-encoder-header';
+
+// namingConvention: "camelCase"  
+export { default as base64EncoderHeader } from './base64-encoder-header';
+
+// namingConvention: "original"
+export { default as base64_encoder_header } from './base64-encoder-header';
+```
+
+## 8. 지원하는 Export 패턴
 
 ### Named Export
 ```typescript
@@ -176,15 +224,23 @@ export default Component2;
 export { Component3 };
 ```
 
-## 8. 개발 환경 설정
+## 9. 개발 환경 설정
 
 ### Next.js 프로젝트
 
 ```json
 {
   "scripts": {
-    "dev": "concurrently \"next dev\" \"auto-index-watch-all src/components \"src/app/**/components\"\"",
+    "dev": "concurrently \"next dev\" \"auto-index-watch-all\"",
     "build": "auto-index src/components && next build"
+  },
+  "autoIndex": {
+    "watchPaths": [
+      "src/components",
+      "src/app/**/components"
+    ],
+    "namingConvention": "pascalCase",
+    "exportStyle": "named"
   }
 }
 ```
@@ -194,8 +250,69 @@ export { Component3 };
 ```json
 {
   "scripts": {
-    "dev": "concurrently \"vite\" \"auto-index-watch-all \"src/**/components\"\"",
+    "dev": "concurrently \"vite\" \"auto-index-watch-all\"",
     "build": "auto-index src/components && vite build"
+  },
+  "autoIndex": {
+    "watchPaths": ["src/**/components"],
+    "fileExtensions": [".tsx", ".ts"],
+    "namingConvention": "pascalCase"
+  }
+}
+```
+
+### 유틸리티 라이브러리
+
+```json
+{
+  "scripts": {
+    "dev": "auto-index-watch-all",
+    "build": "auto-index src/utils && tsc"
+  },
+  "autoIndex": {
+    "watchPaths": ["src/**/utils"],
+    "fileExtensions": [".ts", ".js"],
+    "namingConvention": "camelCase",
+    "exportStyle": "named"
+  }
+}
+```
+
+## 10. 고급 설정 예시
+
+### 컴포넌트 전용 설정
+```json
+{
+  "autoIndex": {
+    "watchPaths": ["src/**/components"],
+    "fileExtensions": [".tsx", ".ts"],
+    "namingConvention": "pascalCase",
+    "exportStyle": "named",
+    "exclude": ["node_modules", "dist", ".next", ".turbo"]
+  }
+}
+```
+
+### 훅 전용 설정
+```json
+{
+  "autoIndex": {
+    "watchPaths": ["src/**/hooks"],
+    "fileExtensions": [".ts", ".tsx"],
+    "namingConvention": "camelCase",
+    "exportStyle": "named"
+  }
+}
+```
+
+### 유틸리티 전용 설정
+```json
+{
+  "autoIndex": {
+    "watchPaths": ["src/**/utils", "packages/**/utils"],
+    "fileExtensions": [".ts", ".js"],
+    "namingConvention": "camelCase",
+    "exportStyle": "named"
   }
 }
 ```

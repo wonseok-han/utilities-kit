@@ -116,6 +116,59 @@ auto-index-watch-all "packages/**/utils"
 auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 ```
 
+## 설정 옵션
+
+### package.json 설정
+
+`package.json`에 `autoIndex` 필드를 추가하여 설정을 관리할 수 있습니다:
+
+```json
+{
+  "autoIndex": {
+    "watchPaths": [
+      "src/components",
+      "src/app/**/components"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist",
+      ".git",
+      ".next"
+    ],
+    "fileExtensions": [
+      ".tsx",
+      ".ts",
+      ".jsx",
+      ".js"
+    ],
+    "outputFile": "index.ts",
+    "exportStyle": "named",
+    "namingConvention": "pascalCase"
+  }
+}
+```
+
+### 설정 옵션 설명
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `watchPaths` | `string[]` | - | 감시할 경로들 |
+| `exclude` | `string[]` | `["node_modules", "dist", ".git"]` | 제외할 폴더들 |
+| `fileExtensions` | `string[]` | `[".tsx", ".ts", ".jsx", ".js"]` | 처리할 파일 확장자 |
+| `outputFile` | `string` | `"index.ts"` | 생성할 파일명 |
+| `exportStyle` | `"named" \| "default"` | `"named"` | default export 처리 방식 |
+| `namingConvention` | `"pascalCase" \| "camelCase" \| "original"` | `"pascalCase"` | 네이밍 변환 규칙 |
+
+### 네이밍 규칙 예시
+
+**파일명**: `user-profile.tsx`
+
+| namingConvention | 결과 |
+|------------------|------|
+| `pascalCase` | `UserProfile` |
+| `camelCase` | `userProfile` |
+| `original` | `user_profile` |
+
 ## 예시
 
 ### 컴포넌트 폴더 구조
@@ -142,7 +195,13 @@ export { Modal } from './Modal';
 {
   "scripts": {
     "generate:index": "auto-index src/components",
-    "dev": "concurrently \"next dev\" \"auto-index-watch-all src/components \"src/app/**/components\"\""
+    "dev": "concurrently \"next dev\" \"auto-index-watch-all\""
+  },
+  "autoIndex": {
+    "watchPaths": [
+      "src/components",
+      "src/app/**/components"
+    ]
   }
 }
 ```
@@ -152,7 +211,13 @@ export { Modal } from './Modal';
 ```json
 {
   "scripts": {
-    "dev:watch": "auto-index-watch-all \"src/**/components\" \"src/**/hooks\""
+    "dev:watch": "auto-index-watch-all"
+  },
+  "autoIndex": {
+    "watchPaths": [
+      "src/**/components",
+      "src/**/hooks"
+    ]
   }
 }
 ```
@@ -183,4 +248,42 @@ auto-index-watch-all "src/**/components"
 
 # 여러 패턴
 auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
+```
+
+## 고급 설정 예시
+
+### React 컴포넌트용 설정
+```json
+{
+  "autoIndex": {
+    "watchPaths": ["src/**/components"],
+    "fileExtensions": [".tsx", ".ts"],
+    "namingConvention": "pascalCase",
+    "exportStyle": "named"
+  }
+}
+```
+
+### 유틸리티 함수용 설정
+```json
+{
+  "autoIndex": {
+    "watchPaths": ["src/**/utils", "packages/**/utils"],
+    "fileExtensions": [".ts", ".js"],
+    "namingConvention": "camelCase",
+    "exportStyle": "named"
+  }
+}
+```
+
+### 훅용 설정
+```json
+{
+  "autoIndex": {
+    "watchPaths": ["src/**/hooks"],
+    "fileExtensions": [".ts", ".tsx"],
+    "namingConvention": "camelCase",
+    "exportStyle": "named"
+  }
+}
 ```

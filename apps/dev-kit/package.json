@@ -4,11 +4,32 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --hostname 0.0.0.0 --turbo --port 3001\" \"auto-index-watch-all src/components \"src/app/**/components\"\"",
+    "dev": "concurrently \"next dev --hostname 0.0.0.0 --turbo --port 3001\" \"auto-index-watch-all\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix --max-warnings 0",
     "check-types": "tsc --noEmit"
+  },
+  "autoIndex": {
+    "watchPaths": [
+      "src/components",
+      "src/app/**/components"
+    ],
+    "exclude": [
+      "node_modules",
+      "dist",
+      ".next",
+      ".turbo"
+    ],
+    "fileExtensions": [
+      ".tsx",
+      ".ts",
+      ".jsx",
+      ".js"
+    ],
+    "outputFile": "index.ts",
+    "exportStyle": "named",
+    "namingConvention": "pascalCase"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

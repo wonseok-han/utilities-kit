@@ -11,7 +11,7 @@ const DEFAULT_CONFIG = {
   fileExtensions: ['.tsx', '.ts', '.jsx', '.js'],
   outputFile: 'index.ts',
   exportStyle: 'named',
-  namingConvention: 'pascalCase',
+  namingConvention: 'original',
 };
 
 /**
@@ -75,6 +75,47 @@ function transformFileName(name, namingConvention) {
 }
 
 /**
+ * 경로별 설정을 찾습니다
+ */
+function findTargetConfig(folderPath, config) {
+  // watchTargets 설정이 있는지 확인
+  if (config.watchTargets && Array.isArray(config.watchTargets)) {
+    const relativePath = path.relative(process.cwd(), folderPath);
+
+    for (const target of config.watchTargets) {
+      if (target.watchPaths && Array.isArray(target.watchPaths)) {
+        for (const watchPath of target.watchPaths) {
+          // glob 패턴 매칭 (간단한 구현)
+          if (watchPath.includes('**')) {
+            const parts = watchPath.split('**/');
+            if (parts.length === 2) {
+              const basePath = parts[0];
+              const targetFolder = parts[1];
+
+              if (
+                relativePath.startsWith(basePath) &&
+                relativePath.includes(targetFolder)
+              ) {
+                // 해당 target에 기본값 병합
+                return { ...DEFAULT_CONFIG, ...target };
+              }
+            }
+          } else {
+            // 정확한 경로 매칭
+            if (relativePath === watchPath) {
+              // 해당 target에 기본값 병합
+              return { ...DEFAULT_CONFIG, ...target };
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return config;
+}
+
+/**
  * 컴포넌트 폴더를 스캔하여 index.ts 파일을 생성합니다
  */
 function generateIndex(folderPath, outputPath) {
@@ -87,6 +128,9 @@ function generateIndex(folderPath, outputPath) {
       return;
     }
 
+    // 경로별 설정 적용
+    const targetConfig = findTargetConfig(fullPath, config);
+
     const files = fs.readdirSync(fullPath);
     const componentFiles = files.filter((file) => {
       const filePath = path.join(fullPath, file);
@@ -95,8 +139,8 @@ function generateIndex(folderPath, outputPath) {
       // 폴더는 제외하고 설정된 확장자 파일만 포함
       return (
         stat.isFile() &&
-        config.fileExtensions.some((ext) => file.endsWith(ext)) &&
-        file !== config.outputFile &&
+        targetConfig.fileExtensions.some((ext) => file.endsWith(ext)) &&
+        file !== targetConfig.outputFile &&
         !file.endsWith('.d.ts') // 타입 정의 파일 제외
       );
     });
@@ -105,7 +149,7 @@ function generateIndex(folderPath, outputPath) {
 
     componentFiles.forEach((file) => {
       const name = path.parse(file).name;
-      const exportName = transformFileName(name, config.namingConvention);
+      const exportName = transformFileName(name, targetConfig.namingConvention);
 
       // 파일 내용을 확인하여 default export가 있는지 체크
       const filePath = path.join(fullPath, file);
@@ -113,21 +157,26 @@ function generateIndex(folderPath, outputPath) {
 
       if (content.includes('export default')) {
         // default export가 있으면 설정에 따라 처리
-        if (config.exportStyle === 'default') {
+        if (targetConfig.exportStyle === 'default') {
           exports.add(`export { default } from './${name}';`);
         } else {
           exports.add(`export { default as ${exportName} } from './${name}';`);
         }
       } else {
         // default export가 없으면 named export로 생성
-        exports.add(`export * from './${name}';`);
+        // namingConvention에 따라 export 이름 결정
+        if (targetConfig.namingConvention === 'original') {
+          exports.add(`export * from './${name}';`);
+        } else {
+          exports.add(`export * as ${exportName} from './${name}';`);
+        }
       }
     });
 
     // index.ts 파일 생성 (기존 내용 완전 삭제 후 새로 생성)
     const indexContent = Array.from(exports).join('\n') + '\n';
     const outputFilePath =
-      outputPath || path.join(folderPath, config.outputFile);
+      outputPath || path.join(folderPath, targetConfig.outputFile);
 
     // 기존 파일이 있으면 삭제하고 새로 생성
     if (fs.existsSync(outputFilePath)) {
@@ -135,7 +184,7 @@ function generateIndex(folderPath, outputPath) {
     }
     fs.writeFileSync(outputFilePath, indexContent, 'utf-8');
     console.log(
-      `✅ ${config.outputFile} 파일이 생성되었습니다: ${outputFilePath}`
+      `✅ ${targetConfig.outputFile} 파일이 생성되었습니다: ${outputFilePath}`
     );
     console.log(`📦 총 ${exports.size}개의 export가 추가되었습니다.`);
   } catch (error) {
@@ -166,25 +215,44 @@ function main() {
     const chokidar = require('chokidar');
     console.log(`🔍 파일 변경 감지 시작: ${folderPath}`);
 
+    const config = getConfigFromEnv();
+    const outputFileName = config.outputFile || 'index.ts';
+
     const watcher = chokidar.watch(folderPath, {
-      ignored: /(^|[\/\\])\../, // 숨김 파일 무시
+      ignored: [
+        /(^|[\/\\])\../, // 숨김 파일 무시
+        new RegExp(`${outputFileName.replace('.', '\\.')}$`), // outputFile 무시
+        /\.d\.ts$/, // 타입 정의 파일 무시
+      ],
       persistent: true,
     });
 
     watcher.on('add', (filePath) => {
       const fileName = path.basename(filePath);
+      // outputFile은 무시
+      if (fileName === outputFileName || fileName.endsWith('.d.ts')) {
+        return;
+      }
       console.log(`📝 파일 추가: ${fileName}`);
       generateIndex(folderPath, outputPath);
     });
 
     watcher.on('unlink', (filePath) => {
       const fileName = path.basename(filePath);
+      // outputFile은 무시
+      if (fileName === outputFileName || fileName.endsWith('.d.ts')) {
+        return;
+      }
       console.log(`🗑️  파일 삭제: ${fileName}`);
       generateIndex(folderPath, outputPath);
     });
 
     watcher.on('change', (filePath) => {
       const fileName = path.basename(filePath);
+      // outputFile은 무시
+      if (fileName === outputFileName || fileName.endsWith('.d.ts')) {
+        return;
+      }
       console.log(`📝 파일 변경: ${fileName}`);
       generateIndex(folderPath, outputPath);
     });

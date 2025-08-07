@@ -60,25 +60,43 @@ watcher.stop();
     "dev": "concurrently \"next dev\" \"auto-index-watch-all\""
   },
   "autoIndex": {
-    "watchPaths": [
-      "src/components",
-      "src/app/**/components"
-    ],
     "exclude": [
       "node_modules",
       "dist",
       ".git",
       ".next"
     ],
-    "fileExtensions": [
-      ".tsx",
-      ".ts",
-      ".jsx",
-      ".js"
-    ],
-    "outputFile": "index.ts",
-    "exportStyle": "named",
-    "namingConvention": "pascalCase"
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/components",
+          "src/app/**/components"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts",
+          ".jsx",
+          ".js"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "pascalCase"
+      },
+      {
+        "watchPaths": [
+          "src/hooks"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts",
+          ".jsx",
+          ".js"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "camelCase"
+      }
+    ]
   }
 }
 ```
@@ -176,26 +194,81 @@ src/
 
 | namingConvention | 결과 | 설명 |
 |------------------|------|------|
+| `original` | `user_profile` | 기본값, 원본 파일명 유지 |
 | `pascalCase` | `UserProfile` | React 컴포넌트용 |
 | `camelCase` | `userProfile` | 유틸리티 함수용 |
-| `original` | `user_profile` | 원본 파일명 유지 |
 
 ### 실제 변환 예시
 
 **파일명**: `base64-encoder-header.tsx`
 
 ```typescript
+// namingConvention: "original" (기본값)
+export { default as base64_encoder_header } from './base64-encoder-header';
+
 // namingConvention: "pascalCase"
 export { default as Base64EncoderHeader } from './base64-encoder-header';
 
 // namingConvention: "camelCase"  
 export { default as base64EncoderHeader } from './base64-encoder-header';
-
-// namingConvention: "original"
-export { default as base64_encoder_header } from './base64-encoder-header';
 ```
 
-## 8. 지원하는 Export 패턴
+## 8. 경로별 설정 예시
+
+### 경로별 네이밍 규칙 적용
+
+```json
+{
+  "autoIndex": {
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/**/components",
+          "src/app/**/components"
+        ],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "src/**/hooks"
+        ],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "src/**/utils"
+        ],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      }
+    ]
+  }
+}
+```
+
+### 결과 예시
+
+**src/components/UserProfile.tsx**:
+```typescript
+// namingConvention: "pascalCase" 적용
+export { default as UserProfile } from './UserProfile';
+```
+
+**src/hooks/useAuth.ts**:
+```typescript
+// namingConvention: "camelCase" 적용
+export { default as useAuth } from './useAuth';
+```
+
+**src/utils/dateHelper.ts**:
+```typescript
+// namingConvention: "camelCase" 적용
+export { default as dateHelper } from './dateHelper';
+```
+
+## 9. 지원하는 Export 패턴
 
 ### Named Export
 ```typescript
@@ -224,7 +297,7 @@ export default Component2;
 export { Component3 };
 ```
 
-## 9. 개발 환경 설정
+## 10. 개발 환경 설정
 
 ### Next.js 프로젝트
 
@@ -235,12 +308,16 @@ export { Component3 };
     "build": "auto-index src/components && next build"
   },
   "autoIndex": {
-    "watchPaths": [
-      "src/components",
-      "src/app/**/components"
-    ],
-    "namingConvention": "pascalCase",
-    "exportStyle": "named"
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/components",
+          "src/app/**/components"
+        ],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named"
+      }
+    ]
   }
 }
 ```
@@ -254,9 +331,13 @@ export { Component3 };
     "build": "auto-index src/components && vite build"
   },
   "autoIndex": {
-    "watchPaths": ["src/**/components"],
-    "fileExtensions": [".tsx", ".ts"],
-    "namingConvention": "pascalCase"
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/components"],
+        "fileExtensions": [".tsx", ".ts"],
+        "namingConvention": "pascalCase"
+      }
+    ]
   }
 }
 ```
@@ -270,25 +351,33 @@ export { Component3 };
     "build": "auto-index src/utils && tsc"
   },
   "autoIndex": {
-    "watchPaths": ["src/**/utils"],
-    "fileExtensions": [".ts", ".js"],
-    "namingConvention": "camelCase",
-    "exportStyle": "named"
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/utils"],
+        "fileExtensions": [".ts", ".js"],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      }
+    ]
   }
 }
 ```
 
-## 10. 고급 설정 예시
+## 11. 고급 설정 예시
 
 ### 컴포넌트 전용 설정
 ```json
 {
   "autoIndex": {
-    "watchPaths": ["src/**/components"],
-    "fileExtensions": [".tsx", ".ts"],
-    "namingConvention": "pascalCase",
-    "exportStyle": "named",
-    "exclude": ["node_modules", "dist", ".next", ".turbo"]
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/components"],
+        "fileExtensions": [".tsx", ".ts"],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named",
+        "exclude": ["node_modules", "dist", ".next", ".turbo"]
+      }
+    ]
   }
 }
 ```
@@ -297,10 +386,14 @@ export { Component3 };
 ```json
 {
   "autoIndex": {
-    "watchPaths": ["src/**/hooks"],
-    "fileExtensions": [".ts", ".tsx"],
-    "namingConvention": "camelCase",
-    "exportStyle": "named"
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/hooks"],
+        "fileExtensions": [".ts", ".tsx"],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      }
+    ]
   }
 }
 ```
@@ -309,10 +402,62 @@ export { Component3 };
 ```json
 {
   "autoIndex": {
-    "watchPaths": ["src/**/utils", "packages/**/utils"],
-    "fileExtensions": [".ts", ".js"],
-    "namingConvention": "camelCase",
-    "exportStyle": "named"
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/utils", "packages/**/utils"],
+        "fileExtensions": [".ts", ".js"],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      }
+    ]
+  }
+}
+```
+
+### 경로별 복합 설정
+```json
+{
+  "autoIndex": {
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/**/components",
+          "src/**/hooks",
+          "src/**/utils",
+          "packages/**/components"
+        ],
+        "namingConvention": "original"
+      },
+      {
+        "watchPaths": [
+          "src/**/components"
+        ],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "src/**/hooks"
+        ],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "src/**/utils"
+        ],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "packages/**/components"
+        ],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named",
+        "fileExtensions": [".tsx", ".ts"]
+      }
+    ]
   }
 }
 ```

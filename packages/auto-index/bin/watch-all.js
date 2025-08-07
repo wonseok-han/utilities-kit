@@ -12,7 +12,7 @@ const DEFAULT_CONFIG = {
   fileExtensions: ['.tsx', '.ts', '.jsx', '.js'],
   outputFile: 'index.ts',
   exportStyle: 'named',
-  namingConvention: 'pascalCase',
+  namingConvention: 'original',
 };
 
 /**
@@ -31,7 +31,20 @@ function getAutoIndexConfig() {
 
     if (config) {
       // 기본값과 병합
-      return { ...DEFAULT_CONFIG, ...config };
+      const mergedConfig = { ...DEFAULT_CONFIG, ...config };
+
+      // watchTargets 배열의 각 요소에 대해 개별적으로 기본값 병합
+      if (
+        mergedConfig.watchTargets &&
+        Array.isArray(mergedConfig.watchTargets)
+      ) {
+        mergedConfig.watchTargets = mergedConfig.watchTargets.map((target) => ({
+          ...DEFAULT_CONFIG,
+          ...target,
+        }));
+      }
+
+      return mergedConfig;
     }
 
     return null;
@@ -117,6 +130,23 @@ function findFoldersByName(
 }
 
 /**
+ * watchTargets에서 모든 경로를 추출합니다
+ */
+function extractPathsFromWatchTargets(config) {
+  const allPaths = [];
+
+  if (config.watchTargets && Array.isArray(config.watchTargets)) {
+    for (const target of config.watchTargets) {
+      if (target.watchPaths && Array.isArray(target.watchPaths)) {
+        allPaths.push(...target.watchPaths);
+      }
+    }
+  }
+
+  return allPaths;
+}
+
+/**
  * 모든 지정된 경로들을 감시합니다
  */
 function watchAllPaths(paths, config = DEFAULT_CONFIG) {
@@ -189,17 +219,17 @@ function main() {
   if (args.length === 0) {
     const config = getAutoIndexConfig();
 
-    if (config && config.watchPaths) {
+    if (config && config.watchTargets) {
       console.log('📋 package.json에서 autoIndex 설정을 읽어옵니다.');
-      console.log(`🚀 폴더 감시 시작: ${config.watchPaths.join(', ')}`);
+
+      // watchTargets에서 모든 경로 추출
+      const paths = extractPathsFromWatchTargets(config);
+      console.log(`🚀 폴더 감시 시작: ${paths.join(', ')}`);
       console.log(`⚙️  설정:`, {
         exclude: config.exclude,
-        fileExtensions: config.fileExtensions,
-        outputFile: config.outputFile,
-        exportStyle: config.exportStyle,
-        namingConvention: config.namingConvention,
+        watchTargets: config.watchTargets.length,
       });
-      watchAllPaths(config.watchPaths, config);
+      watchAllPaths(paths, config);
       return;
     }
 
@@ -214,22 +244,22 @@ function main() {
     console.log('또는 package.json에 autoIndex 설정을 추가하세요:');
     console.log('{');
     console.log('  "autoIndex": {');
-    console.log('    "watchPaths": [');
-    console.log('      "src/components",');
-    console.log('      "src/app/**/components"');
-    console.log('    ],');
-    console.log('    "exclude": ["node_modules", "dist"],');
-    console.log('    "fileExtensions": [".tsx", ".ts"],');
-    console.log('    "outputFile": "index.ts",');
-    console.log('    "exportStyle": "named",');
-    console.log('    "namingConvention": "pascalCase"');
+    console.log('    "watchTargets": [');
+    console.log('      {');
+    console.log('        "watchPaths": [');
+    console.log('          "src/components",');
+    console.log('          "src/app/**/components"');
+    console.log('        ],');
+    console.log('        "namingConvention": "pascalCase"');
+    console.log('      }');
+    console.log('    ]');
     console.log('  }');
     console.log('}');
     process.exit(1);
   }
 
   console.log(`🚀 폴더 감시 시작: ${args.join(', ')}`);
-  watchAllPaths(args);
+  watchAllPaths(args, getAutoIndexConfig()); // Pass config even if args are provided
 }
 
 if (require.main === module) {

@@ -11,25 +11,28 @@
     "check-types": "tsc --noEmit"
   },
   "autoIndex": {
-    "watchPaths": [
-      "src/components",
-      "src/app/**/components"
-    ],
     "exclude": [
       "node_modules",
       "dist",
       ".next",
       ".turbo"
     ],
-    "fileExtensions": [
-      ".tsx",
-      ".ts",
-      ".jsx",
-      ".js"
-    ],
-    "outputFile": "index.ts",
-    "exportStyle": "named",
-    "namingConvention": "pascalCase"
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/components",
+          "src/app/**/components"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts",
+          ".jsx",
+          ".js"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named"
+      }
+    ]
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

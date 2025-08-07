@@ -125,25 +125,43 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 ```json
 {
   "autoIndex": {
-    "watchPaths": [
-      "src/components",
-      "src/app/**/components"
-    ],
     "exclude": [
       "node_modules",
       "dist",
       ".git",
       ".next"
     ],
-    "fileExtensions": [
-      ".tsx",
-      ".ts",
-      ".jsx",
-      ".js"
-    ],
-    "outputFile": "index.ts",
-    "exportStyle": "named",
-    "namingConvention": "pascalCase"
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/components",
+          "src/app/**/components"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts",
+          ".jsx",
+          ".js"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "pascalCase"
+      },
+      {
+        "watchPaths": [
+          "src/hooks"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts",
+          ".jsx",
+          ".js"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "camelCase"
+      }
+    ]
   }
 }
 ```
@@ -152,22 +170,28 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 
 | 옵션 | 타입 | 기본값 | 설명 |
 |------|------|--------|------|
-| `watchPaths` | `string[]` | - | 감시할 경로들 |
 | `exclude` | `string[]` | `["node_modules", "dist", ".git"]` | 제외할 폴더들 |
+| `watchTargets` | `WatchTarget[]` | - | 감시할 타겟들 |
+
+### WatchTarget 옵션
+
+| 옵션 | 타입 | 기본값 | 설명 |
+|------|------|--------|------|
+| `watchPaths` | `string[]` | - | 감시할 경로들 (glob 패턴 지원) |
 | `fileExtensions` | `string[]` | `[".tsx", ".ts", ".jsx", ".js"]` | 처리할 파일 확장자 |
 | `outputFile` | `string` | `"index.ts"` | 생성할 파일명 |
-| `exportStyle` | `"named" \| "default"` | `"named"` | default export 처리 방식 |
-| `namingConvention` | `"pascalCase" \| "camelCase" \| "original"` | `"pascalCase"` | 네이밍 변환 규칙 |
+| `exportStyle` | `"named" \| "default"` | `"named"` | export 처리 방식 |
+| `namingConvention` | `"pascalCase" \| "camelCase" \| "original"` | `"original"` | 네이밍 변환 규칙 |
 
 ### 네이밍 규칙 예시
 
 **파일명**: `user-profile.tsx`
 
-| namingConvention | 결과 |
-|------------------|------|
-| `pascalCase` | `UserProfile` |
-| `camelCase` | `userProfile` |
-| `original` | `user_profile` |
+| namingConvention | 결과 | 설명 |
+|------------------|------|------|
+| `original` | `user_profile` | 기본값, 원본 파일명 유지 |
+| `pascalCase` | `UserProfile` | React 컴포넌트용 |
+| `camelCase` | `userProfile` | 유틸리티 함수용 |
 
 ## 예시
 
@@ -198,9 +222,13 @@ export { Modal } from './Modal';
     "dev": "concurrently \"next dev\" \"auto-index-watch-all\""
   },
   "autoIndex": {
-    "watchPaths": [
-      "src/components",
-      "src/app/**/components"
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/components",
+          "src/app/**/components"
+        ]
+      }
     ]
   }
 }
@@ -214,9 +242,13 @@ export { Modal } from './Modal';
     "dev:watch": "auto-index-watch-all"
   },
   "autoIndex": {
-    "watchPaths": [
-      "src/**/components",
-      "src/**/hooks"
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/**/components",
+          "src/**/hooks"
+        ]
+      }
     ]
   }
 }
@@ -252,14 +284,51 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
 
 ## 고급 설정 예시
 
+### 경로별 네이밍 규칙 설정
+
+```json
+{
+  "autoIndex": {
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/**/components",
+          "src/app/**/components"
+        ],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "src/**/hooks"
+        ],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      },
+      {
+        "watchPaths": [
+          "src/**/utils"
+        ],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      }
+    ]
+  }
+}
+```
+
 ### React 컴포넌트용 설정
 ```json
 {
   "autoIndex": {
-    "watchPaths": ["src/**/components"],
-    "fileExtensions": [".tsx", ".ts"],
-    "namingConvention": "pascalCase",
-    "exportStyle": "named"
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/components"],
+        "fileExtensions": [".tsx", ".ts"],
+        "namingConvention": "pascalCase",
+        "exportStyle": "named"
+      }
+    ]
   }
 }
 ```
@@ -268,10 +337,14 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
 ```json
 {
   "autoIndex": {
-    "watchPaths": ["src/**/utils", "packages/**/utils"],
-    "fileExtensions": [".ts", ".js"],
-    "namingConvention": "camelCase",
-    "exportStyle": "named"
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/utils", "packages/**/utils"],
+        "fileExtensions": [".ts", ".js"],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      }
+    ]
   }
 }
 ```
@@ -280,10 +353,14 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
 ```json
 {
   "autoIndex": {
-    "watchPaths": ["src/**/hooks"],
-    "fileExtensions": [".ts", ".tsx"],
-    "namingConvention": "camelCase",
-    "exportStyle": "named"
+    "watchTargets": [
+      {
+        "watchPaths": ["src/**/hooks"],
+        "fileExtensions": [".ts", ".tsx"],
+        "namingConvention": "camelCase",
+        "exportStyle": "named"
+      }
+    ]
   }
 }
-```
+``` 

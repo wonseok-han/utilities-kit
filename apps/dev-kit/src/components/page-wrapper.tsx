@@ -4,7 +4,7 @@ interface PageWrapperProps {
   className?: string;
 }
 
-export default function PageWrapper({
+export function PageWrapper({
   children,
   className,
 }: PropsWithChildren<PageWrapperProps>) {

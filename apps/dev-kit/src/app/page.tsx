@@ -1,6 +1,5 @@
+import { DashboardContent } from '@components/dashboard-content';
 import { fetchRecentCVEs } from '@services/cve';
-
-import { DashboardContent } from './components/dashboard-content';
 
 export default async function Home() {
   // 서버 사이드에서 최신 CVE 데이터 가져오기

@@ -21,10 +21,8 @@
     }
   },
   "scripts": {
-    "build": "pnpm run build:utils",
-    "build:utils": "tsc --project tsconfig.json",
-    "dev": "pnpm run dev:utils",
-    "dev:utils": "tsc --project tsconfig.json --watch"
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --project tsconfig.json --watch"
   },
   "dependencies": {
     "dayjs": "^1.11.13",

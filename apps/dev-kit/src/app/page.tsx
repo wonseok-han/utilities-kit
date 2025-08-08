@@ -8,6 +8,7 @@ export default async function Home() {
     pagination: { hasMore: false },
   }));
   const initialCVEs = result.cves;
+  const metadata = result.pagination;
 
-  return <DashboardContent initialCVEs={initialCVEs} />;
+  return <DashboardContent initialCVEs={initialCVEs} metadata={metadata} />;
 }

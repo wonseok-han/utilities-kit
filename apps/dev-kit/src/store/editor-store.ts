@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const DEFAULT_CONTENT = '<p>여기에 내용을 입력하세요.</p>';
+
 interface EditorState {
   content: string;
   shouldIncludeStyles: boolean;
@@ -8,8 +10,6 @@ interface EditorState {
   setShouldIncludeStyles: (include: boolean) => void;
   reset: () => void;
 }
-
-const DEFAULT_CONTENT = '<p>여기에 내용을 입력하세요.</p>';
 
 export const useEditorStore = create<EditorState>()(
   persist(

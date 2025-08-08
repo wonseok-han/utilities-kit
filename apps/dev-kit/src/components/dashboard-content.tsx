@@ -160,9 +160,13 @@ const toolCards = [
 
 interface DashboardContentProps {
   initialCVEs?: CVEDataType[];
+  metadata: PaginationType;
 }
 
-export function DashboardContent({ initialCVEs = [] }: DashboardContentProps) {
+export function DashboardContent({
+  initialCVEs = [],
+  metadata,
+}: DashboardContentProps) {
   const router = useRouter();
   const [cves, setCves] = useState<CVEDataType[]>(initialCVEs);
   const [isLoading, setIsLoading] = useState(false);
@@ -170,15 +174,20 @@ export function DashboardContent({ initialCVEs = [] }: DashboardContentProps) {
 
   // CVE 데이터 로드
   useEffect(() => {
-    if (initialCVEs.length === 0) {
+    // 초기 메타데이터를 기반으로 최신순 데이터 조회
+    if (metadata) {
       loadRecentCVEs();
+    } else if (initialCVEs.length > 0) {
+      // 서버에서 가져온 데이터가 있으면 스토어에 설정
+      setCves(initialCVEs);
     }
-  }, [initialCVEs]);
+  }, [initialCVEs, metadata]);
 
   const loadRecentCVEs = async () => {
     setIsLoading(true);
     try {
-      const result = await fetchRecentCVEs(1, 10); // 최신 10개만
+      const totalPages = Math.ceil((metadata.totalResults || 1) / 10);
+      const result = await fetchRecentCVEs(totalPages, 10); // 최신 10개만
       setCves(result.cves);
     } catch (error) {
       console.error('Failed to load recent CVEs:', error);

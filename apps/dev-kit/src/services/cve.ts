@@ -11,12 +11,7 @@ export async function fetchRecentCVEs(
   limit = 20
 ): Promise<{
   cves: CVEDataType[];
-  pagination: {
-    currentPage: number;
-    totalResults: number;
-    resultsPerPage: number;
-    hasMore: boolean;
-  };
+  pagination: PaginationType;
 }> {
   const url = createApiUrl('/api/cve', {
     page: page.toString(),

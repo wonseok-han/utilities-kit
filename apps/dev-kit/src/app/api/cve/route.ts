@@ -20,8 +20,8 @@ export async function GET(request: NextRequest) {
       resultsPerPage: limit,
       startIndex: startIndex.toString(),
       pubStartDate: new Date(
-        Date.now() - 7 * 24 * 60 * 60 * 1000
-      ).toISOString(), // 최근 7일
+        Date.now() - 30 * 24 * 60 * 60 * 1000
+      ).toISOString(), // 최근 30일
       pubEndDate: new Date().toISOString(),
     });
 
@@ -63,10 +63,10 @@ export async function GET(request: NextRequest) {
           ) || [],
       })) || [];
 
-    const pagination = {
+    const pagination: PaginationType = {
       currentPage: page + 1,
       totalResults: data.totalResults || 0,
-      hasMore: (page + 1) * parseInt(limit) < (data.totalResults || 0),
+      hasMore: page > 1, // 역순 페이지네이션: 페이지가 1보다 클 때 더 많은 데이터가 있음
     };
 
     return NextResponse.json({

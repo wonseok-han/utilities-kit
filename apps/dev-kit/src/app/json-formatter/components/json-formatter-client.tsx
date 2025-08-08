@@ -3,17 +3,21 @@
 import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useJsonStore } from '@store';
 
-interface JsonFormatterClientProps {
-  initialData: {
-    input: string;
-    output: string;
-    error: string | null;
-    sampleData: Array<{
-      label: string;
-      data: string;
-    }>;
-  };
-}
+// ===== 샘플 데이터 정의 =====
+const SAMPLE_DATA = [
+  {
+    label: '간단한 객체',
+    data: '{"name":"John","age":30,"city":"New York"}',
+  },
+  {
+    label: '배열 데이터',
+    data: '[{"id":1,"name":"John"},{"id":2,"name":"Jane"}]',
+  },
+  {
+    label: '중첩 객체',
+    data: '{"users":[{"id":1,"profile":{"name":"John","settings":{"theme":"dark","notifications":true}}}]}',
+  },
+];
 
 /**
  * JSON Formatter 클라이언트 컴포넌트
@@ -24,7 +28,7 @@ interface JsonFormatterClientProps {
  * - 사용자 인터랙션 처리
  * - 에러 처리
  */
-export function JsonFormatterClient({ initialData }: JsonFormatterClientProps) {
+export function JsonFormatterClient() {
   const { clearAll, error, formatJson, input, minifyJson, output, setInput } =
     useJsonStore();
 
@@ -127,7 +131,7 @@ export function JsonFormatterClient({ initialData }: JsonFormatterClientProps) {
           </span>
         </h3>
         <div className="flex flex-wrap gap-2">
-          {initialData.sampleData.map((sample) => (
+          {SAMPLE_DATA.map((sample) => (
             <ActionButton
               key={sample.label}
               feedbackText="로드 완료"

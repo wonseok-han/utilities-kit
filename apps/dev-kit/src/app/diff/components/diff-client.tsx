@@ -22,15 +22,6 @@ const ADDED_DECORATION = {
   glyphMarginClassName: styles['diff-gutter-added'],
 };
 
-interface DiffClientProps {
-  initialData: {
-    original: string;
-    changed: string;
-    sampleA: string;
-    sampleB: string;
-  };
-}
-
 // diff/decoration 생성 함수 분리
 function getDiffDecorations(original: string, changed: string) {
   const diffs: Change[] = diffLines(original, changed);
@@ -193,7 +184,7 @@ function useCopyToClipboard() {
  * - 사용자 인터랙션 처리
  * - Monaco Editor 렌더링
  */
-export function DiffClient({ initialData }: DiffClientProps) {
+export function DiffClient() {
   // zustand store 사용
   const { changed, original, setBoth, setChanged, setOriginal } =
     useDiffStore();
@@ -201,6 +192,19 @@ export function DiffClient({ initialData }: DiffClientProps) {
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
+
+  // ===== 샘플 데이터 정의 =====
+  const SAMPLE_A = `{
+  "name": "John",
+  "age": 30,
+  "city": "Seoul"
+}`;
+
+  const SAMPLE_B = `{
+  "name": "John",
+  "age": 31,
+  "country": "Korea"
+}`;
 
   // diff 계산 및 decoration 생성
   const { decorationsA, decorationsB } = useMemo(
@@ -301,7 +305,7 @@ export function DiffClient({ initialData }: DiffClientProps) {
         )}
         <ActionButton
           feedbackText="샘플 적용"
-          onClick={() => setBoth(initialData.sampleA, initialData.sampleB)}
+          onClick={() => setBoth(SAMPLE_A, SAMPLE_B)}
           variant="secondary"
         >
           샘플 입력

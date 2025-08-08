@@ -3,24 +3,33 @@
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useJwtStore } from '@store';
 
-interface JwtEncoderClientProps {
-  initialData: {
-    mode: 'encode' | 'decode';
-    input: string;
-    headerInput: string;
-    payloadInput: string;
-    encodeOutput: string;
-    decodeOutput: string;
-    error: string | null;
-    sampleData: Array<{
-      id: number;
-      label: string;
-      header: string;
-      payload: string;
-      jwt: string;
-    }>;
-  };
-}
+// ===== 샘플 데이터 정의 =====
+const SAMPLE_DATA = [
+  {
+    id: 1,
+    label: '기본 JWT',
+    header: '{\n  "alg": "HS256",\n  "typ": "JWT"\n}',
+    payload:
+      '{\n  "sub": "1234567890",\n  "name": "John Doe",\n  "iat": 1516239022\n}',
+    jwt: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.c2lnbmF0dXJl',
+  },
+  {
+    id: 2,
+    label: '사용자 정보',
+    header: '{\n  "alg": "HS256",\n  "typ": "JWT"\n}',
+    payload:
+      '{\n  "userId": 123,\n  "username": "홍길동",\n  "role": "admin",\n  "exp": 1735689600\n}',
+    jwt: '',
+  },
+  {
+    id: 3,
+    label: '권한 정보',
+    header: '{\n  "alg": "RS256",\n  "typ": "JWT",\n  "kid": "key-id-1"\n}',
+    payload:
+      '{\n  "iss": "https://auth.example.com",\n  "aud": "api.example.com",\n  "scope": ["read", "write"],\n  "exp": 1735689600\n}',
+    jwt: '',
+  },
+];
 
 /**
  * JWT Encoder/Decoder 클라이언트 컴포넌트
@@ -32,7 +41,7 @@ interface JwtEncoderClientProps {
  * - 에러 처리
  * - 탭 전환
  */
-export function JwtEncoderClient({ initialData }: JwtEncoderClientProps) {
+export function JwtEncoderClient() {
   const {
     clearAll,
     decodeOutput,
@@ -302,7 +311,7 @@ export function JwtEncoderClient({ initialData }: JwtEncoderClientProps) {
           </span>
         </h3>
         <div className="flex flex-wrap gap-2">
-          {initialData.sampleData.map((sample) => (
+          {SAMPLE_DATA.map((sample) => (
             <ActionButton
               key={sample.label}
               feedbackText="로드 완료"

@@ -8,31 +8,41 @@ import {
   parseDateWithType,
   type ParsedDateType,
 } from '@repo/shared/date';
-import { ActionButton, CodeTextarea } from '@repo/ui';
+import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useTimestampConverterStore } from '@store/timestamp-converter-store';
 import { useEffect, useState } from 'react';
 
-interface TimestampConverterClientProps {
-  initialData: {
-    input: string;
-    selectedFormats: string[];
-    selectedTimezones: string[];
-    timezones: Array<{
-      label: string;
-      value: string;
-      icon: string;
-    }>;
-    formats: Array<{
-      label: string;
-      value: string;
-      icon: string;
-    }>;
-    sampleData: Array<{
-      label: string;
-      value: string;
-    }>;
-  };
-}
+// ===== 샘플 데이터 정의 =====
+const TIMEZONES = [
+  { label: 'UTC', value: 'UTC', icon: '' },
+  { label: 'GMT', value: 'Etc/GMT', icon: '' },
+  { label: 'KST', value: 'Asia/Seoul', icon: '' },
+  { label: 'JST', value: 'Asia/Tokyo', icon: '' },
+  { label: 'CST', value: 'Asia/Shanghai', icon: '' },
+  { label: 'EST', value: 'America/New_York', icon: '' },
+  { label: 'PST', value: 'America/Los_Angeles', icon: '' },
+  { label: 'CET', value: 'Europe/Berlin', icon: '' },
+  { label: 'IST', value: 'Asia/Kolkata', icon: '' },
+  { label: 'MSK', value: 'Europe/Moscow', icon: '' },
+  { label: 'AEDT', value: 'Australia/Sydney', icon: '' },
+  { label: 'HKT', value: 'Asia/Hong_Kong', icon: '' },
+  { label: 'SGT', value: 'Asia/Singapore', icon: '' },
+  { label: 'BRT', value: 'America/Sao_Paulo', icon: '' },
+];
+
+const FORMATS = [
+  { label: 'YYYY-MM-DD HH:mm:ss', value: 'YYYY-MM-DD HH:mm:ss', icon: '' },
+  { label: 'ISO 8601', value: 'YYYY-MM-DDTHH:mm:ssZ', icon: '' },
+  { label: 'Unix Timestamp(초)', value: 'X', icon: '' },
+  { label: 'Unix Timestamp(밀리초)', value: 'x', icon: '' },
+];
+
+const SAMPLE_DATA = [
+  { label: '날짜/시간', value: '2025-07-15 13:24:08' },
+  { label: 'Timestamp(초)', value: '1752585848' },
+  { label: 'Timestamp(밀리초)', value: '1752585848000' },
+  { label: 'ISO 8601', value: '2025-07-15T13:24:08Z' },
+];
 
 // ===== 상대적 시간 한글 표기 변환 함수 =====
 function toKoreanRelative(str: string) {
@@ -85,9 +95,7 @@ function Badge({
  * - 에러 처리
  * - 타임존 및 포맷 필터링
  */
-export function TimestampConverterClient({
-  initialData,
-}: TimestampConverterClientProps) {
+export function TimestampConverterClient() {
   // ===== zustand store 사용 =====
   const {
     clearAll,
@@ -102,12 +110,26 @@ export function TimestampConverterClient({
   const [inputType, setInputType] = useState<ParsedDateType>('invalid');
   const [error, setError] = useState<string | null>(null);
 
+  // ===== 스낵바 훅 사용 =====
+  const { showSnackbar } = useSnackbar();
+
+  // ===== 에러 처리 =====
+  useEffect(() => {
+    if (error) {
+      showSnackbar({
+        message: error,
+        type: 'error',
+        position: 'bottom-right',
+        autoHideDuration: 6000,
+      });
+    }
+  }, [error, showSnackbar]);
+
   // ===== 타임존 전체 선택/해제 =====
-  const isAllTimezonesSelected =
-    selectedTimezones.length === initialData.timezones.length;
+  const isAllTimezonesSelected = selectedTimezones.length === TIMEZONES.length;
   const handleTimezoneAll = () => {
     setSelectedTimezones(
-      isAllTimezonesSelected ? [] : initialData.timezones.map((t) => t.value)
+      isAllTimezonesSelected ? [] : TIMEZONES.map((t) => t.value)
     );
   };
   const handleTimezoneToggle = (value: string) => {
@@ -119,12 +141,9 @@ export function TimestampConverterClient({
   };
 
   // ===== 포맷 전체 선택/해제 =====
-  const isAllFormatsSelected =
-    selectedFormats.length === initialData.formats.length;
+  const isAllFormatsSelected = selectedFormats.length === FORMATS.length;
   const handleFormatAll = () => {
-    setSelectedFormats(
-      isAllFormatsSelected ? [] : initialData.formats.map((f) => f.value)
-    );
+    setSelectedFormats(isAllFormatsSelected ? [] : FORMATS.map((f) => f.value));
   };
   const handleFormatToggle = (value: string) => {
     setSelectedFormats(
@@ -218,7 +237,7 @@ export function TimestampConverterClient({
         </h3>
 
         <div className="flex flex-wrap gap-2">
-          {initialData.sampleData.map((sample) => (
+          {SAMPLE_DATA.map((sample) => (
             <ActionButton
               key={sample.label}
               feedbackText="로드 완료"
@@ -239,7 +258,7 @@ export function TimestampConverterClient({
             전체
           </Badge>
           <div className="flex gap-1 flex-wrap">
-            {initialData.timezones.map((tz) => (
+            {TIMEZONES.map((tz) => (
               <Badge
                 key={tz.value}
                 onClick={() => handleTimezoneToggle(tz.value)}
@@ -257,7 +276,7 @@ export function TimestampConverterClient({
             전체
           </Badge>
           <div className="flex gap-1 flex-wrap">
-            {initialData.formats.map((fmt) => (
+            {FORMATS.map((fmt) => (
               <Badge
                 key={fmt.value}
                 onClick={() => handleFormatToggle(fmt.value)}
@@ -270,15 +289,10 @@ export function TimestampConverterClient({
         </div>
       </div>
 
-      {error ? (
-        <div className="text-red-400 text-sm flex flex-col justify-center items-center gap-2 mb-4">
-          <div>❌</div>
-          <div>{error}</div>
-        </div>
-      ) : (
+      {!error && (
         <>
           {/* ===== 결과 영역: 카드+테이블 스타일, 시인성 강화 ===== */}
-          {parsed && !error && (
+          {parsed && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
               {/* ===== 타임존별 변환 ===== */}
               <div className="bg-gray-900/80 border border-gray-700 rounded-2xl shadow-md p-4 mb-2">
@@ -286,28 +300,28 @@ export function TimestampConverterClient({
                   <span>🌐</span> 타임존별 변환
                 </div>
                 <div className="divide-y divide-gray-700">
-                  {initialData.timezones
-                    .filter((tz) => selectedTimezones.includes(tz.value))
-                    .map((tz) => (
-                      <div
-                        key={tz.value}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
-                      >
-                        <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
-                          {tz.icon} {tz.label}
-                          <span className="text-gray-500 text-sm">
-                            {`(${tz.value})`}
-                          </span>
+                  {TIMEZONES.filter((tz) =>
+                    selectedTimezones.includes(tz.value)
+                  ).map((tz) => (
+                    <div
+                      key={tz.value}
+                      className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
+                    >
+                      <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
+                        {tz.icon} {tz.label}
+                        <span className="text-gray-500 text-sm">
+                          {`(${tz.value})`}
                         </span>
-                        <span className="font-mono text-sm text-white flex-1 text-right">
-                          {formatDate(
-                            parsed,
-                            'YYYY-MM-DD HH:mm:ss',
-                            tz.value
-                          ) || <span className="text-gray-500">-</span>}
-                        </span>
-                      </div>
-                    ))}
+                      </span>
+                      <span className="font-mono text-sm text-white flex-1 text-right">
+                        {formatDate(
+                          parsed,
+                          'YYYY-MM-DD HH:mm:ss',
+                          tz.value
+                        ) || <span className="text-gray-500">-</span>}
+                      </span>
+                    </div>
+                  ))}
                   {selectedTimezones.length === 0 && (
                     <div className="text-gray-500 text-sm px-3 py-2">
                       표시할 타임존이 없습니다.
@@ -322,47 +336,47 @@ export function TimestampConverterClient({
                   <span>🕒</span> 포맷별 변환
                 </div>
                 <div className="divide-y divide-gray-700">
-                  {initialData.formats
-                    .filter((fmt) => selectedFormats.includes(fmt.value))
-                    .map((fmt) => {
-                      let value = '-';
-                      if (parsed?.isValid()) {
-                        if (fmt.value === 'X') {
-                          if (inputType === 'timestamp_sec') {
-                            value = input;
-                          } else if (inputType === 'timestamp_ms') {
-                            value = String(Math.floor(parsed.valueOf() / 1000));
-                          } else if (inputType === 'date') {
-                            value = String(parsed.unix());
-                          }
-                        } else if (fmt.value === 'x') {
-                          if (inputType === 'timestamp_ms') {
-                            value = input;
-                          } else if (inputType === 'timestamp_sec') {
-                            value = String(parsed.valueOf());
-                          } else if (inputType === 'date') {
-                            value = String(parsed.valueOf());
-                          }
-                        } else {
-                          value = formatDate(parsed, fmt.value);
+                  {FORMATS.filter((fmt) =>
+                    selectedFormats.includes(fmt.value)
+                  ).map((fmt) => {
+                    let value = '-';
+                    if (parsed?.isValid()) {
+                      if (fmt.value === 'X') {
+                        if (inputType === 'timestamp_sec') {
+                          value = input;
+                        } else if (inputType === 'timestamp_ms') {
+                          value = String(Math.floor(parsed.valueOf() / 1000));
+                        } else if (inputType === 'date') {
+                          value = String(parsed.unix());
                         }
+                      } else if (fmt.value === 'x') {
+                        if (inputType === 'timestamp_ms') {
+                          value = input;
+                        } else if (inputType === 'timestamp_sec') {
+                          value = String(parsed.valueOf());
+                        } else if (inputType === 'date') {
+                          value = String(parsed.valueOf());
+                        }
+                      } else {
+                        value = formatDate(parsed, fmt.value);
                       }
-                      return (
-                        <div
-                          key={fmt.value}
-                          className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
+                    }
+                    return (
+                      <div
+                        key={fmt.value}
+                        className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
+                      >
+                        <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
+                          {fmt.icon} {fmt.label}
+                        </span>
+                        <span
+                          className={`font-mono text-sm flex-1 text-right ${value && value !== '-' ? 'text-white' : 'text-gray-500'}`}
                         >
-                          <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
-                            {fmt.icon} {fmt.label}
-                          </span>
-                          <span
-                            className={`font-mono text-sm flex-1 text-right ${value && value !== '-' ? 'text-white' : 'text-gray-500'}`}
-                          >
-                            {value || '-'}
-                          </span>
-                        </div>
-                      );
-                    })}
+                          {value || '-'}
+                        </span>
+                      </div>
+                    );
+                  })}
                   {selectedFormats.length === 0 && (
                     <div className="text-gray-500 text-sm px-3 py-2">
                       표시할 포맷이 없습니다.
@@ -374,7 +388,7 @@ export function TimestampConverterClient({
           )}
 
           {/* ===== 상대적 시간: 결과 박스와 통일된 스타일 ===== */}
-          {parsed && !error && (
+          {parsed && (
             <div className="bg-gray-900/80 border border-gray-700 rounded-2xl shadow-md p-4 flex items-center gap-4 mb-4">
               <h3 className="text-base font-bold text-blue-400 mr-4 flex items-center gap-2">
                 ⏳ 지금으로부터

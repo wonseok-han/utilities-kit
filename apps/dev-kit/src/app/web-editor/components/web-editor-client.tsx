@@ -4,14 +4,7 @@ import { MonacoEditor, TiptapEditor, useSnackbar } from '@repo/ui';
 import { useEditorStore } from '@store/editor-store';
 import parserHtml from 'prettier/plugins/html';
 import prettier from 'prettier/standalone';
-import React, { useMemo } from 'react';
-
-interface WebEditorClientProps {
-  initialData: {
-    content: string;
-    shouldIncludeStyles: boolean;
-  };
-}
+import React, { useEffect, useMemo } from 'react';
 
 /**
  * Web Editor 클라이언트 컴포넌트
@@ -23,7 +16,7 @@ interface WebEditorClientProps {
  * - 사용자 인터랙션 처리
  * - Monaco 에디터 렌더링
  */
-export function WebEditorClient({ initialData }: WebEditorClientProps) {
+export function WebEditorClient() {
   const { content, setContent, setShouldIncludeStyles, shouldIncludeStyles } =
     useEditorStore();
 
@@ -31,12 +24,12 @@ export function WebEditorClient({ initialData }: WebEditorClientProps) {
   const { showSnackbar } = useSnackbar();
 
   // ===== 초기 데이터 설정 (컴포넌트 마운트 시 한 번만) =====
-  React.useEffect(() => {
-    if (!content && initialData.content) {
-      setContent(initialData.content);
+  useEffect(() => {
+    if (!content) {
+      setContent('');
     }
-    if (shouldIncludeStyles !== initialData.shouldIncludeStyles) {
-      setShouldIncludeStyles(initialData.shouldIncludeStyles);
+    if (shouldIncludeStyles === undefined) {
+      setShouldIncludeStyles(true);
     }
   }, []); // 빈 의존성 배열로 마운트 시 한 번만 실행
 

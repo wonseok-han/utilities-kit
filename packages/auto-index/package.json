@@ -12,7 +12,10 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "lint": "eslint . --fix --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "start": "node bin/auto-index.js",
+    "test": "node bin/auto-index.js src",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

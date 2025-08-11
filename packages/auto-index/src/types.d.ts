@@ -4,7 +4,7 @@ export interface WatchTargetConfig {
   fileExtensions: string[];
   outputFile: string;
   exportStyle: 'default' | 'named' | 'star' | 'star-as' | 'mixed' | 'auto';
-  namingConvention: 'camelCase' | 'pascalCase' | 'original';
+  namingConvention: 'camelCase' | 'PascalCase' | 'original';
   fromWithExtension: boolean;
 }
 

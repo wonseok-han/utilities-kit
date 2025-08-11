@@ -14,7 +14,7 @@
     "lint": "eslint . --fix --max-warnings 0",
     "check-types": "tsc --noEmit",
     "start": "node bin/auto-index.js",
-    "test": "node bin/auto-index.js src",
+    "test": "node bin/auto-index.js src --exportStyle=named --fileExtensions=.tsx,.ts --fromWithExtension=true --outputFile=test.ts --namingConvention=PascalCase",
     "clean": "rm -rf dist"
   },
   "devDependencies": {

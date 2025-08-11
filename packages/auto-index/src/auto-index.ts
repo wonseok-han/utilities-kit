@@ -8,11 +8,12 @@ import { AutoIndexConfig, WatchTargetConfig } from './types';
  */
 export function getConfigFromPackageJson(): AutoIndexConfig {
   try {
-    // 현재 작업 디렉토리에서 package.json 찾기
+    // 1) 기본값
+    let merged: AutoIndexConfig = { ...DEFAULT_CONFIG };
+
+    // 2) package.json에서 autoIndex 읽기 (상위 디렉토리 탐색)
     let currentDir = process.cwd();
     let packageJsonPath: string | null = null;
-
-    // 상위 디렉토리로 올라가면서 package.json 찾기
     while (currentDir !== path.dirname(currentDir)) {
       const testPath = path.join(currentDir, 'package.json');
       if (fs.existsSync(testPath)) {
@@ -21,22 +22,125 @@ export function getConfigFromPackageJson(): AutoIndexConfig {
       }
       currentDir = path.dirname(currentDir);
     }
-
     if (packageJsonPath) {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-
       if (packageJson.autoIndex && typeof packageJson.autoIndex === 'object') {
-        // package.json의 autoIndex 설정과 기본 설정을 병합
-        return { ...DEFAULT_CONFIG, ...packageJson.autoIndex };
+        const pkgConfig: AutoIndexConfig = {
+          ...merged,
+          ...packageJson.autoIndex,
+        };
+        merged = pkgConfig;
       }
     }
+
+    // 3) 환경 변수로 전달된 설정 적용 (watch-all에서 전달)
+    if (process.env.AUTO_INDEX_CONFIG) {
+      try {
+        const envConfig = JSON.parse(
+          process.env.AUTO_INDEX_CONFIG
+        ) as Partial<AutoIndexConfig>;
+        merged = {
+          ...merged,
+          ...envConfig,
+        } as AutoIndexConfig;
+      } catch {
+        // 환경변수 파싱 실패는 무시
+      }
+    }
+
+    return merged;
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error';
     console.error('package.json 설정 읽기 오류:', errorMessage);
+    return DEFAULT_CONFIG;
+  }
+}
+
+/**
+ * CLI 인자 파싱 유틸리티
+ */
+function parseBoolean(value: string | true | undefined): boolean | undefined {
+  if (value === undefined) return undefined;
+  if (value === true) return true;
+  const lowered = String(value).toLowerCase();
+  if (lowered === 'true') return true;
+  if (lowered === 'false') return false;
+  return undefined;
+}
+
+function parseExtensions(value: string | undefined): string[] | undefined {
+  if (!value) return undefined;
+  const raw = value
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
+  if (raw.length === 0) return undefined;
+  return raw.map((ext) => (ext.startsWith('.') ? ext : `.${ext}`));
+}
+
+interface ParsedCliArgs {
+  folderPath?: string;
+  outputPath?: string;
+  isWatch: boolean;
+  overrides: Partial<WatchTargetConfig>;
+}
+
+function parseCliArgs(args: string[]): ParsedCliArgs {
+  const positionals: string[] = [];
+  const overrides: Partial<WatchTargetConfig> = {};
+  let isWatch = false;
+
+  for (const arg of args) {
+    if (arg === '--watch') {
+      isWatch = true;
+      continue;
+    }
+    if (arg.startsWith('--')) {
+      const [rawKey, rawVal] = arg.replace(/^--/, '').split('=');
+      const key = rawKey?.trim();
+      const val = rawVal === undefined ? true : rawVal.trim();
+
+      switch (key) {
+        case 'outputFile': {
+          if (typeof val === 'string' && val) overrides.outputFile = val;
+          break;
+        }
+        case 'fileExtensions': {
+          const exts =
+            typeof val === 'string' ? parseExtensions(val) : undefined;
+          if (exts) overrides.fileExtensions = exts;
+          break;
+        }
+        case 'exportStyle': {
+          if (typeof val === 'string' && val)
+            overrides.exportStyle = val as WatchTargetConfig['exportStyle'];
+          break;
+        }
+        case 'namingConvention': {
+          if (typeof val === 'string' && val)
+            overrides.namingConvention =
+              val as WatchTargetConfig['namingConvention'];
+          break;
+        }
+        case 'fromWithExtension': {
+          const boolVal = parseBoolean(val);
+          if (typeof boolVal === 'boolean')
+            overrides.fromWithExtension = boolVal;
+          break;
+        }
+        default:
+          // 알 수 없는 옵션은 무시
+          break;
+      }
+    } else {
+      positionals.push(arg);
+    }
   }
 
-  return DEFAULT_CONFIG;
+  const folderPath = positionals[0];
+  const outputPath = positionals[1];
+  return { folderPath, outputPath, isWatch, overrides };
 }
 
 /**
@@ -65,7 +169,7 @@ function transformFileName(name: string, namingConvention: string): string {
       return camelCaseName.charAt(0).toLowerCase() + camelCaseName.slice(1);
     case 'original':
       return toValidJSVariableName(name);
-    case 'pascalCase':
+    case 'PascalCase':
     default:
       return camelCaseName.charAt(0).toUpperCase() + camelCaseName.slice(1);
   }
@@ -120,7 +224,11 @@ function findTargetConfig(
 /**
  * 컴포넌트 폴더를 스캔하여 index.ts 파일을 생성합니다
  */
-export function generateIndex(folderPath: string, outputPath?: string): void {
+export function generateIndex(
+  folderPath: string,
+  outputPath?: string,
+  cliOverrides?: Partial<WatchTargetConfig>
+): void {
   try {
     const config = getConfigFromPackageJson();
     const fullPath = path.resolve(folderPath);
@@ -131,7 +239,11 @@ export function generateIndex(folderPath: string, outputPath?: string): void {
     }
 
     // 경로별 설정 적용
-    const targetConfig = findTargetConfig(fullPath, config);
+    const targetConfigBase = findTargetConfig(fullPath, config);
+    const targetConfig: WatchTargetConfig = {
+      ...targetConfigBase,
+      ...(cliOverrides || {}),
+    };
 
     console.log('🔍 설정 정보:', {
       folderPath,
@@ -253,23 +365,16 @@ export function generateIndex(folderPath: string, outputPath?: string): void {
 // CLI 실행 함수
 export function runCli(): void {
   const args = process.argv.slice(2);
-
-  if (args.length === 0) {
-    console.log('사용법: auto-index <폴더경로> [출력경로] [--watch]');
-    console.log('예시: auto-index src/components');
-    console.log('예시: auto-index src/components src/components/index.ts');
-    console.log('예시: auto-index src/components --watch');
-    return;
-  }
-
-  // --watch 옵션 제거하고 실제 인수 추출
-  const cleanArgs = args.filter((arg) => arg !== '--watch');
-  const folderPath = cleanArgs[0];
-  const outputPath = cleanArgs[1];
-  const isWatch = args.includes('--watch');
+  const { folderPath, outputPath, isWatch, overrides } = parseCliArgs(args);
 
   if (!folderPath) {
-    console.error('폴더 경로가 필요합니다.');
+    console.log(
+      '사용법: auto-index <폴더경로> [출력경로] [--watch] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]'
+    );
+    console.log('예시: auto-index src/components');
+    console.log('예시: auto-index src/components --outputFile=index.ts');
+    console.log('예시: auto-index src/components src/components/index.ts');
+    console.log('예시: auto-index src/components --watch --exportStyle=named');
     return;
   }
 
@@ -279,7 +384,13 @@ export function runCli(): void {
     console.log(`🔍 파일 변경 감지 시작: ${folderPath}`);
 
     const config = getConfigFromPackageJson();
-    const outputFileName = config.watchTargets[0]?.outputFile || 'index.ts';
+    const fullPath = path.resolve(folderPath);
+    const targetConfigBase = findTargetConfig(fullPath, config);
+    const targetConfig: WatchTargetConfig = {
+      ...targetConfigBase,
+      ...(overrides || {}),
+    };
+    const outputFileName = targetConfig.outputFile || 'index.ts';
 
     const watcher = chokidar.watch(folderPath, {
       ignored: [
@@ -297,7 +408,7 @@ export function runCli(): void {
         return;
       }
       console.log(`📝 파일 추가: ${fileName}`);
-      generateIndex(folderPath, outputPath);
+      generateIndex(folderPath, outputPath, overrides);
     });
 
     watcher.on('unlink', (filePath: string) => {
@@ -307,7 +418,7 @@ export function runCli(): void {
         return;
       }
       console.log(`🗑️  파일 삭제: ${fileName}`);
-      generateIndex(folderPath, outputPath);
+      generateIndex(folderPath, outputPath, overrides);
     });
 
     watcher.on('change', (filePath: string) => {
@@ -317,7 +428,7 @@ export function runCli(): void {
         return;
       }
       console.log(`📝 파일 변경: ${fileName}`);
-      generateIndex(folderPath, outputPath);
+      generateIndex(folderPath, outputPath, overrides);
     });
 
     // 프로세스 종료 시 감시 중지
@@ -327,6 +438,6 @@ export function runCli(): void {
     });
   } else {
     // 한 번만 실행
-    generateIndex(folderPath, outputPath);
+    generateIndex(folderPath, outputPath, overrides);
   }
 }

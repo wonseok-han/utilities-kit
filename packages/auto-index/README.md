@@ -11,8 +11,14 @@ pnpm add @repo/auto-index
 # CLI 사용 (단일 폴더)
 npx auto-index src/components
 
-# CLI 사용 (glob 패턴)
-npx auto-index-watch-all src/components "src/app/**/components"
+# CLI 사용 (감시 모드)
+npx auto-index src/components --watch
+
+# CLI 사용 (watchTargets 설정)
+npx auto-index --watch
+
+# 도움말 보기
+npx auto-index --help
 ```
 
 ## 설치
@@ -31,19 +37,19 @@ auto-index src/components
 
 # 출력 경로 지정
 auto-index src/components src/components/index.ts
+
+# 감시 모드 (파일 변경 시 자동 업데이트)
+auto-index src/components --watch
 ```
 
-### 2. 다중 폴더 및 패턴 처리
+### 2. watchTargets 설정 사용
 
 ```bash
-# 여러 폴더 동시 처리
-auto-index-watch-all src/components src/hooks
+# package.json의 autoIndex 설정으로 감시 모드
+auto-index --watch
 
-# glob 패턴 사용
-auto-index-watch-all "src/**/components" "src/**/hooks"
-
-# 혼합 사용
-auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
+# 특정 설정 오버라이드
+auto-index --watch --exportStyle=named --namingConvention=PascalCase
 ```
 
 ### 3. 프로그래밍 방식 사용
@@ -55,26 +61,29 @@ import { generateIndex } from '@repo/auto-index';
 generateIndex('./src/components');
 ```
 
-### 4. 자동 감지 모드 (파일 변경 시 자동 업데이트)
+### 4. CLI 옵션
 
-```typescript
-import { AutoIndexWatcher } from '@repo/auto-index';
+```bash
+# 도움말
+auto-index --help
 
-// 파일 변경 감지 시작
-const watcher = new AutoIndexWatcher('./src/components');
-watcher.start();
+# 감시 모드
+auto-index --watch
 
-// 감지 중지
-watcher.stop();
-```
+# 출력 파일명 지정
+auto-index src/components --outputFile=index.ts
 
-### 5. 한 번만 생성
+# 파일 확장자 지정
+auto-index src/components --fileExtensions=.tsx,.ts
 
-```typescript
-import { AutoIndexWatcher } from '@repo/auto-index';
+# export 스타일 지정
+auto-index src/components --exportStyle=named
 
-// 한 번만 index.ts 생성
-AutoIndexWatcher.generateOnce('./src/components');
+# 네이밍 규칙 지정
+auto-index src/components --namingConvention=PascalCase
+
+# 확장자 포함 여부
+auto-index src/components --fromWithExtension=false
 ```
 
 ## 지원하는 Export 패턴
@@ -103,17 +112,11 @@ export { MyComponent, AnotherComponent };
 다양한 폴더 구조를 패턴으로 처리할 수 있습니다:
 
 ```bash
-# 모든 components 폴더
-auto-index-watch-all "src/**/components"
+# package.json의 watchTargets 설정 사용
+auto-index --watch
 
-# 모든 hooks 폴더
-auto-index-watch-all "src/**/hooks"
-
-# 모든 utils 폴더
-auto-index-watch-all "packages/**/utils"
-
-# 여러 패턴 조합
-auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
+# 단일 폴더 감시
+auto-index src/components --watch
 ```
 
 ## 설정 옵션
@@ -125,12 +128,6 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 ```json
 {
   "autoIndex": {
-    "exclude": [
-      "node_modules",
-      "dist",
-      ".git",
-      ".next"
-    ],
     "watchTargets": [
       {
         "watchPaths": [
@@ -145,7 +142,7 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
         ],
         "outputFile": "index.ts",
         "exportStyle": "named",
-        "namingConvention": "pascalCase"
+        "namingConvention": "PascalCase"
       },
       {
         "watchPaths": [
@@ -170,7 +167,7 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
         ],
         "outputFile": "index.ts",
         "exportStyle": "named",
-        "namingConvention": "pascalCase",
+        "namingConvention": "PascalCase",
         "fromWithExtension": true
       }
     ]
@@ -182,7 +179,6 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 
 | 옵션 | 타입 | 기본값 | 설명 |
 |------|------|--------|------|
-| `exclude` | `string[]` | `["node_modules", "dist", ".git"]` | 제외할 폴더들 |
 | `watchTargets` | `WatchTarget[]` | - | 감시할 타겟들 |
 
 ### WatchTarget 옵션
@@ -192,9 +188,20 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 | `watchPaths` | `string[]` | - | 감시할 경로들 (glob 패턴 지원) |
 | `fileExtensions` | `string[]` | `[".tsx", ".ts", ".jsx", ".js"]` | 처리할 파일 확장자 |
 | `outputFile` | `string` | `"index.ts"` | 생성할 파일명 |
-| `exportStyle` | `"named" \| "default"` | `"named"` | export 처리 방식 |
-| `namingConvention` | `"pascalCase" \| "camelCase" \| "original"` | `"original"` | 네이밍 변환 규칙 |
-| `fromWithExtension` | `boolean` | `false` | from 경로에 파일 확장자 포함 여부 |
+| `exportStyle` | `"default" \| "named" \| "star" \| "star-as" \| "mixed" \| "auto"` | `"auto"` | export 처리 방식 |
+| `namingConvention` | `"camelCase" \| "PascalCase" \| "original"` | `"original"` | 네이밍 변환 규칙 |
+| `fromWithExtension` | `boolean` | `true` | from 경로에 파일 확장자 포함 여부 |
+
+### Export 스타일 옵션
+
+| 스타일 | 설명 | 예시 |
+|--------|------|------|
+| `default` | default export만 | `export { default } from './Component';` |
+| `named` | default를 named로 변환 | `export { default as Component } from './Component';` |
+| `star` | export * 사용 | `export * from './Component';` |
+| `star-as` | export * as 사용 | `export * as Component from './Component';` |
+| `mixed` | default와 named 모두 | `export { default } from './Component';` + `export { default as Component } from './Component';` |
+| `auto` | 파일 내용에 따라 자동 결정 | 파일 내용 분석 후 적절한 스타일 선택 |
 
 ### 네이밍 규칙 예시
 
@@ -203,7 +210,7 @@ auto-index-watch-all "src/**/components" "src/**/hooks" "packages/**/shared"
 | namingConvention | 결과 | 설명 |
 |------------------|------|------|
 | `original` | `user_profile` | 기본값, 원본 파일명 유지 |
-| `pascalCase` | `UserProfile` | React 컴포넌트용 |
+| `PascalCase` | `UserProfile` | React 컴포넌트용 |
 | `camelCase` | `userProfile` | 유틸리티 함수용 |
 
 ### fromWithExtension 옵션 예시
@@ -255,7 +262,7 @@ export { default as IconMenu } from './icon-menu.svg';
 {
   "scripts": {
     "generate:index": "auto-index src/components",
-    "dev": "concurrently \"next dev\" \"auto-index-watch-all\""
+    "dev": "auto-index --watch"
   },
   "autoIndex": {
     "watchTargets": [
@@ -275,7 +282,7 @@ export { default as IconMenu } from './icon-menu.svg';
 ```json
 {
   "scripts": {
-    "dev:watch": "auto-index-watch-all"
+    "dev:watch": "auto-index --watch"
   },
   "autoIndex": {
     "watchTargets": [
@@ -293,29 +300,38 @@ export { default as IconMenu } from './icon-menu.svg';
 ## CLI 명령어
 
 ### auto-index
-단일 폴더를 처리합니다.
+단일 폴더를 처리하거나 watchTargets 설정을 사용합니다.
 
 ```bash
-auto-index <folder-path> [output-path]
-```
+# 단일 폴더 처리
+auto-index <folder-path> [output-file-path]
 
-### auto-index-watch-all
-여러 폴더와 glob 패턴을 처리합니다.
+# 감시 모드 (단일 폴더)
+auto-index <folder-path> --watch
 
-```bash
-auto-index-watch-all <path1> [path2] [path3] ...
+# 감시 모드 (watchTargets 설정)
+auto-index --watch
+
+# 도움말
+auto-index --help
 ```
 
 **예시:**
 ```bash
 # 기본 사용
-auto-index-watch-all src/components
+auto-index src/components
 
-# glob 패턴
-auto-index-watch-all "src/**/components"
+# 감시 모드
+auto-index src/components --watch
 
-# 여러 패턴
-auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
+# 출력 파일 경로 지정
+auto-index src/components output/components.ts
+
+# watchTargets 설정 사용
+auto-index --watch
+
+# 옵션과 함께 사용
+auto-index src/components --watch --exportStyle=named --namingConvention=PascalCase
 ```
 
 ## 고급 설정 예시
@@ -331,7 +347,7 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
           "src/**/components",
           "src/app/**/components"
         ],
-        "namingConvention": "pascalCase",
+        "namingConvention": "PascalCase",
         "exportStyle": "named"
       },
       {
@@ -361,7 +377,7 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
       {
         "watchPaths": ["src/**/components"],
         "fileExtensions": [".tsx", ".ts"],
-        "namingConvention": "pascalCase",
+        "namingConvention": "PascalCase",
         "exportStyle": "named"
       }
     ]
@@ -385,22 +401,6 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
 }
 ```
 
-### 훅용 설정
-```json
-{
-  "autoIndex": {
-    "watchTargets": [
-      {
-        "watchPaths": ["src/**/hooks"],
-        "fileExtensions": [".ts", ".tsx"],
-        "namingConvention": "camelCase",
-        "exportStyle": "named"
-      }
-    ]
-  }
-}
-```
-
 ### SVG/이미지 파일용 설정
 ```json
 {
@@ -409,7 +409,7 @@ auto-index-watch-all src/components "src/app/**/components" "packages/**/utils"
       {
         "watchPaths": ["public/assets/icons"],
         "fileExtensions": [".svg"],
-        "namingConvention": "pascalCase",
+        "namingConvention": "PascalCase",
         "exportStyle": "named",
         "fromWithExtension": true
       }

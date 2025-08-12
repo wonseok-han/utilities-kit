@@ -50,6 +50,13 @@ importers:
       zustand:
         specifier: ^5.0.6
         version: 5.0.6(@types/react@19.1.0)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
+    optionalDependencies:
+      '@tailwindcss/oxide-linux-arm64-musl':
+        specifier: ^4.1.11
+        version: 4.1.11
+      lightningcss-linux-arm64-musl:
+        specifier: ^1.30.1
+        version: 1.30.1
     devDependencies:
       '@repo/auto-index':
         specifier: workspace:*

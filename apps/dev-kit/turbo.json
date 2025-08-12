@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "extends": ["//"],
+  "globalEnv": ["NODE_ENV"],
   "tasks": {
     "dev": {
       "dependsOn": ["@repo/auto-index#build"],

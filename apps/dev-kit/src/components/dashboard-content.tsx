@@ -188,7 +188,7 @@ export function DashboardContent({
     try {
       const totalPages = Math.ceil((metadata.totalResults || 1) / 10);
       const result = await fetchRecentCVEs(totalPages, 10); // 최신 10개만
-      setCves(result.cves);
+      setCves(result.cves.reverse());
     } catch (error) {
       console.error('Failed to load recent CVEs:', error);
     } finally {

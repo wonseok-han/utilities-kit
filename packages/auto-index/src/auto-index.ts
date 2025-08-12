@@ -1,91 +1,19 @@
 import fs from 'fs';
 import path from 'path';
-import { DEFAULT_CONFIG, DEFAULT_WATCH_TARGETS_CONFIG } from './constant';
-import { AutoIndexConfig, WatchTargetConfig } from './types';
-
-/**
- * package.json에서 설정을 읽어옵니다
- */
-export function getConfigFromPackageJson(): AutoIndexConfig {
-  try {
-    // 1) 기본값
-    let merged: AutoIndexConfig = { ...DEFAULT_CONFIG };
-
-    // 2) package.json에서 autoIndex 읽기 (상위 디렉토리 탐색)
-    let currentDir = process.cwd();
-    let packageJsonPath: string | null = null;
-    while (currentDir !== path.dirname(currentDir)) {
-      const testPath = path.join(currentDir, 'package.json');
-      if (fs.existsSync(testPath)) {
-        packageJsonPath = testPath;
-        break;
-      }
-      currentDir = path.dirname(currentDir);
-    }
-    if (packageJsonPath) {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-      if (packageJson.autoIndex && typeof packageJson.autoIndex === 'object') {
-        const pkgConfig: AutoIndexConfig = {
-          ...merged,
-          ...packageJson.autoIndex,
-        };
-        merged = pkgConfig;
-      }
-    }
-
-    // 3) 환경 변수로 전달된 설정 적용 (watch-all에서 전달)
-    if (process.env.AUTO_INDEX_CONFIG) {
-      try {
-        const envConfig = JSON.parse(
-          process.env.AUTO_INDEX_CONFIG
-        ) as Partial<AutoIndexConfig>;
-        merged = {
-          ...merged,
-          ...envConfig,
-        } as AutoIndexConfig;
-      } catch {
-        // 환경변수 파싱 실패는 무시
-      }
-    }
-
-    return merged;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    console.error('package.json 설정 읽기 오류:', errorMessage);
-    return DEFAULT_CONFIG;
-  }
-}
+import { DEFAULT_WATCH_TARGETS_CONFIG } from './constant';
+import { AutoIndexConfig, ParsedCliArgs, WatchTargetConfig } from './types';
+import {
+  getConfigFromPackageJson,
+  parseBoolean,
+  parseExtensions,
+  toValidJSVariableName,
+} from './utils';
 
 /**
  * CLI 인자 파싱 유틸리티
+ * @param args - 명령행 인자 배열
+ * @returns 파싱된 CLI 인자 객체
  */
-function parseBoolean(value: string | true | undefined): boolean | undefined {
-  if (value === undefined) return undefined;
-  if (value === true) return true;
-  const lowered = String(value).toLowerCase();
-  if (lowered === 'true') return true;
-  if (lowered === 'false') return false;
-  return undefined;
-}
-
-function parseExtensions(value: string | undefined): string[] | undefined {
-  if (!value) return undefined;
-  const raw = value
-    .split(',')
-    .map((v) => v.trim())
-    .filter(Boolean);
-  if (raw.length === 0) return undefined;
-  return raw.map((ext) => (ext.startsWith('.') ? ext : `.${ext}`));
-}
-
-interface ParsedCliArgs {
-  folderPath?: string;
-  outputPath?: string;
-  isWatch: boolean;
-  overrides: Partial<WatchTargetConfig>;
-}
-
 function parseCliArgs(args: string[]): ParsedCliArgs {
   const positionals: string[] = [];
   const overrides: Partial<WatchTargetConfig> = {};
@@ -144,18 +72,10 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
 }
 
 /**
- * 파일명을 유효한 JavaScript 변수명으로 변환
- */
-function toValidJSVariableName(str: string): string {
-  let validName = str.replace(/[^a-zA-Z0-9_]/g, '');
-  if (/^[0-9]/.test(validName)) {
-    validName = '_' + validName;
-  }
-  return validName;
-}
-
-/**
  * 네이밍 규칙에 따라 파일명을 변환
+ * @param name - 변환할 파일명
+ * @param namingConvention - 적용할 네이밍 규칙 (camelCase, original, PascalCase)
+ * @returns 변환된 파일명
  */
 function transformFileName(name: string, namingConvention: string): string {
   // 먼저 하이픈과 언더스코어를 제거하고 camelCase로 변환
@@ -177,6 +97,14 @@ function transformFileName(name: string, namingConvention: string): string {
 
 /**
  * 경로별 설정을 찾습니다
+ * @param folderPath - 설정을 찾을 폴더 경로
+ * @param config - autoIndex 설정 객체
+ * @returns 해당 경로에 적용할 WatchTargetConfig 설정
+ *
+ * 동작 방식:
+ * 1. watchTargets 설정에서 해당 경로와 매칭되는 설정 찾기
+ * 2. glob 패턴과 정확한 경로 모두 지원
+ * 3. 매칭되는 설정이 없으면 기본 설정 반환
  */
 function findTargetConfig(
   folderPath: string,
@@ -223,6 +151,14 @@ function findTargetConfig(
 
 /**
  * 컴포넌트 폴더를 스캔하여 index.ts 파일을 생성합니다
+ * @param folderPath - 스캔할 폴더 경로
+ * @param outputPath - 출력 파일 경로 (선택사항)
+ * @param cliOverrides - CLI에서 전달된 설정 오버라이드 (선택사항)
+ *
+ * 동작 방식:
+ * 1. 지정된 폴더의 파일들을 스캔
+ * 2. 설정된 확장자와 네이밍 규칙에 따라 export 문 생성
+ * 3. index.ts 파일에 export 문들을 작성
  */
 export function generateIndex(
   folderPath: string,
@@ -362,10 +298,102 @@ export function generateIndex(
   }
 }
 
-// CLI 실행 함수
+/**
+ * CLI 메인 실행 함수
+ * 명령행 인자를 파싱하고 적절한 모드로 실행합니다
+ * - 일반 모드: 지정된 폴더에 index.ts 생성
+ * - 감시 모드: 폴더 경로가 있으면 단일 폴더 감시, 없으면 watchTargets 설정 사용
+ */
 export function runCli(): void {
   const args = process.argv.slice(2);
   const { folderPath, outputPath, isWatch, overrides } = parseCliArgs(args);
+
+  if (isWatch && !folderPath) {
+    // 감시 모드 + 폴더 경로 없음: watchTargets 설정 사용
+    const config = getConfigFromPackageJson();
+    console.log('🔍 watchTargets 설정으로 감시 모드 시작...');
+
+    if (config.watchTargets && Array.isArray(config.watchTargets)) {
+      config.watchTargets.forEach((target, index) => {
+        if (target.watchPaths && Array.isArray(target.watchPaths)) {
+          target.watchPaths.forEach((watchPath) => {
+            console.log(`📁 감시 시작: ${watchPath}`);
+
+            /**
+             * package.json의 autoIndex 설정과 watchTargets의 개별 설정을 병합
+             * - targetConfig: package.json에서 찾은 기본 설정
+             * - target: watchTargets에서 정의된 개별 설정 (우선순위 높음)
+             */
+            const fullPath = path.resolve(watchPath);
+            const targetConfig = findTargetConfig(fullPath, config);
+            const finalConfig: WatchTargetConfig = {
+              ...targetConfig,
+              ...target,
+            };
+
+            // 병합된 설정으로 초기 인덱스 파일 생성
+            generateIndex(watchPath, undefined, finalConfig);
+
+            /**
+             * Chokidar를 사용하여 파일 시스템 감시 모드 시작
+             * - add: 새 파일 추가 시 인덱스 재생성
+             * - unlink: 파일 삭제 시 인덱스 재생성
+             * - change: 파일 변경 시 인덱스 재생성
+             */
+            const chokidar = require('chokidar');
+            const outputFileName = finalConfig.outputFile || 'index.ts';
+
+            const watcher = chokidar.watch(watchPath, {
+              ignored: [
+                /(^|[\/\\])\../, // 숨김 파일 무시
+                new RegExp(`${outputFileName.replace('.', '\\.')}$`), // outputFile 무시
+                /\.d\.ts$/, // 타입 정의 파일 무시
+              ],
+              persistent: true,
+            });
+
+            // 새 파일 추가 감지 시 인덱스 재생성
+            watcher.on('add', (filePath: string) => {
+              const fileName = path.basename(filePath);
+              if (fileName === outputFileName || fileName.endsWith('.d.ts'))
+                return;
+              console.log(`📝 파일 추가: ${fileName} (${watchPath})`);
+              generateIndex(watchPath, undefined, finalConfig);
+            });
+
+            // 파일 삭제 감지 시 인덱스 재생성
+            watcher.on('unlink', (filePath: string) => {
+              const fileName = path.basename(filePath);
+              if (fileName === outputFileName || fileName.endsWith('.d.ts'))
+                return;
+              console.log(`🗑️  파일 삭제: ${fileName} (${watchPath})`);
+              generateIndex(watchPath, undefined, finalConfig);
+            });
+
+            // 파일 변경 감지 시 인덱스 재생성
+            watcher.on('change', (filePath: string) => {
+              const fileName = path.basename(filePath);
+              if (fileName === outputFileName || fileName.endsWith('.d.ts'))
+                return;
+              console.log(`📝 파일 변경: ${fileName} (${watchPath})`);
+              generateIndex(watchPath, undefined, finalConfig);
+            });
+          });
+        }
+      });
+
+      // 프로세스 종료 시 모든 감시 중지
+      process.on('SIGINT', () => {
+        console.log('\n🛑 감시 모드 종료...');
+        process.exit(0);
+      });
+
+      return;
+    } else {
+      console.log('❌ watchTargets 설정을 찾을 수 없습니다.');
+      return;
+    }
+  }
 
   if (!folderPath) {
     console.log(
@@ -375,11 +403,12 @@ export function runCli(): void {
     console.log('예시: auto-index src/components --outputFile=index.ts');
     console.log('예시: auto-index src/components src/components/index.ts');
     console.log('예시: auto-index src/components --watch --exportStyle=named');
+    console.log('예시: auto-index --watch (watchTargets 설정 사용)');
     return;
   }
 
   if (isWatch) {
-    // 감시 모드
+    // 감시 모드 (기존 방식)
     const chokidar = require('chokidar');
     console.log(`🔍 파일 변경 감지 시작: ${folderPath}`);
 

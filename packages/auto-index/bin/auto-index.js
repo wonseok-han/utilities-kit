@@ -3,6 +3,7 @@
 /**
  * auto-index CLI 실행 파일
  * src의 TypeScript 모듈을 dynamic import로 로드합니다.
+ * --watch 옵션으로 감시 모드 실행 가능
  */
 
 const fs = require('fs');

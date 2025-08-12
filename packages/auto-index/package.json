@@ -5,12 +5,12 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "auto-index": "./bin/auto-index.js",
-    "auto-index-watch-all": "./bin/watch-all.js"
+    "auto-index": "./bin/auto-index.js"
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "watch": "auto-index --watch",
     "lint": "eslint . --fix --max-warnings 0",
     "check-types": "tsc --noEmit",
     "start": "node bin/auto-index.js",

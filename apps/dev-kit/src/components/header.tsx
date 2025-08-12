@@ -1,26 +1,24 @@
 'use client';
 
+import { IconGithub, IconLogo } from '@assets/icons';
 import { useIsMobile } from '@hooks/use-media-query';
 import { useSidebarStore } from '@store/sidebar-store';
+import Link from 'next/link';
 
 export interface HeaderProps {
-  title?: string;
-  onSettingsClick?: () => void;
   onToggleSettingsPanel?: () => void;
   isSettingsPanelOpen?: boolean;
 }
 
 export function Header({
   isSettingsPanelOpen = false,
-  onSettingsClick,
   onToggleSettingsPanel,
-  title,
 }: HeaderProps) {
   const isMobile = useIsMobile();
   const { toggle: onToggleSidebar } = useSidebarStore();
 
   return (
-    <header className="bg-gray-800 px-6 py-4">
+    <header className="bg-gray-800 px-6 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           {/* 모바일 햄버거 메뉴 버튼 */}
@@ -45,37 +43,36 @@ export function Header({
               </svg>
             </button>
           )}
-          <h2 className="text-lg font-medium text-white">{title}</h2>
+
+          {isMobile && (
+            <div className="flex items-center gap-3 text-white">
+              <div className="relative flex items-center">
+                <IconLogo />
+                <span
+                  className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden font-bold opacity-100 transform scale-x-100 delay-100`}
+                >
+                  Dev Kit
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* 기존 설정 버튼 (호환성을 위해 유지) */}
-          {onSettingsClick && (
-            <button
-              className="p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
-              onClick={onSettingsClick}
-              title="설정"
-            >
-              <svg
-                fill="none"
-                height="20"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                width="20"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-            </button>
-          )}
+          <Link
+            aria-label="GitHub Repository"
+            className="hover:text-gray-200 transition-colors duration-200 p-1 rounded hover:bg-gray-700/50 p-1"
+            href="https://github.com/wonseok-han/utilities-kit"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <IconGithub className="w-4 h-4" />
+          </Link>
 
           {/* 설정패널 토글 버튼 */}
           {/* TODO: 추후 추가 예정 */}
           <button
-            className={`p-2 rounded-md transition-colors cursor-pointer invisible ${
+            className={`p-1 rounded-md transition-colors cursor-pointer hidden ${
               isSettingsPanelOpen
                 ? 'text-white bg-gray-700'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'

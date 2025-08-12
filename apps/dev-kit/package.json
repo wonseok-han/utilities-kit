@@ -5,10 +5,51 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --turbo --port 3001",
+    "dev:auto-index": "auto-index --watch",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix --max-warnings 0",
     "check-types": "tsc --noEmit"
+  },
+  "autoIndex": {
+    "watchTargets": [
+      {
+        "watchPaths": [
+          "src/components",
+          "src/app/**/components"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "auto"
+      },
+      {
+        "watchPaths": [
+          "src/hooks",
+          "src/store"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "auto"
+      },
+      {
+        "watchPaths": [
+          "public/assets/icons"
+        ],
+        "fileExtensions": [
+          ".svg"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "named",
+        "namingConvention": "PascalCase",
+        "fromWithExtension": true
+      }
+    ]
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -29,6 +70,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@repo/auto-index": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
@@ -42,5 +84,9 @@
     "sass": "^1.89.2",
     "tailwindcss": "^4.1.11",
     "typescript": "5.8.2"
+  },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-arm64-musl": "^4.1.11",
+    "lightningcss-linux-arm64-musl": "^1.30.1"
   }
 }

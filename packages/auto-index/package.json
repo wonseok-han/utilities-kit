@@ -1,0 +1,30 @@
+{
+  "name": "@repo/auto-index",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "auto-index": "./bin/auto-index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "watch": "auto-index --watch",
+    "lint": "eslint . --fix --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "start": "node bin/auto-index.js",
+    "test": "node bin/auto-index.js src --exportStyle=named --fileExtensions=.tsx,.ts --fromWithExtension=true --outputFile=test.ts --namingConvention=PascalCase",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "eslint": "^9.30.0",
+    "typescript": "5.8.2"
+  },
+  "dependencies": {
+    "chokidar": "^3.6.0"
+  }
+}

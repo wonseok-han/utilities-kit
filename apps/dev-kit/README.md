@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# Dev Kit App
 
-## Getting Started
+Utilities Kit의 메인 개발 도구 애플리케이션입니다.
 
-First, run the development server:
+## 🚀 Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 개발 서버 시작
+pnpm run dev
+
+# 또는 모노레포 전체와 함께 실행
+pnpm run dev:kit
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 [http://localhost:3001](http://localhost:3001)을 열어 결과를 확인하세요.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 구현된 도구들
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+### 🔧 개발 도구
 
-## Learn More
+- **JSON Formatter**: JSON 데이터 포맷팅 및 검증
+- **Base64 Encoder/Decoder**: Base64 인코딩/디코딩
+- **JWT Encoder/Decoder**: JWT 토큰 디코딩 및 검증
+- **Regex Tester**: 정규식 테스트 및 유효성 검사
+- **Timestamp Converter**: Unix timestamp ↔ 날짜 변환
+- **Diff Comparator**: 텍스트 차이점 비교 및 하이라이팅
+- **Web Editor**: 실시간 HTML 에디터 (TipTap 기반)
+- **CVE Viewer**: NVD API를 통한 CVE 데이터 조회
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ 개발 환경
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 스크립트
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# 개발 서버 (포트 3001)
+pnpm run dev
 
-## Deploy on Vercel
+# 빌드
+pnpm run build
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# 프로덕션 서버
+pnpm run start
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# 린팅
+pnpm run lint
+
+# 타입 체크
+pnpm run check-types
+```
+
+### 자동 인덱스 생성
+
+이 앱은 `@repo/auto-index` 패키지를 사용하여 다음 파일들을 자동으로 생성합니다:
+
+- `src/components/index.ts`
+- `src/hooks/index.ts`
+- `src/store/index.ts`
+- `public/assets/icons/index.ts`
+
+## 📁 앱 구조
+
+```
+src/
+├── app/                    # App Router 페이지들
+│   ├── json-formatter/     # JSON 포맷터
+│   ├── base64-encoder/     # Base64 인코더
+│   ├── jwt-encoder/        # JWT 인코더
+│   ├── regex-tester/       # 정규식 테스터
+│   ├── timestamp-converter/ # 타임스탬프 변환기
+│   ├── diff/               # Diff 비교기
+│   ├── web-editor/         # 웹 에디터
+│   ├── cve-viewer/         # CVE 뷰어
+│   └── api/                # API 라우트
+├── components/             # 공통 컴포넌트
+│   ├── sidebar/           # 사이드바 컴포넌트
+│   ├── header.tsx         # 헤더 컴포넌트
+│   └── page-wrapper.tsx   # 페이지 래퍼
+├── store/                 # Zustand 스토어
+│   ├── cve-store.ts       # CVE 데이터 스토어
+│   ├── json-store.ts      # JSON 포맷터 스토어
+│   └── ...                # 기타 스토어들
+├── hooks/                 # 커스텀 훅
+│   ├── use-infinite-scroll.ts
+│   └── use-media-query.ts
+├── types/                 # 타입 정의
+└── constants/             # 상수 정의
+    └── menu.ts           # 메뉴 아이템 정의
+```
+
+## 🔧 기술 스택
+
+- **Next.js 15.3.0**: App Router 기반 React 프레임워크
+- **React 19.1.0**: 최신 React 버전
+- **TypeScript 5.8.2**: 정적 타입 검사
+- **Tailwind CSS 4.1.11**: 유틸리티 퍼스트 CSS
+- **Zustand 5.0.6**: 경량 상태 관리
+- **TipTap**: 리치 텍스트 에디터
+- **Monaco Editor**: 코드 에디터
+
+## 📝 주요 기능 상세
+
+### CVE Viewer
+
+- NVD API를 통한 실시간 CVE 데이터 조회
+- 무한스크롤을 통한 효율적인 데이터 로딩
+- 역순 페이지네이션으로 최신 데이터부터 표시
+
+### Web Editor
+
+- TipTap 기반의 리치 텍스트 에디터
+- 실시간 HTML 미리보기
+- 마크다운 지원
+- 커스텀 툴바 및 단축키
+
+### JSON Formatter
+
+- JSON 데이터 자동 포맷팅
+- 구문 오류 검증
+- 압축/확장 토글 기능
+- 복사 기능
+
+## 🔗 관련 링크
+
+- [프로젝트 전체 README](../../README.md)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [TipTap Editor](https://tiptap.dev/docs/editor/getting-started/install/react)

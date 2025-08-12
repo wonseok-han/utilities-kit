@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 
 # 코딩 패턴 및 파일 명명 규칙

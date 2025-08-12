@@ -29,23 +29,26 @@ export function useInfiniteScroll({
 }: UseInfiniteScrollProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
+  const isSetupRef = useRef(false);
 
   const handleObserver = (entries: IntersectionObserverEntry[]) => {
     const [target] = entries;
     if (target?.isIntersecting && hasMore && !isLoading) {
+      console.log(
+        '🔄 Triggering loadMore - isIntersecting:',
+        target.isIntersecting
+      );
       onLoadMore();
     }
   };
 
-  useEffect(() => {
+  const setupObserver = () => {
     if (!loadingRef?.current) {
-      return;
+      console.log('❌ loadingRef.current is null');
+      return false;
     }
 
     const element = loadingRef.current;
-
-    // root가 null이면 viewport를 사용
-    const observerRoot = root || null;
 
     // 기존 observer가 있으면 먼저 해제
     if (observerRef.current) {
@@ -53,19 +56,48 @@ export function useInfiniteScroll({
     }
 
     observerRef.current = new IntersectionObserver(handleObserver, {
-      root: observerRoot,
+      root: root,
       rootMargin: `${threshold}px`,
-      threshold: [0, 0.25, 0.5, 0.75, 1], // 여러 임계값으로 테스트
+      threshold: [0, 0.25, 0.5, 0.75, 1],
     });
 
     observerRef.current.observe(element);
+    console.log('👁️ IntersectionObserver set up for element:', element);
+    isSetupRef.current = true;
+    return true;
+  };
+
+  useEffect(() => {
+    // 즉시 시도
+    if (setupObserver()) {
+      return;
+    }
+
+    // DOM이 준비되지 않았으면 약간의 지연 후 다시 시도
+    const timer = setTimeout(() => {
+      if (!isSetupRef.current) {
+        console.log('🔄 Retrying observer setup...');
+        setupObserver();
+      }
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (observerRef.current) {
         observerRef.current.disconnect();
+        console.log('🧹 IntersectionObserver disconnected');
+        isSetupRef.current = false;
       }
     };
-  }, [loadingRef?.current, threshold, hasMore, isLoading, root, onLoadMore]); // loadingRef는 ref이므로 의존성에서 제외
+  }, [hasMore, isLoading, onLoadMore, threshold, root]);
+
+  // DOM이 변경될 때마다 다시 설정
+  useEffect(() => {
+    if (loadingRef.current && !isSetupRef.current) {
+      console.log('🔄 Re-setting up observer due to DOM change');
+      setupObserver();
+    }
+  });
 
   return loadingRef;
 }

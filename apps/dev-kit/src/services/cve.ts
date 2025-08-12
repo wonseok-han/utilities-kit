@@ -18,7 +18,11 @@ export async function fetchRecentCVEs(
     limit: limit.toString(),
   });
 
-  const response = await apiFetch(url);
+  const response = await apiFetch(url, {
+    next: {
+      revalidate: 3600, // 1 hour
+    },
+  });
   return response.json();
 }
 

@@ -18,10 +18,15 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
   const positionals: string[] = [];
   const overrides: Partial<WatchTargetConfig> = {};
   let isWatch = false;
+  let isHelp = false;
 
   for (const arg of args) {
     if (arg === '--watch') {
       isWatch = true;
+      continue;
+    }
+    if (arg === '--help' || arg === '-h') {
+      isHelp = true;
       continue;
     }
     if (arg.startsWith('--')) {
@@ -68,7 +73,7 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
 
   const folderPath = positionals[0];
   const outputPath = positionals[1];
-  return { folderPath, outputPath, isWatch, overrides };
+  return { folderPath, outputPath, isWatch, isHelp, overrides };
 }
 
 /**
@@ -299,6 +304,31 @@ export function generateIndex(
 }
 
 /**
+ * 도움말 메시지를 출력합니다.
+ */
+function printHelp(): void {
+  console.log(`
+사용법: auto-index <폴더경로> [출력경로] [--watch] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]
+
+옵션:
+  --watch               감시 모드 활성화 (폴더 경로가 있으면 단일 폴더 감시, 없으면 watchTargets 설정 사용)
+  --outputFile=<파일명> 생성할 index.ts 파일의 이름 (기본값: index.ts)
+  --fileExtensions=<확장자> 감시할 파일 확장자 (예: .tsx,.ts)
+  --exportStyle=<스타일> 생성할 export 스타일 (default, named, star, star-as, mixed, auto)  --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
+  --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
+  --fromWithExtension=<true|false> 파일 경로에 확장자 포함 여부 (기본값: true)
+  -h, --help            도움말 출력
+
+예시:
+  auto-index src/components
+  auto-index src/components --outputFile=index.ts
+  auto-index src/components src/components/index.ts
+  auto-index src/components --watch --exportStyle=named
+  auto-index --watch (watchTargets 설정 사용)
+`);
+}
+
+/**
  * CLI 메인 실행 함수
  * 명령행 인자를 파싱하고 적절한 모드로 실행합니다
  * - 일반 모드: 지정된 폴더에 index.ts 생성
@@ -306,7 +336,14 @@ export function generateIndex(
  */
 export function runCli(): void {
   const args = process.argv.slice(2);
-  const { folderPath, outputPath, isWatch, overrides } = parseCliArgs(args);
+  const { folderPath, outputPath, isWatch, isHelp, overrides } =
+    parseCliArgs(args);
+
+  // 도움말 출력
+  if (isHelp) {
+    printHelp();
+    return;
+  }
 
   if (isWatch && !folderPath) {
     // 감시 모드 + 폴더 경로 없음: watchTargets 설정 사용
@@ -396,14 +433,7 @@ export function runCli(): void {
   }
 
   if (!folderPath) {
-    console.log(
-      '사용법: auto-index <폴더경로> [출력경로] [--watch] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]'
-    );
-    console.log('예시: auto-index src/components');
-    console.log('예시: auto-index src/components --outputFile=index.ts');
-    console.log('예시: auto-index src/components src/components/index.ts');
-    console.log('예시: auto-index src/components --watch --exportStyle=named');
-    console.log('예시: auto-index --watch (watchTargets 설정 사용)');
+    printHelp();
     return;
   }
 

@@ -16,5 +16,6 @@ export type ParsedCliArgs = {
   folderPath?: string;
   outputPath?: string;
   isWatch: boolean;
+  isHelp: boolean;
   overrides: Partial<WatchTargetConfig>;
 };

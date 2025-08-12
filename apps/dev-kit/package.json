@@ -4,19 +4,14 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --hostname 0.0.0.0 --turbo --port 3001\" \"auto-index-watch-all\"",
+    "dev": "next dev --hostname 0.0.0.0 --turbo --port 3001",
+    "dev:auto-index": "auto-index-watch-all",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix --max-warnings 0",
     "check-types": "tsc --noEmit"
   },
   "autoIndex": {
-    "exclude": [
-      "node_modules",
-      "dist",
-      ".next",
-      ".turbo"
-    ],
     "watchTargets": [
       {
         "watchPaths": [
@@ -28,7 +23,7 @@
           ".ts"
         ],
         "outputFile": "index.ts",
-        "exportStyle": "named"
+        "exportStyle": "auto"
       },
       {
         "watchPaths": [
@@ -40,7 +35,7 @@
           ".ts"
         ],
         "outputFile": "index.ts",
-        "exportStyle": "named"
+        "exportStyle": "auto"
       },
       {
         "watchPaths": [

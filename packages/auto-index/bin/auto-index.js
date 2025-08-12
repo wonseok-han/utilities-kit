@@ -5,16 +5,61 @@
  * src의 TypeScript 모듈을 dynamic import로 로드합니다.
  */
 
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Check if dist folder exists
+ */
+function checkDistExists() {
+  const distPath = path.resolve(__dirname, '../dist');
+
+  if (!fs.existsSync(distPath)) {
+    console.error('❌ Package is not properly installed.');
+    console.error('');
+    console.error('💡 Solutions:');
+    console.error(
+      '   1. Try reinstalling the package: npm install <package-name>'
+    );
+    console.error('   2. Delete node_modules and reinstall');
+    console.error('   3. Package might be corrupted, try clearing cache');
+    console.error('');
+    console.error('📝 Command examples:');
+    console.error('   npm install <package-name>');
+    console.error('   # or');
+    console.error('   npm cache clean --force && npm install <package-name>');
+    return false;
+  }
+
+  return true;
+}
+
 async function main() {
   try {
-    // dist의 컴파일된 auto-index 모듈을 dynamic import로 로드
+    // Check if dist folder exists
+    if (!checkDistExists()) {
+      process.exit(1);
+    }
+
+    // Load compiled auto-index module from dist using dynamic import
     const { runCli } = await import('../dist/auto-index.js');
 
-    // CLI 실행
+    // Execute CLI
     runCli();
   } catch (error) {
-    console.error('auto-index 모듈 로드 중 오류:', error.message);
-    console.error('TypeScript 컴파일이 필요할 수 있습니다.');
+    console.error('❌ Error running auto-index:', error.message);
+    console.error('');
+    console.error('💡 Additional solutions:');
+    console.error(
+      '   1. Try reinstalling the package: npm install <package-name>'
+    );
+    console.error('   2. Check if Node.js version is compatible');
+    console.error('   3. Package might be corrupted, try clearing cache');
+    console.error('');
+    console.error('📝 Command examples:');
+    console.error('   npm cache clean --force && npm install <package-name>');
+    console.error('   # or');
+    console.error('   rm -rf node_modules && npm install');
     process.exit(1);
   }
 }

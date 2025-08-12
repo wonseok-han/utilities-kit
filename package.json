@@ -6,7 +6,7 @@
     "prepare": "husky",
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:kit": "concurrently \"turbo run dev --filter=@repo/ui --filter=@repo/shared\" \"turbo run dev --filter=dev-kit\"",
+    "dev:kit": "turbo run dev --filter=dev-kit",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md}\"",
     "check-types": "turbo run check-types"

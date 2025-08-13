@@ -13,8 +13,8 @@ export type AutoIndexConfig = {
 };
 
 export type ParsedCliArgs = {
+  mode: 'cli-only' | 'config-based' | 'hybrid';
   folderPath?: string;
-  outputPath?: string;
   isWatch: boolean;
   isHelp: boolean;
   overrides: Partial<WatchTargetConfig>;

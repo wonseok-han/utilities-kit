@@ -9,7 +9,7 @@ import { AutoIndexConfig } from './types';
 export function getConfigFromPackageJson(): AutoIndexConfig {
   try {
     // 1) 기본값
-    let merged: AutoIndexConfig = { ...DEFAULT_CONFIG };
+    let merged: AutoIndexConfig | undefined = { ...DEFAULT_CONFIG };
 
     // 2) package.json에서 autoIndex 읽기 (상위 디렉토리 탐색)
     let currentDir = process.cwd();
@@ -30,21 +30,6 @@ export function getConfigFromPackageJson(): AutoIndexConfig {
           ...packageJson.autoIndex,
         };
         merged = pkgConfig;
-      }
-    }
-
-    // 3) 환경 변수로 전달된 설정 적용 (watch-all에서 전달)
-    if (process.env.AUTO_INDEX_CONFIG) {
-      try {
-        const envConfig = JSON.parse(
-          process.env.AUTO_INDEX_CONFIG
-        ) as Partial<AutoIndexConfig>;
-        merged = {
-          ...merged,
-          ...envConfig,
-        } as AutoIndexConfig;
-      } catch {
-        // 환경변수 파싱 실패는 무시
       }
     }
 
@@ -74,20 +59,23 @@ export function parseBoolean(
 }
 
 /**
- * 확장자 문자열을 배열로 파싱하는 유틸리티
- * @param value - 쉼표로 구분된 확장자 문자열
- * @returns 파싱된 확장자 배열 또는 undefined
+ * 쉼표로 구분된 문자열을 배열로 파싱하는 함수
+ * @param value - 쉼표로 구분된 문자열
+ * @returns 파싱된 배열 또는 undefined
  */
-export function parseExtensions(
+export function parseCommaSeparated(
   value: string | undefined
 ): string[] | undefined {
   if (!value) return undefined;
+
   const raw = value
     .split(',')
     .map((v) => v.trim())
     .filter(Boolean);
+
   if (raw.length === 0) return undefined;
-  return raw.map((ext) => (ext.startsWith('.') ? ext : `.${ext}`));
+
+  return raw;
 }
 
 /**
@@ -101,4 +89,56 @@ export function toValidJSVariableName(str: string): string {
     validName = '_' + validName;
   }
   return validName;
+}
+
+/**
+ * 네이밍 규칙에 따라 파일명을 변환
+ * @param name - 변환할 파일명
+ * @param namingConvention - 적용할 네이밍 규칙 (camelCase, original, PascalCase)
+ * @returns 변환된 파일명
+ */
+export function transformFileName(
+  name: string,
+  namingConvention: string
+): string {
+  // 먼저 하이픈과 언더스코어를 제거하고 camelCase로 변환
+  const camelCaseName = name.replace(
+    /[-_]([a-z])/g,
+    (_match: string, letter: string) => letter.toUpperCase()
+  );
+
+  switch (namingConvention) {
+    case 'camelCase':
+      return camelCaseName.charAt(0).toLowerCase() + camelCaseName.slice(1);
+    case 'original':
+      return toValidJSVariableName(name);
+    case 'PascalCase':
+    default:
+      return camelCaseName.charAt(0).toUpperCase() + camelCaseName.slice(1);
+  }
+}
+
+/**
+ * 도움말 메시지를 출력합니다.
+ */
+export function printHelp(): void {
+  console.log(`
+사용법: auto-index <폴더경로> [출력경로] [--watch] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]
+
+옵션:
+  --watch               감시 모드 활성화 (폴더 경로가 있으면 단일 폴더 감시, 없으면 watchTargets 설정 사용)
+  --outputFile=<파일명> 생성할 index.ts 파일의 이름 (기본값: index.ts)
+  --fileExtensions=<확장자> 감시할 파일 확장자 (예: .tsx,.ts)
+  --exportStyle=<스타일> 생성할 export 스타일 (default, named, star, star-as, mixed, auto)  --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
+  --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
+  --fromWithExtension=<true|false> 파일 경로에 확장자 포함 여부 (기본값: true)
+  -h, --help            도움말 출력
+
+예시:
+  auto-index src/components
+  auto-index src/components --outputFile=index.ts
+  auto-index src/components src/components/index.ts
+  auto-index src/components --watch --exportStyle=named
+  auto-index --watch (watchTargets 설정 사용)
+`);
 }

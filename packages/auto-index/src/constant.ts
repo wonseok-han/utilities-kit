@@ -2,7 +2,7 @@ import { AutoIndexConfig, WatchTargetConfig } from './types';
 
 export const DEFAULT_WATCH_TARGETS_CONFIG: WatchTargetConfig = {
   watchPaths: [],
-  fileExtensions: ['.tsx', '.ts', '.jsx', '.js'],
+  fileExtensions: [],
   outputFile: 'index.ts',
   exportStyle: 'auto',
   namingConvention: 'original',

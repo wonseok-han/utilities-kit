@@ -17,7 +17,7 @@ vi.mock('./utils', async () => {
   };
 });
 
-describe('AutoIndex', () => {
+describe('auto-index', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -25,67 +25,67 @@ describe('AutoIndex', () => {
   });
 
   describe('parseCliArgs', () => {
-    it('should parse --watch flag', () => {
+    it('--watch 플래그를 파싱해야 함', () => {
       const result = parseCliArgs(['--watch']);
       expect(result.isWatch).toBe(true);
     });
 
-    it('should parse --help flag', () => {
+    it('--help 플래그를 파싱해야 함', () => {
       const result = parseCliArgs(['--help']);
       expect(result.isHelp).toBe(true);
     });
 
-    it('should parse --paths option', () => {
+    it('--paths 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--paths=src']);
       expect(result.overrides.paths).toEqual(['src']);
     });
 
-    it('should parse --outputFile option', () => {
+    it('--outputFile 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--outputFile=exports.ts']);
       expect(result.overrides.outputFile).toBe('exports.ts');
     });
 
-    it('should parse --fileExtensions option', () => {
+    it('--fileExtensions 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--fileExtensions=.ts,.tsx']);
       expect(result.overrides.fileExtensions).toEqual(['.ts', '.tsx']);
     });
 
-    it('should parse --excludes option', () => {
+    it('--excludes 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--excludes=*.d.ts']);
       expect(result.overrides.excludes).toEqual(['*.d.ts']);
     });
 
-    it('should parse --exportStyle option', () => {
+    it('--exportStyle 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--exportStyle=named']);
       expect(result.overrides.exportStyle).toBe('named');
     });
 
-    it('should parse --namingConvention option', () => {
+    it('--namingConvention 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--namingConvention=PascalCase']);
       expect(result.overrides.namingConvention).toBe('PascalCase');
     });
 
-    it('should parse --fromWithExtension option', () => {
+    it('--fromWithExtension 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--fromWithExtension=true']);
       expect(result.overrides.fromWithExtension).toBe(true);
     });
 
-    it('should parse --log option', () => {
+    it('--log 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--log=true']);
       expect(result.logOverride).toBe(true);
     });
 
-    it('should parse --debug option', () => {
+    it('--debug 옵션을 파싱해야 함', () => {
       const result = parseCliArgs(['--debug=true']);
       expect(result.debugOverride).toBe(true);
     });
 
-    it('should determine cli-only mode when no config and paths provided', () => {
+    it('설정과 경로가 제공되지 않았을 때 cli-only 모드를 결정해야 함', () => {
       const result = parseCliArgs(['--paths=src']);
       expect(result.mode).toBe('cli-only');
     });
 
-    it('should exit on unknown option', () => {
+    it('알 수 없는 옵션에 대해 종료해야 함', () => {
       // Mock process.exit to throw error instead of exiting
       const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
         throw new Error('process.exit called');
@@ -97,21 +97,21 @@ describe('AutoIndex', () => {
       exitSpy.mockRestore();
     });
 
-    it('should handle empty arguments array', () => {
+    it('빈 인수 배열을 처리해야 함', () => {
       const result = parseCliArgs([]);
       expect(result.isWatch).toBe(false);
       expect(result.isHelp).toBe(false);
       expect(result.overrides.paths).toBeUndefined();
     });
 
-    it('should handle mixed CLI and config mode', () => {
+    it('CLI와 설정 모드를 혼합해서 처리해야 함', () => {
       const result = parseCliArgs(['--paths=src', '--outputFile=index.ts']);
       expect(result.mode).toBe('cli-only');
       expect(result.overrides.paths).toEqual(['src']);
       expect(result.overrides.outputFile).toBe('index.ts');
     });
 
-    it('should handle all CLI options together', () => {
+    it('모든 CLI 옵션을 함께 처리해야 함', () => {
       const result = parseCliArgs([
         '--watch',
         '--paths=src',
@@ -139,7 +139,7 @@ describe('AutoIndex', () => {
   });
 
   describe('findTargetConfig', () => {
-    it('should return merged config with defaults', () => {
+    it('기본값과 병합된 설정을 반환해야 함', () => {
       const config = {
         targets: [
           {
@@ -162,7 +162,7 @@ describe('AutoIndex', () => {
       expect(result.outputFile).toBe('index.ts');
     });
 
-    it('should return default config when no matching target', () => {
+    it('매칭되는 대상이 없을 때 기본 설정을 반환해야 함', () => {
       const config = {
         targets: [
           {
@@ -185,7 +185,7 @@ describe('AutoIndex', () => {
       expect(result.outputFile).toBe('index.ts');
     });
 
-    it('should apply CLI overrides', () => {
+    it('CLI 오버라이드를 적용해야 함', () => {
       const config = {
         targets: [
           {
@@ -208,14 +208,14 @@ describe('AutoIndex', () => {
       expect(result.outputFile).toBe('exports.ts');
     });
 
-    it('should handle undefined config', () => {
+    it('undefined 설정을 처리해야 함', () => {
       const result = findTargetConfig('src', undefined as any);
       expect(result).toBeDefined();
       // undefined config일 때는 DEFAULT_TARGETS_CONFIG 사용
       expect(result.outputFile).toBe('index.ts');
     });
 
-    it('should handle empty targets array', () => {
+    it('빈 targets 배열을 처리해야 함', () => {
       const config = { targets: [], log: true, debug: false };
       const result = findTargetConfig('src', config);
       expect(result).toBeDefined();
@@ -225,32 +225,32 @@ describe('AutoIndex', () => {
   });
 
   describe('analyzeFileExports', () => {
-    it('should detect default export', () => {
+    it('기본 내보내기를 감지해야 함', () => {
       const result = analyzeFileExports('test.ts');
       // 실제 파일이 없으므로 빈 결과 반환
       expect(result.namedExports).toEqual([]);
       expect(result.defaultExports).toEqual([]);
     });
 
-    it('should detect named exports', () => {
+    it('명명된 내보내기를 감지해야 함', () => {
       const result = analyzeFileExports('test.ts');
       expect(result.namedExports).toEqual([]);
       expect(result.defaultExports).toEqual([]);
     });
 
-    it('should detect grouped exports', () => {
+    it('그룹화된 내보내기를 감지해야 함', () => {
       const result = analyzeFileExports('test.ts');
       expect(result.namedExports).toEqual([]);
       expect(result.defaultExports).toEqual([]);
     });
 
-    it('should filter out comments', () => {
+    it('주석을 필터링해야 함', () => {
       const result = analyzeFileExports('test.ts');
       expect(result.namedExports).toEqual([]);
       expect(result.defaultExports).toEqual([]);
     });
 
-    it('should handle file read errors gracefully', () => {
+    it('파일 읽기 오류를 우아하게 처리해야 함', () => {
       const result = analyzeFileExports('nonexistent.ts');
       expect(result.namedExports).toEqual([]);
       expect(result.defaultExports).toEqual([]);
@@ -266,7 +266,7 @@ describe('AutoIndex', () => {
       });
     });
 
-    it('should run CLI with valid arguments', () => {
+    it('유효한 인수로 CLI를 실행해야 함', () => {
       process.argv = [
         'node',
         'script.js',
@@ -280,7 +280,7 @@ describe('AutoIndex', () => {
       expect(true).toBe(true);
     });
 
-    it('should handle missing paths argument', () => {
+    it('누락된 paths 인수를 처리해야 함', () => {
       process.argv = ['node', 'script.js', '--outputFile=index.ts'];
 
       runCli();
@@ -289,7 +289,7 @@ describe('AutoIndex', () => {
       expect(true).toBe(true);
     });
 
-    it('should handle help flag', () => {
+    it('help 플래그를 처리해야 함', () => {
       process.argv = ['node', 'script.js', '--help'];
 
       runCli();
@@ -298,7 +298,7 @@ describe('AutoIndex', () => {
       expect(true).toBe(true);
     });
 
-    it('should handle watch mode', () => {
+    it('watch 모드를 처리해야 함', () => {
       process.argv = ['node', 'script.js', '--paths=src', '--watch'];
 
       runCli();

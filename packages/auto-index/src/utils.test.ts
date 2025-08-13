@@ -27,94 +27,94 @@ describe('utils', () => {
   });
 
   describe('parseBoolean', () => {
-    it('should parse "true" string to true', () => {
+    it('문자열 "true"를 true로 파싱해야 함', () => {
       expect(parseBoolean('true')).toBe(true);
     });
 
-    it('should parse "false" string to false', () => {
+    it('문자열 "false"를 false로 파싱해야 함', () => {
       expect(parseBoolean('false')).toBe(false);
     });
 
-    it('should return true for boolean true', () => {
+    it('boolean true에 대해 true를 반환해야 함', () => {
       expect(parseBoolean(true)).toBe(true);
     });
 
-    it('should return undefined for undefined', () => {
+    it('undefined에 대해 undefined를 반환해야 함', () => {
       expect(parseBoolean(undefined)).toBeUndefined();
     });
 
-    it('should return undefined for invalid string', () => {
+    it('잘못된 문자열에 대해 undefined를 반환해야 함', () => {
       expect(parseBoolean('invalid')).toBeUndefined();
     });
   });
 
   describe('parseCommaSeparated', () => {
-    it('should parse comma-separated string to array', () => {
+    it('쉼표로 구분된 문자열을 배열로 파싱해야 함', () => {
       expect(parseCommaSeparated('a,b,c')).toEqual(['a', 'b', 'c']);
     });
 
-    it('should trim whitespace', () => {
+    it('공백을 제거해야 함', () => {
       expect(parseCommaSeparated(' a , b , c ')).toEqual(['a', 'b', 'c']);
     });
 
-    it('should filter empty values', () => {
+    it('빈 값을 필터링해야 함', () => {
       expect(parseCommaSeparated('a,,b,c')).toEqual(['a', 'b', 'c']);
     });
 
-    it('should return undefined for empty string', () => {
+    it('빈 문자열에 대해 undefined를 반환해야 함', () => {
       expect(parseCommaSeparated('')).toBeUndefined();
     });
 
-    it('should return undefined for undefined', () => {
+    it('undefined에 대해 undefined를 반환해야 함', () => {
       expect(parseCommaSeparated(undefined)).toBeUndefined();
     });
   });
 
   describe('toValidJSVariableName', () => {
-    it('should remove invalid characters', () => {
+    it('잘못된 문자를 제거해야 함', () => {
       expect(toValidJSVariableName('user-name')).toBe('username');
     });
 
-    it('should add underscore prefix for numbers', () => {
+    it('숫자로 시작하는 경우 언더스코어 접두사를 추가해야 함', () => {
       expect(toValidJSVariableName('123name')).toBe('_123name');
     });
 
-    it('should preserve valid characters', () => {
+    it('유효한 문자를 보존해야 함', () => {
       expect(toValidJSVariableName('userName_123')).toBe('userName_123');
     });
   });
 
   describe('transformFileName', () => {
-    it('should transform to camelCase', () => {
+    it('camelCase로 변환해야 함', () => {
       expect(transformFileName('user-profile', 'camelCase')).toBe(
         'userProfile'
       );
     });
 
-    it('should transform to PascalCase', () => {
+    it('PascalCase로 변환해야 함', () => {
       expect(transformFileName('user-profile', 'PascalCase')).toBe(
         'UserProfile'
       );
     });
 
-    it('should use original naming convention', () => {
+    it('원래 명명 규칙을 사용해야 함', () => {
       expect(transformFileName('user-profile', 'original')).toBe('userprofile');
     });
 
-    it('should handle underscores', () => {
+    it('언더스코어를 처리해야 함', () => {
       expect(transformFileName('user_profile', 'camelCase')).toBe(
         'userProfile'
       );
     });
 
-    it('should default to PascalCase', () => {
+    it('기본값으로 PascalCase를 사용해야 함', () => {
       expect(transformFileName('user-profile', 'PascalCase')).toBe(
         'UserProfile'
       );
     });
   });
 
-  describe('Logging Functions', () => {
+  describe('로깅 함수들', () => {
     let consoleSpy: {
       log: any;
       error: any;
@@ -135,49 +135,49 @@ describe('utils', () => {
       Object.values(consoleSpy).forEach((spy) => spy.mockRestore());
     });
 
-    it('should call console.log when log is enabled', () => {
+    it('로깅이 활성화되었을 때 console.log를 호출해야 함', () => {
       setLoggingConfig(true, false);
       log('test message');
       expect(consoleSpy.log).toHaveBeenCalledWith('test message');
     });
 
-    it('should not call console.log when log is disabled', () => {
+    it('로깅이 비활성화되었을 때 console.log를 호출하지 않아야 함', () => {
       setLoggingConfig(false, false);
       log('test message');
       expect(consoleSpy.log).not.toHaveBeenCalled();
     });
 
-    it('should call console.error when log is enabled', () => {
+    it('로깅이 활성화되었을 때 console.error를 호출해야 함', () => {
       setLoggingConfig(true, false);
       error('test error');
       expect(consoleSpy.error).toHaveBeenCalledWith('test error');
     });
 
-    it('should not call console.error when log is disabled', () => {
+    it('로깅이 비활성화되었을 때 console.error를 호출하지 않아야 함', () => {
       setLoggingConfig(false, false);
       error('test error');
       expect(consoleSpy.error).not.toHaveBeenCalled();
     });
 
-    it('should call console.warn when log is enabled', () => {
+    it('로깅이 활성화되었을 때 console.warn을 호출해야 함', () => {
       setLoggingConfig(true, false);
       warn('test warning');
       expect(consoleSpy.warn).toHaveBeenCalledWith('test warning');
     });
 
-    it('should not call console.warn when log is disabled', () => {
+    it('로깅이 비활성화되었을 때 console.warn을 호출하지 않아야 함', () => {
       setLoggingConfig(false, false);
       warn('test warning');
       expect(consoleSpy.warn).not.toHaveBeenCalled();
     });
 
-    it('should call console.info when debug is enabled', () => {
+    it('디버그가 활성화되었을 때 console.info를 호출해야 함', () => {
       setLoggingConfig(true, true);
       info('test info');
       expect(consoleSpy.info).toHaveBeenCalledWith('test info');
     });
 
-    it('should not call console.info when debug is disabled', () => {
+    it('디버그가 비활성화되었을 때 console.info를 호출하지 않아야 함', () => {
       setLoggingConfig(true, false);
       info('test info');
       expect(consoleSpy.info).not.toHaveBeenCalled();

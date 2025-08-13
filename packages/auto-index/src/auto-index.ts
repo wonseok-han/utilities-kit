@@ -308,26 +308,41 @@ function generateIndex(
 
         switch (targetConfig.exportStyle) {
           case 'named':
+            const fromPath = targetConfig.fromWithExtension ? file : fileName;
             exportStatements.push(
-              `export { default as ${transformedName} } from './${fileName}';`
+              `export { default as ${transformedName} } from './${fromPath}';`
             );
             break;
           case 'default':
-            exportStatements.push(`export { default } from './${fileName}';`);
+            const defaultFromPath = targetConfig.fromWithExtension
+              ? file
+              : fileName;
+            exportStatements.push(
+              `export { default } from './${defaultFromPath}';`
+            );
             break;
           case 'star':
-            exportStatements.push(`export * from './${fileName}';`);
+            const starFromPath = targetConfig.fromWithExtension
+              ? file
+              : fileName;
+            exportStatements.push(`export * from './${starFromPath}';`);
             break;
           case 'star-as':
+            const starAsFromPath = targetConfig.fromWithExtension
+              ? file
+              : fileName;
             exportStatements.push(
-              `export * as ${transformedName} from './${fileName}';`
+              `export * as ${transformedName} from './${starAsFromPath}';`
             );
             break;
           case 'mixed':
+            const mixedFromPath = targetConfig.fromWithExtension
+              ? file
+              : fileName;
             exportStatements.push(
-              `export { default as ${transformedName} } from './${fileName}';`
+              `export { default as ${transformedName} } from './${mixedFromPath}';`
             );
-            exportStatements.push(`export * from './${fileName}';`);
+            exportStatements.push(`export * from './${mixedFromPath}';`);
             break;
           case 'auto':
           default:
@@ -338,12 +353,16 @@ function generateIndex(
               content.includes('export default') ||
               content.includes('export { default }');
 
+            const autoFromPath = targetConfig.fromWithExtension
+              ? file
+              : fileName;
+
             if (hasDefaultExport) {
               exportStatements.push(
-                `export { default as ${transformedName} } from './${fileName}';`
+                `export { default as ${transformedName} } from './${autoFromPath}';`
               );
             } else {
-              exportStatements.push(`export * from './${fileName}';`);
+              exportStatements.push(`export * from './${autoFromPath}';`);
             }
             break;
         }

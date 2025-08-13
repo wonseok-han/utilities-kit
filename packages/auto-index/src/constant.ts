@@ -1,15 +1,16 @@
-import { AutoIndexConfig, WatchTargetConfig } from './types';
+import { AutoIndexConfig, TargetConfig } from './types';
 
-export const DEFAULT_WATCH_TARGETS_CONFIG: WatchTargetConfig = {
-  watchPaths: [],
-  fileExtensions: [],
+export const DEFAULT_TARGETS_CONFIG: TargetConfig = {
+  paths: [],
+  fileExtensions: ['.tsx', '.ts', '.jsx', '.js'],
   outputFile: 'index.ts',
   exportStyle: 'auto',
   namingConvention: 'original',
   fromWithExtension: false, // from 경로에 확장자를 포함할지 여부
+  excludes: [], // 제외할 파일 패턴
 };
 
 export const DEFAULT_CONFIG: AutoIndexConfig = {
-  watchTargets: [DEFAULT_WATCH_TARGETS_CONFIG],
+  targets: [DEFAULT_TARGETS_CONFIG],
   log: true,
 };

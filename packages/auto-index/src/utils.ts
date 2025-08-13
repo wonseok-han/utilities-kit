@@ -123,22 +123,25 @@ export function transformFileName(
  */
 export function printHelp(): void {
   console.log(`
-사용법: auto-index <폴더경로> [출력경로] [--watch] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]
+사용법: auto-index [--watch] [--paths=<경로1,경로2>] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]
 
 옵션:
-  --watch               감시 모드 활성화 (폴더 경로가 있으면 단일 폴더 감시, 없으면 watchTargets 설정 사용)
+  --paths=<경로1,경로2>     처리할 폴더 경로 (쉼표로 구분하여 여러 경로 지정 가능)
+  --watch               감시 모드 활성화 (폴더 경로가 있으면 단일 폴더 감시, 없으면 targets 설정 사용)
   --outputFile=<파일명> 생성할 index.ts 파일의 이름 (기본값: index.ts)
   --fileExtensions=<확장자> 감시할 파일 확장자 (예: .tsx,.ts)
-  --exportStyle=<스타일> 생성할 export 스타일 (default, named, star, star-as, mixed, auto)  --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
+  --excludes=<패턴1,패턴2>  제외할 파일 패턴 (예: *.d.ts,*.png)
+  --exportStyle=<스타일> 생성할 export 스타일 (default, named, star, star-as, mixed, auto)
   --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
   --fromWithExtension=<true|false> 파일 경로에 확장자 포함 여부 (기본값: true)
   -h, --help            도움말 출력
 
 예시:
-  auto-index src/components
-  auto-index src/components --outputFile=index.ts
-  auto-index src/components src/components/index.ts
-  auto-index src/components --watch --exportStyle=named
-  auto-index --watch (watchTargets 설정 사용)
+  auto-index --paths=src/components,src/hooks
+  auto-index --paths=src/components --outputFile=index.ts
+  auto-index --paths=src/components src/components/index.ts
+  auto-index --paths=src/components --watch --exportStyle=named
+  auto-index --paths=src/components --excludes=*.d.ts,*.test.ts
+  auto-index --watch (targets 설정 사용)
 `);
 }

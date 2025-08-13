@@ -14,8 +14,35 @@
     "lint": "eslint . --fix --max-warnings 0",
     "check-types": "tsc --noEmit",
     "start": "node bin/auto-index.js",
-    "test": "node bin/auto-index.js src --exportStyle=named --fileExtensions=.tsx,.ts --fromWithExtension=true --outputFile=test.ts --namingConvention=PascalCase",
+    "test": "node bin/auto-index.js --watch --exportStyle=star-as --fileExtensions=.tsx,.ts --fromWithExtension=true --outputFile=test.ts --namingConvention=PascalCase --paths=src",
     "clean": "rm -rf dist"
+  },
+  "autoIndex": {
+    "targets": [
+      {
+        "paths": [
+          "src"
+        ],
+        "fileExtensions": [
+          ".tsx",
+          ".ts"
+        ],
+        "outputFile": "index.ts",
+        "exportStyle": "auto",
+        "excludes": [
+          "*.d.ts"
+        ]
+      }
+    ]
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

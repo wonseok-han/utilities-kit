@@ -166,7 +166,7 @@ export function findTargetConfig(
   let targetConfig: TargetConfig | undefined;
 
   // targets 설정이 있는지 확인
-  if (config.targets && Array.isArray(config.targets)) {
+  if (config?.targets && Array.isArray(config.targets)) {
     if (folderPath) {
       // folderPath가 있는 경우: 경로 매칭
       const relativePath = path.relative(process.cwd(), folderPath);

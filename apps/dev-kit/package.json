@@ -11,46 +11,6 @@
     "lint": "next lint --fix --max-warnings 0",
     "check-types": "tsc --noEmit"
   },
-  "autoIndex": {
-    "watchTargets": [
-      {
-        "watchPaths": [
-          "src/components",
-          "src/app/**/components"
-        ],
-        "fileExtensions": [
-          ".tsx",
-          ".ts"
-        ],
-        "outputFile": "index.ts",
-        "exportStyle": "auto"
-      },
-      {
-        "watchPaths": [
-          "src/hooks",
-          "src/store"
-        ],
-        "fileExtensions": [
-          ".tsx",
-          ".ts"
-        ],
-        "outputFile": "index.ts",
-        "exportStyle": "auto"
-      },
-      {
-        "watchPaths": [
-          "public/assets/icons"
-        ],
-        "fileExtensions": [
-          ".svg"
-        ],
-        "outputFile": "index.ts",
-        "exportStyle": "named",
-        "namingConvention": "PascalCase",
-        "fromWithExtension": true
-      }
-    ]
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint",

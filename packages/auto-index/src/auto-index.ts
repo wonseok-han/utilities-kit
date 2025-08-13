@@ -1,12 +1,18 @@
 import fs from 'fs';
 import path from 'path';
-import { DEFAULT_WATCH_TARGETS_CONFIG } from './constant';
-import { AutoIndexConfig, ParsedCliArgs, WatchTargetConfig } from './types';
+import { DEFAULT_TARGETS_CONFIG } from './constant';
+import { AutoIndexConfig, ParsedCliArgs, TargetConfig } from './types';
 import {
-  getConfigFromPackageJson,
+  analyzeFileExports,
+  getConfig,
   parseBoolean,
-  parseExtensions,
-  toValidJSVariableName,
+  parseCommaSeparated,
+  printHelp,
+  transformFileName,
+  setLoggingConfig,
+  error,
+  log,
+  info,
 } from './utils';
 
 /**
@@ -14,11 +20,13 @@ import {
  * @param args - 명령행 인자 배열
  * @returns 파싱된 CLI 인자 객체
  */
-function parseCliArgs(args: string[]): ParsedCliArgs {
-  const positionals: string[] = [];
-  const overrides: Partial<WatchTargetConfig> = {};
+export function parseCliArgs(args: string[]): ParsedCliArgs {
+  const overrides: Partial<TargetConfig> = {};
   let isWatch = false;
   let isHelp = false;
+  let hasConfigOptions = false; // 설정 관련 옵션이 있는지 확인
+  let logOverride: boolean | undefined;
+  let debugOverride: boolean | undefined;
 
   for (const arg of args) {
     if (arg === '--watch') {
@@ -34,26 +42,58 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
       const key = rawKey?.trim();
       const val = rawVal === undefined ? true : rawVal.trim();
 
+      // 설정 관련 옵션이 있는지 확인
+      if (
+        [
+          'paths',
+          'outputFile',
+          'fileExtensions',
+          'exportStyle',
+          'namingConvention',
+          'fromWithExtension',
+          'excludes',
+          'log',
+          'debug',
+        ].includes(key || '')
+      ) {
+        hasConfigOptions = true;
+      }
+
       switch (key) {
+        case 'paths': {
+          const paths =
+            typeof val === 'string' ? parseCommaSeparated(val) : undefined;
+          if (paths) overrides.paths = paths;
+          break;
+        }
         case 'outputFile': {
           if (typeof val === 'string' && val) overrides.outputFile = val;
           break;
         }
         case 'fileExtensions': {
           const exts =
-            typeof val === 'string' ? parseExtensions(val) : undefined;
-          if (exts) overrides.fileExtensions = exts;
+            typeof val === 'string' ? parseCommaSeparated(val) : undefined;
+          if (exts)
+            overrides.fileExtensions = exts.map((ext) =>
+              ext.startsWith('.') ? ext : `.${ext}`
+            );
+          break;
+        }
+        case 'excludes': {
+          const excludes =
+            typeof val === 'string' ? parseCommaSeparated(val) : undefined;
+          if (excludes) overrides.excludes = excludes;
           break;
         }
         case 'exportStyle': {
           if (typeof val === 'string' && val)
-            overrides.exportStyle = val as WatchTargetConfig['exportStyle'];
+            overrides.exportStyle = val as TargetConfig['exportStyle'];
           break;
         }
         case 'namingConvention': {
           if (typeof val === 'string' && val)
             overrides.namingConvention =
-              val as WatchTargetConfig['namingConvention'];
+              val as TargetConfig['namingConvention'];
           break;
         }
         case 'fromWithExtension': {
@@ -62,393 +102,359 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
             overrides.fromWithExtension = boolVal;
           break;
         }
-        default:
-          // 알 수 없는 옵션은 무시
+        case 'log': {
+          const boolVal = parseBoolean(val);
+          if (typeof boolVal === 'boolean') {
+            logOverride = boolVal;
+          }
           break;
+        }
+        case 'debug': {
+          const boolVal = parseBoolean(val);
+          if (typeof boolVal === 'boolean') {
+            debugOverride = boolVal;
+          }
+          break;
+        }
+        default: {
+          printHelp();
+          process.exit(1);
+        }
       }
-    } else {
-      positionals.push(arg);
     }
   }
 
-  const folderPath = positionals[0];
-  const outputPath = positionals[1];
-  return { folderPath, outputPath, isWatch, isHelp, overrides };
-}
+  // 모드 결정 - 설정 파일 존재 여부 확인
+  let mode: ParsedCliArgs['mode'];
 
-/**
- * 네이밍 규칙에 따라 파일명을 변환
- * @param name - 변환할 파일명
- * @param namingConvention - 적용할 네이밍 규칙 (camelCase, original, PascalCase)
- * @returns 변환된 파일명
- */
-function transformFileName(name: string, namingConvention: string): string {
-  // 먼저 하이픈과 언더스코어를 제거하고 camelCase로 변환
-  const camelCaseName = name.replace(
-    /[-_]([a-z])/g,
-    (_match: string, letter: string) => letter.toUpperCase()
-  );
+  // 설정 파일을 먼저 확인
+  const config = getConfig();
+  const hasPackageConfig =
+    config?.targets &&
+    config.targets.length > 0 &&
+    config.targets[0]?.paths &&
+    config.targets[0]?.paths.length > 0;
 
-  switch (namingConvention) {
-    case 'camelCase':
-      return camelCaseName.charAt(0).toLowerCase() + camelCaseName.slice(1);
-    case 'original':
-      return toValidJSVariableName(name);
-    case 'PascalCase':
-    default:
-      return camelCaseName.charAt(0).toUpperCase() + camelCaseName.slice(1);
+  // paths 옵션이 있는지 확인
+  const hasPaths = overrides.paths && overrides.paths.length > 0;
+
+  if (hasPackageConfig && hasPaths && hasConfigOptions) {
+    mode = 'hybrid'; // CLI 설정 + 설정 파일 + 경로
+  } else if (!hasPackageConfig && hasPaths) {
+    mode = 'cli-only'; // CLI 설정만
+  } else if (hasPackageConfig) {
+    mode = 'config-based'; // 설정 파일 기반
+  } else {
+    mode = 'cli-only'; // CLI 설정만, 기본값
   }
+
+  return { mode, overrides, isWatch, isHelp, logOverride, debugOverride };
 }
 
 /**
  * 경로별 설정을 찾습니다
- * @param folderPath - 설정을 찾을 폴더 경로
+ * @param folderPath - 설정을 찾을 폴더 경로 (선택사항)
  * @param config - autoIndex 설정 객체
- * @returns 해당 경로에 적용할 WatchTargetConfig 설정
- *
- * 동작 방식:
- * 1. watchTargets 설정에서 해당 경로와 매칭되는 설정 찾기
- * 2. glob 패턴과 정확한 경로 모두 지원
- * 3. 매칭되는 설정이 없으면 기본 설정 반환
+ * @param cliOverrides - CLI에서 전달된 설정 오버라이드 (선택사항)
+ * @returns 해당 경로에 적용할 TargetConfig 설정
  */
-function findTargetConfig(
-  folderPath: string,
-  config: AutoIndexConfig
-): WatchTargetConfig {
-  // watchTargets 설정이 있는지 확인
-  if (config.watchTargets && Array.isArray(config.watchTargets)) {
-    const relativePath = path.relative(process.cwd(), folderPath);
+export function findTargetConfig(
+  folderPath: string | undefined,
+  config: AutoIndexConfig,
+  cliOverrides?: Partial<TargetConfig>
+): TargetConfig {
+  let targetConfig: TargetConfig | undefined;
 
-    for (const target of config.watchTargets) {
-      if (target.watchPaths && Array.isArray(target.watchPaths)) {
-        for (const watchPath of target.watchPaths) {
-          // glob 패턴 매칭 (간단한 구현)
-          if (watchPath.includes('**')) {
-            const parts = watchPath.split('**/');
-            if (parts.length === 2) {
-              const basePath = parts[0];
-              const targetFolder = parts[1];
+  // targets 설정이 있는지 확인
+  if (config?.targets && Array.isArray(config.targets)) {
+    if (folderPath) {
+      // folderPath가 있는 경우: 경로 매칭
+      const relativePath = path.relative(process.cwd(), folderPath);
 
-              if (
-                basePath !== undefined &&
-                targetFolder !== undefined &&
-                relativePath.startsWith(basePath) &&
-                relativePath.includes(targetFolder)
-              ) {
+      for (const target of config.targets) {
+        if (target.paths && Array.isArray(target.paths)) {
+          for (const watchPath of target.paths) {
+            // glob 패턴 매칭 (간단한 구현)
+            if (watchPath.includes('**')) {
+              const parts = watchPath.split('**/');
+              if (parts.length === 2) {
+                const basePath = parts[0];
+                const targetFolder = parts[1];
+
+                if (
+                  basePath !== undefined &&
+                  targetFolder !== undefined &&
+                  relativePath.startsWith(basePath) &&
+                  relativePath.includes(targetFolder)
+                ) {
+                  // 해당 target에 기본값 병합
+                  targetConfig = { ...DEFAULT_TARGETS_CONFIG, ...target };
+                  break;
+                }
+              }
+            } else {
+              // 정확한 경로 매칭
+              if (relativePath === watchPath) {
                 // 해당 target에 기본값 병합
-                return { ...DEFAULT_WATCH_TARGETS_CONFIG, ...target };
+                targetConfig = { ...DEFAULT_TARGETS_CONFIG, ...target };
+                break;
               }
             }
-          } else {
-            // 정확한 경로 매칭
-            if (relativePath === watchPath) {
-              // 해당 target에 기본값 병합
-              return { ...DEFAULT_WATCH_TARGETS_CONFIG, ...target };
-            }
           }
+          if (targetConfig) break;
         }
+      }
+    } else {
+      // folderPath가 없는 경우: 첫 번째 설정 사용
+      if (config.targets.length > 0) {
+        targetConfig = {
+          ...DEFAULT_TARGETS_CONFIG,
+          ...config.targets[0],
+        };
       }
     }
   }
 
-  return DEFAULT_WATCH_TARGETS_CONFIG;
+  // 매칭되는 설정이 없으면 기본값 사용
+  if (!targetConfig) {
+    targetConfig = { ...DEFAULT_TARGETS_CONFIG };
+  }
+
+  // CLI 오버라이드 적용 (최우선)
+  if (cliOverrides) {
+    targetConfig = { ...targetConfig, ...cliOverrides };
+  }
+
+  return targetConfig;
 }
 
 /**
  * 컴포넌트 폴더를 스캔하여 index.ts 파일을 생성합니다
- * @param folderPath - 스캔할 폴더 경로
- * @param outputPath - 출력 파일 경로 (선택사항)
+ * @param folderPath - 스캔할 폴더 경로 (선택사항)
  * @param cliOverrides - CLI에서 전달된 설정 오버라이드 (선택사항)
- *
- * 동작 방식:
- * 1. 지정된 폴더의 파일들을 스캔
- * 2. 설정된 확장자와 네이밍 규칙에 따라 export 문 생성
- * 3. index.ts 파일에 export 문들을 작성
  */
-export function generateIndex(
-  folderPath: string,
-  outputPath?: string,
-  cliOverrides?: Partial<WatchTargetConfig>
+function generateIndex(
+  folderPath: string | undefined,
+  cliOverrides?: Partial<TargetConfig>
 ): void {
   try {
-    const config = getConfigFromPackageJson();
-    const fullPath = path.resolve(folderPath);
+    const config = getConfig();
 
-    if (!fs.existsSync(fullPath)) {
-      console.error(`폴더가 존재하지 않습니다: ${folderPath}`);
-      return;
-    }
+    if (folderPath) {
+      // folderPath가 있는 경우: 특정 폴더 처리
+      const fullPath = path.resolve(folderPath);
 
-    // 경로별 설정 적용
-    const targetConfigBase = findTargetConfig(fullPath, config);
-    const targetConfig: WatchTargetConfig = {
-      ...targetConfigBase,
-      ...(cliOverrides || {}),
-    };
-
-    console.log('🔍 설정 정보:', {
-      folderPath,
-      targetConfig,
-      fileExtensions: targetConfig.fileExtensions,
-      fromWithExtension: targetConfig.fromWithExtension,
-    });
-
-    const files = fs.readdirSync(fullPath);
-    const componentFiles = files.filter((file: string) => {
-      const filePath = path.join(fullPath, file);
-      const stat = fs.statSync(filePath);
-
-      // 폴더는 제외하고 설정된 확장자 파일만 포함
-      return (
-        stat.isFile() &&
-        targetConfig.fileExtensions.some((ext: string) => file.endsWith(ext)) &&
-        file !== targetConfig.outputFile &&
-        !file.endsWith('.d.ts') // 타입 정의 파일 제외
-      );
-    });
-
-    const exports = new Set<string>(); // 중복 방지를 위해 Set 사용
-
-    componentFiles.forEach((file: string) => {
-      const name = path.parse(file).name;
-      const extension = path.parse(file).ext;
-      const exportName = transformFileName(name, targetConfig.namingConvention);
-
-      // 파일 내용을 확인하여 default export가 있는지 체크
-      const filePath = path.join(fullPath, file);
-      const content = fs.readFileSync(filePath, 'utf-8');
-
-      // includeExtension 옵션에 따라 from 경로 결정
-      const fromPath = targetConfig.fromWithExtension
-        ? `./${name}${extension}`
-        : `./${name}`;
-
-      // exportStyle에 따른 다양한 export 패턴 처리
-      switch (targetConfig.exportStyle) {
-        case 'default':
-          // default export만
-          exports.add(`export { default } from '${fromPath}';`);
-          break;
-
-        case 'named':
-          // default export를 named export로 변환
-          exports.add(
-            `export { default as ${exportName} } from '${fromPath}';`
-          );
-          break;
-
-        case 'star':
-          // export * from 사용
-          exports.add(`export * from '${fromPath}';`);
-          break;
-
-        case 'star-as':
-          // export * as {이름} from 사용
-          exports.add(`export * as ${exportName} from '${fromPath}';`);
-          break;
-
-        case 'mixed':
-          // default와 named를 모두 export
-          exports.add(`export { default } from '${fromPath}';`);
-          exports.add(
-            `export { default as ${exportName} } from '${fromPath}';`
-          );
-          break;
-
-        case 'auto':
-          // 파일 내용에 따라 자동 결정
-          if (content.includes('export default')) {
-            // default export가 있으면 named export로 변환
-            exports.add(
-              `export { default as ${exportName} } from '${fromPath}';`
-            );
-          } else {
-            // default export가 없으면 star export 사용
-            exports.add(`export * from '${fromPath}';`);
-          }
-          break;
-
-        default:
-          // 기본값: named export
-          if (content.includes('export default')) {
-            exports.add(
-              `export { default as ${exportName} } from '${fromPath}';`
-            );
-          } else {
-            exports.add(`export * from '${fromPath}';`);
-          }
-          break;
+      if (!fs.existsSync(fullPath)) {
+        error(`폴더가 존재하지 않습니다: ${folderPath}`);
+        return;
       }
-    });
 
-    // index.ts 파일 생성 (기존 내용 완전 삭제 후 새로 생성)
-    const indexContent = Array.from(exports).join('\n') + '\n';
-    const outputFilePath = outputPath
-      ? path.resolve(outputPath)
-      : path.join(folderPath, targetConfig.outputFile);
+      // 모드별 설정 처리
+      if (!config) {
+        error('❌ 설정 파일을 읽을 수 없습니다.');
+        return;
+      }
 
-    // 기존 파일이 있으면 삭제하고 새로 생성
-    if (fs.existsSync(outputFilePath)) {
-      fs.unlinkSync(outputFilePath);
-    }
-    fs.writeFileSync(outputFilePath, indexContent, 'utf-8');
-    console.log(
-      `✅ ${targetConfig.outputFile} 파일이 생성되었습니다: ${outputFilePath}`
-    );
-    console.log(`📦 총 ${exports.size}개의 export가 추가되었습니다.`);
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    console.error('index.ts 생성 중 오류:', errorMessage);
-  }
-}
+      const targetConfig = findTargetConfig(folderPath, config, cliOverrides);
 
-/**
- * 도움말 메시지를 출력합니다.
- */
-function printHelp(): void {
-  console.log(`
-사용법: auto-index <폴더경로> [출력경로] [--watch] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]
+      const files = fs.readdirSync(fullPath);
+      const componentFiles = files.filter((file: string) => {
+        const filePath = path.join(fullPath, file);
+        const stat = fs.statSync(filePath);
 
-옵션:
-  --watch               감시 모드 활성화 (폴더 경로가 있으면 단일 폴더 감시, 없으면 watchTargets 설정 사용)
-  --outputFile=<파일명> 생성할 index.ts 파일의 이름 (기본값: index.ts)
-  --fileExtensions=<확장자> 감시할 파일 확장자 (예: .tsx,.ts)
-  --exportStyle=<스타일> 생성할 export 스타일 (default, named, star, star-as, mixed, auto)  --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
-  --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
-  --fromWithExtension=<true|false> 파일 경로에 확장자 포함 여부 (기본값: true)
-  -h, --help            도움말 출력
+        // 디렉토리는 제외
+        if (stat.isDirectory()) {
+          return false;
+        }
 
-예시:
-  auto-index src/components
-  auto-index src/components --outputFile=index.ts
-  auto-index src/components src/components/index.ts
-  auto-index src/components --watch --exportStyle=named
-  auto-index --watch (watchTargets 설정 사용)
-`);
-}
+        // excludes 패턴에 맞는 파일은 제외
+        if (targetConfig.excludes && targetConfig.excludes.length > 0) {
+          for (const excludePattern of targetConfig.excludes) {
+            if (excludePattern.startsWith('*.')) {
+              // *.ext 패턴 매칭
+              const ext = excludePattern.substring(1);
+              if (file.endsWith(ext)) {
+                return false;
+              }
+            } else if (excludePattern.startsWith('*')) {
+              // *filename 패턴 매칭
+              const suffix = excludePattern.substring(1);
+              if (file.endsWith(suffix)) {
+                return false;
+              }
+            } else if (file === excludePattern) {
+              // 정확한 파일명 매칭
+              return false;
+            }
+          }
+        }
 
-/**
- * CLI 메인 실행 함수
- * 명령행 인자를 파싱하고 적절한 모드로 실행합니다
- * - 일반 모드: 지정된 폴더에 index.ts 생성
- * - 감시 모드: 폴더 경로가 있으면 단일 폴더 감시, 없으면 watchTargets 설정 사용
- */
-export function runCli(): void {
-  const args = process.argv.slice(2);
-  const { folderPath, outputPath, isWatch, isHelp, overrides } =
-    parseCliArgs(args);
+        // outputFile 자체는 제외 (무한 루프 방지)
+        const outputFileName = targetConfig.outputFile || 'index.ts';
+        if (file === outputFileName) {
+          return false;
+        }
 
-  // 도움말 출력
-  if (isHelp) {
-    printHelp();
-    return;
-  }
+        // 설정된 확장자와 일치하는지 확인
+        const fileExt = path.extname(file);
+        return targetConfig.fileExtensions.includes(fileExt);
+      });
 
-  if (isWatch && !folderPath) {
-    // 감시 모드 + 폴더 경로 없음: watchTargets 설정 사용
-    const config = getConfigFromPackageJson();
-    console.log('🔍 watchTargets 설정으로 감시 모드 시작...');
+      if (componentFiles.length === 0) {
+        log(`📁 ${folderPath}에 처리할 파일이 없습니다.`);
+        return;
+      }
 
-    if (config.watchTargets && Array.isArray(config.watchTargets)) {
-      config.watchTargets.forEach((target, index) => {
-        if (target.watchPaths && Array.isArray(target.watchPaths)) {
-          target.watchPaths.forEach((watchPath) => {
-            console.log(`📁 감시 시작: ${watchPath}`);
+      // export 문 생성
+      const exportStatements: string[] = [];
+      const outputFileName = targetConfig.outputFile || 'index.ts';
 
-            /**
-             * package.json의 autoIndex 설정과 watchTargets의 개별 설정을 병합
-             * - targetConfig: package.json에서 찾은 기본 설정
-             * - target: watchTargets에서 정의된 개별 설정 (우선순위 높음)
-             */
-            const fullPath = path.resolve(watchPath);
-            const targetConfig = findTargetConfig(fullPath, config);
-            const finalConfig: WatchTargetConfig = {
-              ...targetConfig,
-              ...target,
-            };
+      componentFiles.forEach((file) => {
+        const fileName = path.basename(file, path.extname(file));
+        const transformedName = transformFileName(
+          fileName,
+          targetConfig.namingConvention
+        );
+        const filePath = path.join(fullPath, file);
+        const fromPath = targetConfig.fromWithExtension ? file : fileName;
 
-            // 병합된 설정으로 초기 인덱스 파일 생성
-            generateIndex(watchPath, undefined, finalConfig);
-
-            /**
-             * Chokidar를 사용하여 파일 시스템 감시 모드 시작
-             * - add: 새 파일 추가 시 인덱스 재생성
-             * - unlink: 파일 삭제 시 인덱스 재생성
-             * - change: 파일 변경 시 인덱스 재생성
-             */
-            const chokidar = require('chokidar');
-            const outputFileName = finalConfig.outputFile || 'index.ts';
-
-            const watcher = chokidar.watch(watchPath, {
-              ignored: [
-                /(^|[\/\\])\../, // 숨김 파일 무시
-                new RegExp(`${outputFileName.replace('.', '\\.')}$`), // outputFile 무시
-                /\.d\.ts$/, // 타입 정의 파일 무시
-              ],
-              persistent: true,
+        switch (targetConfig.exportStyle) {
+          case 'named':
+            exportStatements.push(
+              `export { default as ${transformedName} } from './${fromPath}';`
+            );
+            break;
+          case 'default':
+            exportStatements.push(`export { default } from './${fromPath}';`);
+            break;
+          case 'star':
+            exportStatements.push(`export * from './${fromPath}';`);
+            break;
+          case 'star-as':
+            exportStatements.push(
+              `export * as ${transformedName} from './${fromPath}';`
+            );
+            break;
+          case 'mixed':
+            // 파일 내용을 분석하여 export 문 생성
+            const exportInfo = analyzeFileExports(filePath);
+            info(`🔍 파일 분석 결과:`, {
+              file: file,
+              hasDefaultExport: exportInfo.hasDefaultExport,
+              hasNamedExports: exportInfo.hasNamedExports,
+              namedExports: exportInfo.namedExports,
+              defaultExports: exportInfo.defaultExports,
             });
 
-            // 새 파일 추가 감지 시 인덱스 재생성
-            watcher.on('add', (filePath: string) => {
-              const fileName = path.basename(filePath);
-              if (fileName === outputFileName || fileName.endsWith('.d.ts'))
-                return;
-              console.log(`📝 파일 추가: ${fileName} (${watchPath})`);
-              generateIndex(watchPath, undefined, finalConfig);
-            });
+            // 유효한 식별자만 사용하도록 필터링
+            const identifierRegex = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
-            // 파일 삭제 감지 시 인덱스 재생성
-            watcher.on('unlink', (filePath: string) => {
-              const fileName = path.basename(filePath);
-              if (fileName === outputFileName || fileName.endsWith('.d.ts'))
-                return;
-              console.log(`🗑️  파일 삭제: ${fileName} (${watchPath})`);
-              generateIndex(watchPath, undefined, finalConfig);
-            });
+            // 한 라인으로 합쳐서 생성
+            const combinedExports: string[] = [];
+            if (exportInfo.hasDefaultExport) {
+              const defaultAliasCandidate =
+                exportInfo.defaultExports[0] || transformedName;
+              const defaultAlias = identifierRegex.test(defaultAliasCandidate)
+                ? defaultAliasCandidate
+                : transformedName;
+              combinedExports.push(`default as ${defaultAlias}`);
+            }
+            if (
+              exportInfo.hasNamedExports &&
+              exportInfo.namedExports.length > 0
+            ) {
+              const uniqueNamed = Array.from(
+                new Set(exportInfo.namedExports)
+              ).filter((name) => identifierRegex.test(name));
+              if (uniqueNamed.length > 0) {
+                combinedExports.push(...uniqueNamed);
+              }
+            }
+            if (combinedExports.length > 0) {
+              exportStatements.push(
+                `export { ${combinedExports.join(', ')} } from './${fromPath}';`
+              );
+            }
+            break;
+          case 'auto':
+          default:
+            // 파일 내용을 확인하여 default export가 있는지 확인
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const hasDefaultExport =
+              content.includes('export default') ||
+              content.includes('export { default }');
 
-            // 파일 변경 감지 시 인덱스 재생성
-            watcher.on('change', (filePath: string) => {
-              const fileName = path.basename(filePath);
-              if (fileName === outputFileName || fileName.endsWith('.d.ts'))
-                return;
-              console.log(`📝 파일 변경: ${fileName} (${watchPath})`);
-              generateIndex(watchPath, undefined, finalConfig);
-            });
-          });
+            if (hasDefaultExport) {
+              exportStatements.push(
+                `export { default as ${transformedName} } from './${fromPath}';`
+              );
+            } else {
+              exportStatements.push(`export * from './${fromPath}';`);
+            }
+            break;
         }
       });
 
-      // 프로세스 종료 시 모든 감시 중지
-      process.on('SIGINT', () => {
-        console.log('\n🛑 감시 모드 종료...');
-        process.exit(0);
-      });
+      // index.ts 파일 생성
+      const indexPath = path.join(fullPath, outputFileName);
 
-      return;
+      // outputFileName에 폴더가 포함되어 있는지 확인하고 필요한 폴더 생성
+      const outputDir = path.dirname(indexPath);
+      if (outputDir !== fullPath && !fs.existsSync(outputDir)) {
+        log(`📁 폴더 생성: ${outputDir}`);
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      const indexContent = exportStatements.join('\n') + '\n';
+
+      fs.writeFileSync(indexPath, indexContent, 'utf-8');
+      log(`✅ ${indexPath} 생성 완료 (${componentFiles.length}개 파일)`);
     } else {
-      console.log('❌ watchTargets 설정을 찾을 수 없습니다.');
+      // folderPath가 없는 경우: 설정 파일의 targets 설정 사용
+      if (!config || !config.targets || config.targets.length === 0) {
+        error('❌ 설정 파일에 autoIndex 설정이 없습니다.');
+        return;
+      }
+
+      log('🔍 설정 파일로 인덱스 파일 생성...');
+
+      config.targets.forEach((target, index) => {
+        if (target.paths && Array.isArray(target.paths)) {
+          target.paths.forEach((watchPath) => {
+            log(`📁 처리 중: ${watchPath}`);
+            generateIndex(watchPath, cliOverrides);
+          });
+        }
+      });
+    }
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    error('인덱스 생성 오류:', errorMessage);
+  }
+}
+
+/**
+ * 파일 감시 모드를 시작합니다
+ * @param folderPath - 감시할 폴더 경로 (선택사항)
+ * @param overrides - CLI 오버라이드 설정
+ */
+export function startWatchMode(
+  folderPath: string | undefined,
+  overrides: Partial<TargetConfig>
+): void {
+  const chokidar = require('chokidar');
+
+  if (folderPath) {
+    // 특정 폴더 감시
+    log(`🔍 파일 변경 감지 시작: ${folderPath}`);
+
+    const config = getConfig();
+    if (!config) {
+      error('❌ 설정 파일을 읽을 수 없습니다.');
       return;
     }
-  }
 
-  if (!folderPath) {
-    printHelp();
-    return;
-  }
-
-  if (isWatch) {
-    // 감시 모드 (기존 방식)
-    const chokidar = require('chokidar');
-    console.log(`🔍 파일 변경 감지 시작: ${folderPath}`);
-
-    const config = getConfigFromPackageJson();
-    const fullPath = path.resolve(folderPath);
-    const targetConfigBase = findTargetConfig(fullPath, config);
-    const targetConfig: WatchTargetConfig = {
-      ...targetConfigBase,
-      ...(overrides || {}),
-    };
+    const targetConfig = findTargetConfig(folderPath, config, overrides);
     const outputFileName = targetConfig.outputFile || 'index.ts';
 
     const watcher = chokidar.watch(folderPath, {
@@ -462,41 +468,150 @@ export function runCli(): void {
 
     watcher.on('add', (filePath: string) => {
       const fileName = path.basename(filePath);
-      // outputFile은 무시
-      if (fileName === outputFileName || fileName.endsWith('.d.ts')) {
-        return;
-      }
-      console.log(`📝 파일 추가: ${fileName}`);
-      generateIndex(folderPath, outputPath, overrides);
+      if (fileName === outputFileName) return;
+      log(`📝 파일 추가: ${fileName}`);
+      generateIndex(folderPath, overrides);
     });
 
     watcher.on('unlink', (filePath: string) => {
       const fileName = path.basename(filePath);
-      // outputFile은 무시
-      if (fileName === outputFileName || fileName.endsWith('.d.ts')) {
-        return;
-      }
-      console.log(`🗑️  파일 삭제: ${fileName}`);
-      generateIndex(folderPath, outputPath, overrides);
+      if (fileName === outputFileName) return;
+      log(`🗑️  파일 삭제: ${fileName}`);
+      generateIndex(folderPath, overrides);
     });
 
     watcher.on('change', (filePath: string) => {
       const fileName = path.basename(filePath);
-      // outputFile은 무시
-      if (fileName === outputFileName || fileName.endsWith('.d.ts')) {
-        return;
-      }
-      console.log(`📝 파일 변경: ${fileName}`);
-      generateIndex(folderPath, outputPath, overrides);
+      if (fileName === outputFileName) return;
+      log(`📝 파일 변경: ${fileName}`);
+      generateIndex(folderPath, overrides);
     });
 
-    // 프로세스 종료 시 감시 중지
     process.on('SIGINT', () => {
       watcher.close();
       process.exit(0);
     });
   } else {
-    // 한 번만 실행
-    generateIndex(folderPath, outputPath, overrides);
+    // 설정 파일의 targets 설정으로 감시
+    const config = getConfig();
+    if (!config || !config.targets || config.targets.length === 0) {
+      error('❌ 설정 파일에 autoIndex 설정이 없습니다.');
+      return;
+    }
+
+    log('🔍 설정 파일로 감시 모드 시작...');
+
+    const watchers: any[] = [];
+
+    config.targets.forEach((target, index) => {
+      if (target.paths && Array.isArray(target.paths)) {
+        target.paths.forEach((watchPath) => {
+          log(`📁 감시 시작: ${watchPath}`);
+
+          const targetConfig = findTargetConfig(watchPath, config, overrides);
+          const outputFileName = targetConfig.outputFile || 'index.ts';
+
+          const watcher = chokidar.watch(watchPath, {
+            ignored: [
+              /(^|[\/\\])\../,
+              new RegExp(`${outputFileName.replace('.', '\\.')}$`),
+              /\.d\.ts$/,
+            ],
+            persistent: true,
+          });
+
+          watcher.on('add', (filePath: string) => {
+            const fileName = path.basename(filePath);
+            if (fileName === outputFileName) return;
+            log(`📝 파일 추가: ${fileName} (${watchPath})`);
+            generateIndex(watchPath, overrides);
+          });
+
+          watcher.on('unlink', (filePath: string) => {
+            const fileName = path.basename(filePath);
+            if (fileName === outputFileName) return;
+            log(`🗑️  파일 삭제: ${fileName} (${watchPath})`);
+            generateIndex(watchPath, overrides);
+          });
+
+          watcher.on('change', (filePath: string) => {
+            const fileName = path.basename(filePath);
+            if (fileName === outputFileName) return;
+            log(`📝 파일 변경: ${fileName} (${watchPath})`);
+            generateIndex(watchPath, overrides);
+          });
+
+          watchers.push(watcher);
+        });
+      }
+    });
+
+    // 프로세스 종료 시 모든 감시 중지
+    process.on('SIGINT', () => {
+      log('\n🛑 감시 모드 종료...');
+      watchers.forEach((watcher) => watcher.close());
+      process.exit(0);
+    });
+  }
+}
+
+/**
+ * CLI 메인 실행 함수
+ * 명령행 인자를 파싱하고 적절한 모드로 실행합니다
+ */
+export function runCli(): void {
+  const args = process.argv.slice(2);
+  const { mode, overrides, isWatch, isHelp, logOverride, debugOverride } =
+    parseCliArgs(args);
+
+  // 도움말 출력
+  if (isHelp) {
+    printHelp();
+    return;
+  }
+
+  // 로깅 설정 적용
+  if (logOverride !== undefined || debugOverride !== undefined) {
+    const currentConfig = getConfig();
+    const currentLog = currentConfig?.log ?? true;
+    const currentDebug = currentConfig?.debug ?? false;
+
+    const finalLog = logOverride !== undefined ? logOverride : currentLog;
+    const finalDebug =
+      debugOverride !== undefined ? debugOverride : currentDebug;
+
+    setLoggingConfig(finalLog, finalDebug);
+  }
+
+  if (mode === 'hybrid') {
+    // 하이브리드 모드: CLI 설정 + 설정 파일 + 경로
+    if (isWatch) {
+      startWatchMode(overrides.paths?.[0], overrides);
+    } else {
+      generateIndex(overrides.paths?.[0], overrides);
+    }
+  } else if (mode === 'cli-only') {
+    // CLI 설정만 사용
+    if (!overrides.paths || overrides.paths.length === 0) {
+      error('❌ CLI 설정 모드에서는 폴더 경로를 지정해야 합니다.');
+      return;
+    }
+
+    if (isWatch) {
+      startWatchMode(overrides.paths[0], overrides);
+    } else {
+      generateIndex(overrides.paths[0], overrides);
+    }
+  } else {
+    // config-based 모드: 설정 파일 기반
+    if (isWatch) {
+      startWatchMode(undefined, overrides);
+    } else {
+      if (overrides.paths && overrides.paths.length > 0) {
+        generateIndex(overrides.paths[0], overrides);
+      } else {
+        generateIndex(undefined, overrides);
+      }
+    }
   }
 }

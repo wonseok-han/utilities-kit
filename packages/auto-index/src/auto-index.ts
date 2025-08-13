@@ -3,6 +3,7 @@ import path from 'path';
 import { DEFAULT_TARGETS_CONFIG } from './constant';
 import { AutoIndexConfig, ParsedCliArgs, TargetConfig } from './types';
 import {
+  analyzeFileExports,
   getConfig,
   parseBoolean,
   parseCommaSeparated,
@@ -15,7 +16,7 @@ import {
  * @param args - 명령행 인자 배열
  * @returns 파싱된 CLI 인자 객체
  */
-function parseCliArgs(args: string[]): ParsedCliArgs {
+export function parseCliArgs(args: string[]): ParsedCliArgs {
   const overrides: Partial<TargetConfig> = {};
   let isWatch = false;
   let isHelp = false;
@@ -101,10 +102,10 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
     }
   }
 
-  // 모드 결정 - package.json 설정 존재 여부 확인
+  // 모드 결정 - 설정 파일 존재 여부 확인
   let mode: ParsedCliArgs['mode'];
 
-  // package.json 설정을 먼저 확인
+  // 설정 파일을 먼저 확인
   const config = getConfig();
   const hasPackageConfig =
     config?.targets &&
@@ -116,11 +117,11 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
   const hasPaths = overrides.paths && overrides.paths.length > 0;
 
   if (hasPackageConfig && hasPaths && hasConfigOptions) {
-    mode = 'hybrid'; // CLI 설정 + package.json 설정 + 경로
+    mode = 'hybrid'; // CLI 설정 + 설정 파일 + 경로
   } else if (!hasPackageConfig && hasPaths) {
     mode = 'cli-only'; // CLI 설정만
   } else if (hasPackageConfig) {
-    mode = 'config-based'; // package.json 설정 기반
+    mode = 'config-based'; // 설정 파일 기반
   } else {
     mode = 'cli-only'; // CLI 설정만, 기본값
   }
@@ -134,15 +135,8 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
  * @param config - autoIndex 설정 객체
  * @param cliOverrides - CLI에서 전달된 설정 오버라이드 (선택사항)
  * @returns 해당 경로에 적용할 TargetConfig 설정
- *
- * 동작 방식:
- * 1. folderPath가 있으면: targets 설정에서 해당 경로와 매칭되는 설정 찾기
- * 2. folderPath가 없으면: targets의 첫 번째 설정 사용
- * 3. glob 패턴과 정확한 경로 모두 지원
- * 4. 매칭되는 설정이 없으면 기본 설정 반환
- * 5. CLI 오버라이드 적용 (최우선)
  */
-function findTargetConfig(
+export function findTargetConfig(
   folderPath: string | undefined,
   config: AutoIndexConfig,
   cliOverrides?: Partial<TargetConfig>
@@ -216,12 +210,6 @@ function findTargetConfig(
  * 컴포넌트 폴더를 스캔하여 index.ts 파일을 생성합니다
  * @param folderPath - 스캔할 폴더 경로 (선택사항)
  * @param cliOverrides - CLI에서 전달된 설정 오버라이드 (선택사항)
- *
- * 동작 방식:
- * 1. folderPath가 있으면: 지정된 폴더의 파일들을 스캔
- * 2. folderPath가 없으면: package.json의 targets 설정 사용
- * 3. 설정된 확장자와 네이밍 규칙에 따라 export 문 생성
- * 4. index.ts 파일에 export 문들을 작성
  */
 function generateIndex(
   folderPath: string | undefined,
@@ -241,7 +229,7 @@ function generateIndex(
 
       // 모드별 설정 처리
       if (!config) {
-        console.error('❌ package.json 설정을 읽을 수 없습니다.');
+        console.error('❌ 설정 파일을 읽을 수 없습니다.');
         return;
       }
 
@@ -305,64 +293,81 @@ function generateIndex(
           fileName,
           targetConfig.namingConvention
         );
+        const filePath = path.join(fullPath, file);
+        const fromPath = targetConfig.fromWithExtension ? file : fileName;
 
         switch (targetConfig.exportStyle) {
           case 'named':
-            const fromPath = targetConfig.fromWithExtension ? file : fileName;
             exportStatements.push(
               `export { default as ${transformedName} } from './${fromPath}';`
             );
             break;
           case 'default':
-            const defaultFromPath = targetConfig.fromWithExtension
-              ? file
-              : fileName;
-            exportStatements.push(
-              `export { default } from './${defaultFromPath}';`
-            );
+            exportStatements.push(`export { default } from './${fromPath}';`);
             break;
           case 'star':
-            const starFromPath = targetConfig.fromWithExtension
-              ? file
-              : fileName;
-            exportStatements.push(`export * from './${starFromPath}';`);
+            exportStatements.push(`export * from './${fromPath}';`);
             break;
           case 'star-as':
-            const starAsFromPath = targetConfig.fromWithExtension
-              ? file
-              : fileName;
             exportStatements.push(
-              `export * as ${transformedName} from './${starAsFromPath}';`
+              `export * as ${transformedName} from './${fromPath}';`
             );
             break;
           case 'mixed':
-            const mixedFromPath = targetConfig.fromWithExtension
-              ? file
-              : fileName;
-            exportStatements.push(
-              `export { default as ${transformedName} } from './${mixedFromPath}';`
-            );
-            exportStatements.push(`export * from './${mixedFromPath}';`);
+            // 파일 내용을 분석하여 export 문 생성
+            const exportInfo = analyzeFileExports(filePath);
+            console.log(`🔍 파일 분석 결과:`, {
+              file: file,
+              hasDefaultExport: exportInfo.hasDefaultExport,
+              hasNamedExports: exportInfo.hasNamedExports,
+              namedExports: exportInfo.namedExports,
+              defaultExports: exportInfo.defaultExports,
+            });
+
+            // 유효한 식별자만 사용하도록 필터링
+            const identifierRegex = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+            // 한 라인으로 합쳐서 생성
+            const combinedExports: string[] = [];
+            if (exportInfo.hasDefaultExport) {
+              const defaultAliasCandidate =
+                exportInfo.defaultExports[0] || transformedName;
+              const defaultAlias = identifierRegex.test(defaultAliasCandidate)
+                ? defaultAliasCandidate
+                : transformedName;
+              combinedExports.push(`default as ${defaultAlias}`);
+            }
+            if (
+              exportInfo.hasNamedExports &&
+              exportInfo.namedExports.length > 0
+            ) {
+              const uniqueNamed = Array.from(
+                new Set(exportInfo.namedExports)
+              ).filter((name) => identifierRegex.test(name));
+              if (uniqueNamed.length > 0) {
+                combinedExports.push(...uniqueNamed);
+              }
+            }
+            if (combinedExports.length > 0) {
+              exportStatements.push(
+                `export { ${combinedExports.join(', ')} } from './${fromPath}';`
+              );
+            }
             break;
           case 'auto':
           default:
             // 파일 내용을 확인하여 default export가 있는지 확인
-            const filePath = path.join(fullPath, file);
             const content = fs.readFileSync(filePath, 'utf-8');
             const hasDefaultExport =
               content.includes('export default') ||
               content.includes('export { default }');
 
-            const autoFromPath = targetConfig.fromWithExtension
-              ? file
-              : fileName;
-
             if (hasDefaultExport) {
               exportStatements.push(
-                `export { default as ${transformedName} } from './${autoFromPath}';`
+                `export { default as ${transformedName} } from './${fromPath}';`
               );
             } else {
-              exportStatements.push(`export * from './${autoFromPath}';`);
+              exportStatements.push(`export * from './${fromPath}';`);
             }
             break;
         }
@@ -385,13 +390,13 @@ function generateIndex(
         `✅ ${indexPath} 생성 완료 (${componentFiles.length}개 파일)`
       );
     } else {
-      // folderPath가 없는 경우: package.json의 targets 설정 사용
+      // folderPath가 없는 경우: 설정 파일의 targets 설정 사용
       if (!config || !config.targets || config.targets.length === 0) {
-        console.log('❌ package.json에 autoIndex 설정이 없습니다.');
+        console.log('❌ 설정 파일에 autoIndex 설정이 없습니다.');
         return;
       }
 
-      console.log('🔍 package.json 설정으로 인덱스 파일 생성...');
+      console.log('🔍 설정 파일로 인덱스 파일 생성...');
 
       config.targets.forEach((target, index) => {
         if (target.paths && Array.isArray(target.paths)) {
@@ -414,7 +419,7 @@ function generateIndex(
  * @param folderPath - 감시할 폴더 경로 (선택사항)
  * @param overrides - CLI 오버라이드 설정
  */
-function startWatchMode(
+export function startWatchMode(
   folderPath: string | undefined,
   overrides: Partial<TargetConfig>
 ): void {
@@ -426,7 +431,7 @@ function startWatchMode(
 
     const config = getConfig();
     if (!config) {
-      console.error('❌ package.json 설정을 읽을 수 없습니다.');
+      console.error('❌ 설정 파일을 읽을 수 없습니다.');
       return;
     }
 
@@ -468,14 +473,14 @@ function startWatchMode(
       process.exit(0);
     });
   } else {
-    // package.json의 targets 설정으로 감시
+    // 설정 파일의 targets 설정으로 감시
     const config = getConfig();
     if (!config || !config.targets || config.targets.length === 0) {
-      console.log('❌ package.json에 autoIndex 설정이 없습니다.');
+      console.log('❌ 설정 파일에 autoIndex 설정이 없습니다.');
       return;
     }
 
-    console.log('🔍 package.json 설정으로 감시 모드 시작...');
+    console.log('🔍 설정 파일로 감시 모드 시작...');
 
     const watchers: any[] = [];
 
@@ -534,8 +539,6 @@ function startWatchMode(
 /**
  * CLI 메인 실행 함수
  * 명령행 인자를 파싱하고 적절한 모드로 실행합니다
- * - 일반 모드: 지정된 폴더에 index.ts 생성
- * - 감시 모드: 폴더 경로가 있으면 단일 폴더 감시, 없으면 targets 설정 사용
  */
 export function runCli(): void {
   const args = process.argv.slice(2);
@@ -548,12 +551,11 @@ export function runCli(): void {
   }
 
   if (mode === 'hybrid') {
-    // 하이브리드 모드: CLI 설정 + package.json 설정 + 경로
+    // 하이브리드 모드: CLI 설정 + 설정 파일 + 경로
     if (isWatch) {
-      startWatchMode(overrides.paths?.[0], overrides); // 첫 번째 경로를 폴더 경로로 사용
+      startWatchMode(overrides.paths?.[0], overrides);
     } else {
-      // 한 번만 실행
-      generateIndex(overrides.paths?.[0], overrides); // 첫 번째 경로를 폴더 경로로 사용
+      generateIndex(overrides.paths?.[0], overrides);
     }
   } else if (mode === 'cli-only') {
     // CLI 설정만 사용
@@ -565,20 +567,16 @@ export function runCli(): void {
     if (isWatch) {
       startWatchMode(overrides.paths[0], overrides);
     } else {
-      // 한 번만 실행
       generateIndex(overrides.paths[0], overrides);
     }
   } else {
-    // config-based 모드: package.json 설정 기반
+    // config-based 모드: 설정 파일 기반
     if (isWatch) {
-      // 감시 모드 (package.json의 targets 사용)
       startWatchMode(undefined, overrides);
     } else {
-      // 한 번만 실행
       if (overrides.paths && overrides.paths.length > 0) {
         generateIndex(overrides.paths[0], overrides);
       } else {
-        // 폴더 경로가 없으면 package.json의 targets 사용
         generateIndex(undefined, overrides);
       }
     }

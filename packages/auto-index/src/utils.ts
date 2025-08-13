@@ -149,6 +149,168 @@ export function transformFileName(
 }
 
 /**
+ * 파일의 export 문을 분석합니다
+ * @param filePath - 분석할 파일 경로
+ * @returns export 정보 객체
+ */
+export function analyzeFileExports(filePath: string): {
+  hasDefaultExport: boolean;
+  hasNamedExports: boolean;
+  namedExports: string[];
+  defaultExports: string[];
+} {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    // 주석을 제외한 실제 코드에서만 export 검색
+    const allLines = content.split('\n');
+    const codeLines = allLines.filter((line) => {
+      const trimmedLine = line.trim();
+      return (
+        !trimmedLine.startsWith('//') &&
+        !trimmedLine.startsWith('/*') &&
+        !trimmedLine.startsWith('*')
+      );
+    });
+
+    // 라인 중간의 주석도 제거
+    const cleanCodeLines = codeLines.map((line) => {
+      // // 주석 제거
+      const commentIndex = line.indexOf('//');
+      if (commentIndex !== -1) {
+        return line.substring(0, commentIndex).trim();
+      }
+      return line;
+    });
+
+    const codeContent = cleanCodeLines.join('\n');
+
+    // 문자열 리터럴(", ', `) 내부 내용 제거 후 분석 (주석 외 추가 오탐 방지)
+    const codeWithoutStrings = codeContent
+      .replace(/`(?:\\.|[\s\S])*?`/g, '')
+      .replace(/"(?:\\.|[^"\\])*"/g, '')
+      .replace(/'(?:\\.|[^'\\])*'/g, '');
+
+    const hasDefaultExport = /export\s+default\s+/.test(codeWithoutStrings);
+
+    console.log(`🔍 hasDefaultExport 디버깅:`, {
+      hasDefaultExport,
+      hasExportDefault: /export\s+default\s+/.test(codeWithoutStrings),
+      hasExportBraceDefault: /export\s+\{\s*default\s*\}/.test(
+        codeWithoutStrings
+      ),
+      codeContentSample: codeWithoutStrings.substring(0, 500), // 처음 500자만 표시
+    });
+
+    // 모든 export 타입 찾기
+    const namedExports: string[] = [];
+    const defaultExports: string[] = [];
+
+    // 1. export function/const/class/interface/type/enum
+    const exportPatterns = [
+      /export\s+function\s+(\w+)/g,
+      /export\s+const\s+(\w+)/g,
+      /export\s+class\s+(\w+)/g,
+      /export\s+interface\s+(\w+)/g,
+      /export\s+type\s+(\w+)/g,
+      /export\s+enum\s+(\w+)/g,
+    ];
+
+    exportPatterns.forEach((pattern) => {
+      let match;
+      while ((match = pattern.exec(codeWithoutStrings)) !== null) {
+        if (match[1] && !namedExports.includes(match[1])) {
+          namedExports.push(match[1]);
+        }
+      }
+    });
+
+    // 2. export { a, b, c } 형태 (주석과 템플릿 리터럴 제외)
+    const lines = codeWithoutStrings.split('\n');
+    lines.forEach((line) => {
+      const trimmedLine = line.trim();
+      // 주석 라인은 건너뛰기
+      if (
+        trimmedLine.startsWith('//') ||
+        trimmedLine.startsWith('/*') ||
+        trimmedLine.startsWith('*')
+      ) {
+        return;
+      }
+
+      const exportGroupPattern = /export\s+\{\s*([^}]+)\s*\}/g;
+      let groupMatch;
+      while ((groupMatch = exportGroupPattern.exec(trimmedLine)) !== null) {
+        if (groupMatch[1]) {
+          const exports = groupMatch[1].split(',').map((e) => e.trim());
+          exports.forEach((exp) => {
+            // default나 *가 아닌 경우만 추가
+            if (
+              exp &&
+              !/^default\b/.test(exp) &&
+              !exp.includes('*') &&
+              !exp.includes(' as ')
+            ) {
+              const cleanExp = exp.split(' as ')[0]?.trim();
+              if (cleanExp && !namedExports.includes(cleanExp)) {
+                namedExports.push(cleanExp);
+              }
+            }
+          });
+        }
+      }
+    });
+
+    // 3. export default const/function/class (이름을 가진 default 만 추출)
+    const defaultPatterns = [
+      /export\s+default\s+const\s+(\w+)/g,
+      /export\s+default\s+function\s+(\w+)/g,
+      /export\s+default\s+class\s+(\w+)/g,
+    ];
+
+    defaultPatterns.forEach((pattern) => {
+      let match;
+      while ((match = pattern.exec(codeWithoutStrings)) !== null) {
+        if (match[1] && !defaultExports.includes(match[1])) {
+          defaultExports.push(match[1]);
+        }
+      }
+    });
+
+    console.log(`🔍 analyzeFileExports 디버깅:`, {
+      filePath,
+      contentLength: content.length,
+      namedExports,
+      defaultExports,
+    });
+
+    const hasNamedExports = namedExports.length > 0;
+
+    console.log(`📊 최종 결과:`, {
+      hasDefaultExport,
+      hasNamedExports,
+      namedExports,
+      defaultExports,
+    });
+
+    return {
+      hasDefaultExport,
+      hasNamedExports,
+      namedExports,
+      defaultExports,
+    };
+  } catch (error) {
+    console.warn(`⚠️  파일 분석 실패: ${filePath}`, error);
+    return {
+      hasDefaultExport: false,
+      hasNamedExports: false,
+      namedExports: [],
+      defaultExports: [],
+    };
+  }
+}
+
+/**
  * 도움말 메시지를 출력합니다.
  */
 export function printHelp(): void {

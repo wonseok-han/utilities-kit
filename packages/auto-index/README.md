@@ -185,14 +185,40 @@ module.exports = {
 
 ### Export 스타일 옵션
 
-| 스타일    | 설명                       | 예시                                                                                             |
-| --------- | -------------------------- | ------------------------------------------------------------------------------------------------ |
-| `default` | default export만           | `export { default } from './Component';`                                                         |
-| `named`   | default를 named로 변환     | `export { default as Component } from './Component';`                                            |
-| `star`    | export \* 사용             | `export * from './Component';`                                                                   |
-| `star-as` | export \* as 사용          | `export * as Component from './Component';`                                                      |
-| `mixed`   | default와 named 모두       | `export { default } from './Component';` + `export { default as Component } from './Component';` |
-| `auto`    | 파일 내용에 따라 자동 결정 | 파일 내용 분석 후 적절한 스타일 선택                                                             |
+| 스타일    | 설명                       | 예시                                                                  |
+| --------- | -------------------------- | --------------------------------------------------------------------- |
+| `default` | default export만           | `export { default } from './Component';`                              |
+| `named`   | default를 named로 변환     | `export { default as Component } from './Component';`                 |
+| `star`    | export \* 사용             | `export * from './Component';`                                        |
+| `star-as` | export \* as 사용          | `export * as Component from './Component';`                           |
+| `mixed`   | default와 named를 한 줄로  | `export { default as Component, named1, named2 } from './Component';` |
+| `auto`    | 파일 내용에 따라 자동 결정 | 파일 내용 분석 후 적절한 스타일 선택                                  |
+
+#### mixed 스타일 상세 설명
+
+`mixed` 스타일은 파일 내용을 분석하여 다음과 같이 동작합니다:
+
+- **default export가 있는 경우**: `export { default as [Alias], [named1], [named2] } from './path';`
+- **default export가 없는 경우**: `export { [named1], [named2] } from './path';`
+
+**예시**:
+
+```typescript
+// Button.tsx (default export 있음)
+export default function Button() { ... }
+export const ButtonGroup = () => { ... }
+export const ButtonSize = { ... }
+
+// 생성되는 index.ts
+export { default as Button, ButtonGroup, ButtonSize } from './Button';
+
+// utils.ts (default export 없음)
+export const formatDate = () => { ... }
+export const parseDate = () => { ... }
+
+// 생성되는 index.ts
+export { formatDate, parseDate } from './utils';
+```
 
 ### 네이밍 규칙 예시
 

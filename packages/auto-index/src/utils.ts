@@ -1,45 +1,75 @@
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { DEFAULT_CONFIG } from './constant';
 import { AutoIndexConfig } from './types';
 
 /**
- * package.json에서 설정을 읽어옵니다
+ * 설정 파일에서 autoIndex 설정을 읽어옵니다
+ * @returns AutoIndexConfig 또는 undefined
  */
-export function getConfigFromPackageJson(): AutoIndexConfig {
-  try {
-    // 1) 기본값
-    let merged: AutoIndexConfig | undefined = { ...DEFAULT_CONFIG };
+export function getConfig(): AutoIndexConfig | undefined {
+  const configFiles = [
+    '.autoindexrc',
+    '.autoindexrc.json',
+    'autoindex.config.js',
+    'autoindex.config.mjs',
+    'autoindex.config.ts',
+  ];
 
-    // 2) package.json에서 autoIndex 읽기 (상위 디렉토리 탐색)
-    let currentDir = process.cwd();
-    let packageJsonPath: string | null = null;
-    while (currentDir !== path.dirname(currentDir)) {
-      const testPath = path.join(currentDir, 'package.json');
-      if (fs.existsSync(testPath)) {
-        packageJsonPath = testPath;
-        break;
-      }
-      currentDir = path.dirname(currentDir);
-    }
-    if (packageJsonPath) {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-      if (packageJson.autoIndex && typeof packageJson.autoIndex === 'object') {
-        const pkgConfig: AutoIndexConfig = {
-          ...merged,
-          ...packageJson.autoIndex,
-        };
-        merged = pkgConfig;
-      }
-    }
+  for (const configFile of configFiles) {
+    const configPath = path.join(process.cwd(), configFile);
 
-    return merged;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    console.error('package.json 설정 읽기 오류:', errorMessage);
-    return DEFAULT_CONFIG;
+    if (fs.existsSync(configPath)) {
+      try {
+        if (
+          configFile.endsWith('.js') ||
+          configFile.endsWith('.mjs') ||
+          configFile.endsWith('.ts')
+        ) {
+          // JavaScript/TypeScript 설정 파일
+          const config = require(configPath);
+          const fileConfig = config.default || config;
+
+          if (fileConfig) {
+            // DEFAULT_CONFIG와 병합하여 기본값 채우기
+            return mergeWithDefaults(fileConfig);
+          }
+        } else {
+          // JSON 설정 파일
+          const content = fs.readFileSync(configPath, 'utf-8');
+          const fileConfig = JSON.parse(content);
+
+          if (fileConfig) {
+            // DEFAULT_CONFIG와 병합하여 기본값 채우기
+            return mergeWithDefaults(fileConfig);
+          }
+        }
+      } catch (error) {
+        console.warn(`⚠️  설정 파일 ${configFile} 읽기 실패:`, error);
+        continue;
+      }
+    }
   }
+
+  return undefined;
+}
+
+/**
+ * 설정을 DEFAULT_CONFIG와 병합하여 기본값을 채웁니다
+ * @param config - 사용자 설정
+ * @returns 병합된 설정
+ */
+function mergeWithDefaults(config: any): AutoIndexConfig {
+  const merged: AutoIndexConfig = { ...DEFAULT_CONFIG };
+
+  if (config.targets && Array.isArray(config.targets)) {
+    merged.targets = config.targets.map((target: any) => ({
+      ...DEFAULT_CONFIG.targets[0], // 기본 target 설정
+      ...target, // 사용자 설정으로 오버라이드
+    }));
+  }
+
+  return merged;
 }
 
 /**

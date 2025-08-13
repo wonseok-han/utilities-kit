@@ -8,13 +8,13 @@
 # 패키지 설치
 pnpm add @repo/auto-index
 
-# CLI 사용
+# CLI 사용 (필수: --paths 옵션)
 npx auto-index --paths=src/components
 
 # CLI 사용 (감시 모드)
 npx auto-index --paths=src/components --watch
 
-# CLI 사용 (package.json 설정 기반)
+# 설정 파일 기반 사용
 npx auto-index --watch
 
 # 도움말 보기
@@ -29,7 +29,7 @@ pnpm add @repo/auto-index
 
 ## 사용법
 
-### 1. CLI 기반 사용 (권장)
+### 1. CLI 기반 사용
 
 ```bash
 # 기본 사용법 (--paths는 필수)
@@ -60,26 +60,19 @@ auto-index --paths=src/components --namingConvention=PascalCase
 auto-index --paths=src/components --fromWithExtension=false
 ```
 
-### 2. package.json 설정 기반 사용
+### 2. 설정 파일 기반 사용
+
+설정 파일을 생성한 후 간단하게 사용할 수 있습니다:
 
 ```bash
-# package.json의 autoIndex 설정으로 감시 모드
+# 설정 파일 기반 감시 모드
 auto-index --watch
 
-# 특정 설정 오버라이드
-auto-index --paths=src/components --watch --exportStyle=named --namingConvention=PascalCase
+# CLI 옵션으로 설정 오버라이드
+auto-index --paths=src/components --watch --exportStyle=named
 ```
 
-### 3. 프로그래밍 방식 사용
-
-```typescript
-import { generateIndex } from '@repo/auto-index';
-
-// 컴포넌트 폴더의 index.ts 파일 생성
-generateIndex('./src/components');
-```
-
-### 4. CLI 옵션
+### 3. CLI 옵션
 
 ```bash
 # 도움말
@@ -101,78 +94,76 @@ auto-index --help
 -h, --help              도움말 출력
 ```
 
-## 지원하는 Export 패턴
-
-다음과 같은 export 패턴을 자동으로 감지합니다:
-
-```typescript
-// 1. export default
-export default MyComponent;
-
-// 2. named export
-export const MyComponent = () => {};
-
-// 3. export function
-export function MyComponent() {}
-
-// 4. export class
-export class MyComponent {}
-
-// 5. export { ... }
-export { MyComponent, AnotherComponent };
-```
-
-## Glob 패턴 지원
-
-다양한 폴더 구조를 패턴으로 처리할 수 있습니다:
-
-```bash
-# package.json의 targets 설정 사용
-auto-index --watch
-
-# 단일 폴더 감시
-auto-index --paths=src/components --watch
-```
-
 ## 설정 옵션
 
-### package.json 설정
+### 설정 파일 사용
 
-`package.json`에 `autoIndex` 필드를 추가하여 설정을 관리할 수 있습니다:
+ESLint나 Prettier처럼 별도의 설정 파일을 사용합니다:
+
+#### 1. JSON 설정 파일 (`.autoindexrc`)
+
+프로젝트 루트에 `.autoindexrc` 파일을 생성합니다:
 
 ```json
 {
-  "autoIndex": {
-    "targets": [
-      {
-        "paths": ["src/components", "src/app/**/components"],
-        "fileExtensions": [".tsx", ".ts", ".jsx", ".js"],
-        "outputFile": "index.ts",
-        "exportStyle": "named",
-        "namingConvention": "PascalCase",
-        "excludes": ["*.d.ts", "*.test.ts"]
-      },
-      {
-        "paths": ["src/hooks"],
-        "fileExtensions": [".tsx", ".ts", ".jsx", ".js"],
-        "outputFile": "index.ts",
-        "exportStyle": "named",
-        "namingConvention": "camelCase",
-        "excludes": ["*.d.ts"]
-      },
-      {
-        "paths": ["public/assets/icons"],
-        "fileExtensions": [".svg"],
-        "outputFile": "index.ts",
-        "exportStyle": "named",
-        "namingConvention": "PascalCase",
-        "fromWithExtension": true,
-        "excludes": ["*.png", "*.jpg"]
-      }
-    ]
-  }
+  "targets": [
+    {
+      "paths": ["src/components", "src/app/**/components"],
+      "fileExtensions": [".tsx", ".ts", ".jsx", ".js"],
+      "outputFile": "index.ts",
+      "exportStyle": "named",
+      "namingConvention": "PascalCase",
+      "excludes": ["*.d.ts", "*.test.ts", "*.stories.ts"]
+    },
+    {
+      "paths": ["src/hooks"],
+      "fileExtensions": [".tsx", ".ts", ".jsx", ".js"],
+      "outputFile": "index.ts",
+      "exportStyle": "named",
+      "namingConvention": "camelCase",
+      "excludes": ["*.d.ts"]
+    },
+    {
+      "paths": ["public/assets/icons"],
+      "fileExtensions": [".svg"],
+      "outputFile": "index.ts",
+      "exportStyle": "named",
+      "namingConvention": "PascalCase",
+      "fromWithExtension": true,
+      "excludes": ["*.png", "*.jpg", "*.gif"]
+    }
+  ]
 }
 ```
+
+#### 2. JavaScript 설정 파일 (`autoindex.config.js`)
+
+더 복잡한 설정이나 동적 설정이 필요한 경우 JavaScript 파일을 사용할 수 있습니다:
+
+```javascript
+module.exports = {
+  targets: [
+    {
+      paths: ['src/components', 'src/app/**/components'],
+      fileExtensions: ['.tsx', '.ts', '.jsx', '.js'],
+      outputFile: 'index.ts',
+      exportStyle: 'named',
+      namingConvention: 'PascalCase',
+      excludes: ['*.d.ts', '*.test.ts', '*.stories.ts'],
+    },
+  ],
+};
+```
+
+#### 3. 지원하는 설정 파일 형식
+
+다음 순서로 설정 파일을 찾습니다:
+
+1. `.autoindexrc` (JSON)
+2. `.autoindexrc.json` (JSON)
+3. `autoindex.config.js` (CommonJS)
+4. `autoindex.config.mjs` (ES Module)
+5. `autoindex.config.ts` (TypeScript)
 
 ### 설정 옵션 설명
 
@@ -270,20 +261,25 @@ export { default as IconMenu } from './icon-menu.svg';
 
 ## 설정
 
+### 설정 파일 생성
+
+프로젝트 루트에 설정 파일을 생성합니다:
+
+```bash
+# JSON 설정 파일 생성
+cp .autoindexrc.example .autoindexrc
+
+# 또는 JavaScript 설정 파일 생성
+cp autoindex.config.js.example autoindex.config.js
+```
+
 ### package.json에 스크립트 추가
 
 ```json
 {
   "scripts": {
     "generate:index": "auto-index --paths=src/components",
-    "dev": "auto-index --paths=src/components --watch"
-  },
-  "autoIndex": {
-    "targets": [
-      {
-        "paths": ["src/components", "src/app/**/components"]
-      }
-    ]
+    "dev": "auto-index --watch"
   }
 }
 ```
@@ -294,138 +290,6 @@ export { default as IconMenu } from './icon-menu.svg';
 {
   "scripts": {
     "dev:watch": "auto-index --watch"
-  },
-  "autoIndex": {
-    "targets": [
-      {
-        "paths": ["src/**/components", "src/**/hooks"]
-      }
-    ]
-  }
-}
-```
-
-## CLI 명령어
-
-### auto-index
-
-폴더를 처리하거나 package.json 설정을 사용합니다.
-
-```bash
-# CLI 기반 사용 (--paths는 필수)
-auto-index --paths=<폴더경로>
-
-# 감시 모드 (CLI 기반)
-auto-index --paths=<폴더경로> --watch
-
-# 감시 모드 (package.json 설정 기반)
-auto-index --watch
-
-# 도움말
-auto-index --help
-```
-
-**예시:**
-
-```bash
-# 기본 사용
-auto-index --paths=src/components
-
-# 감시 모드
-auto-index --paths=src/components --watch
-
-# 여러 경로 지정
-auto-index --paths=src/components,src/hooks
-
-# 제외 패턴과 함께
-auto-index --paths=src/components --excludes=*.d.ts,*.test.ts
-
-# package.json 설정 사용
-auto-index --watch
-
-# 옵션과 함께 사용
-auto-index --paths=src/components --watch --exportStyle=named --namingConvention=PascalCase
-```
-
-## 고급 설정 예시
-
-### 경로별 네이밍 규칙 설정
-
-```json
-{
-  "autoIndex": {
-    "targets": [
-      {
-        "paths": ["src/**/components", "src/app/**/components"],
-        "namingConvention": "PascalCase",
-        "exportStyle": "named"
-      },
-      {
-        "paths": ["src/**/hooks"],
-        "namingConvention": "camelCase",
-        "exportStyle": "named"
-      },
-      {
-        "paths": ["src/**/utils"],
-        "namingConvention": "camelCase",
-        "exportStyle": "named"
-      }
-    ]
-  }
-}
-```
-
-### React 컴포넌트용 설정
-
-```json
-{
-  "autoIndex": {
-    "targets": [
-      {
-        "paths": ["src/**/components"],
-        "fileExtensions": [".tsx", ".ts"],
-        "namingConvention": "PascalCase",
-        "exportStyle": "named",
-        "excludes": ["*.d.ts", "*.test.ts"]
-      }
-    ]
-  }
-}
-```
-
-### 유틸리티 함수용 설정
-
-```json
-{
-  "autoIndex": {
-    "targets": [
-      {
-        "paths": ["src/**/utils", "packages/**/utils"],
-        "fileExtensions": [".ts", ".js"],
-        "namingConvention": "camelCase",
-        "exportStyle": "named",
-        "excludes": ["*.d.ts"]
-      }
-    ]
-  }
-}
-```
-
-### SVG/이미지 파일용 설정
-
-```json
-{
-  "autoIndex": {
-    "targets": [
-      {
-        "paths": ["public/assets/icons"],
-        "fileExtensions": [".svg"],
-        "namingConvention": "PascalCase",
-        "exportStyle": "named",
-        "fromWithExtension": true,
-        "excludes": ["*.png", "*.jpg", "*.gif"]
-      }
-    ]
   }
 }
 ```
@@ -434,22 +298,22 @@ auto-index --paths=src/components --watch --exportStyle=named --namingConvention
 
 ### 1. CLI 전용 모드 (`cli-only`)
 
-- `--paths` 옵션이 제공되고 package.json에 `autoIndex` 설정이 없는 경우
+- `--paths` 옵션이 제공되고 설정 파일이 없는 경우
 - CLI 옵션만으로 동작
 
 ### 2. 설정 기반 모드 (`config-based`)
 
-- `--paths` 옵션이 없고 package.json에 `autoIndex` 설정이 있는 경우
-- package.json 설정만으로 동작
+- `--paths` 옵션이 없고 설정 파일이 있는 경우
+- 설정 파일 설정만으로 동작
 
 ### 3. 하이브리드 모드 (`hybrid`)
 
-- `--paths` 옵션이 제공되고 package.json에 `autoIndex` 설정도 있는 경우
-- CLI 옵션이 package.json 설정을 오버라이드
+- `--paths` 옵션이 제공되고 설정 파일도 있는 경우
+- CLI 옵션이 설정 파일 설정을 오버라이드
 
 ## 주의사항
 
 - `--paths` 옵션은 CLI 사용 시 필수입니다
 - `outputFile`로 지정된 파일은 자동으로 제외되어 무한 루프를 방지합니다
 - `excludes` 패턴은 glob 패턴을 지원합니다 (`*.d.ts`, `*test*` 등)
-- package.json 설정을 사용할 때는 `paths` 필드가 필요합니다
+- 설정 파일을 사용할 때는 `paths` 필드가 필요합니다

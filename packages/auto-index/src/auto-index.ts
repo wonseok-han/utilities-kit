@@ -3,7 +3,7 @@ import path from 'path';
 import { DEFAULT_TARGETS_CONFIG } from './constant';
 import { AutoIndexConfig, ParsedCliArgs, TargetConfig } from './types';
 import {
-  getConfigFromPackageJson,
+  getConfig,
   parseBoolean,
   parseCommaSeparated,
   printHelp,
@@ -105,7 +105,7 @@ function parseCliArgs(args: string[]): ParsedCliArgs {
   let mode: ParsedCliArgs['mode'];
 
   // package.json 설정을 먼저 확인
-  const config = getConfigFromPackageJson();
+  const config = getConfig();
   const hasPackageConfig =
     config?.targets &&
     config.targets.length > 0 &&
@@ -228,7 +228,7 @@ function generateIndex(
   cliOverrides?: Partial<TargetConfig>
 ): void {
   try {
-    const config = getConfigFromPackageJson();
+    const config = getConfig();
 
     if (folderPath) {
       // folderPath가 있는 경우: 특정 폴더 처리
@@ -424,7 +424,7 @@ function startWatchMode(
     // 특정 폴더 감시
     console.log(`🔍 파일 변경 감지 시작: ${folderPath}`);
 
-    const config = getConfigFromPackageJson();
+    const config = getConfig();
     if (!config) {
       console.error('❌ package.json 설정을 읽을 수 없습니다.');
       return;
@@ -469,7 +469,7 @@ function startWatchMode(
     });
   } else {
     // package.json의 targets 설정으로 감시
-    const config = getConfigFromPackageJson();
+    const config = getConfig();
     if (!config || !config.targets || config.targets.length === 0) {
       console.log('❌ package.json에 autoIndex 설정이 없습니다.');
       return;

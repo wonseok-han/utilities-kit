@@ -11,11 +11,14 @@ export type TargetConfig = {
 export type AutoIndexConfig = {
   targets: TargetConfig[];
   log: boolean;
+  debug: boolean;
 };
 
-export type ParsedCliArgs = {
+export interface ParsedCliArgs {
   mode: 'cli-only' | 'config-based' | 'hybrid';
   overrides: Partial<TargetConfig>;
   isWatch: boolean;
   isHelp: boolean;
-};
+  logOverride?: boolean;
+  debugOverride?: boolean;
+}

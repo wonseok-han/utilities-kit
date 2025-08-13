@@ -9,6 +9,10 @@ import {
   parseCommaSeparated,
   printHelp,
   transformFileName,
+  setLoggingConfig,
+  error,
+  log,
+  info,
 } from './utils';
 
 /**
@@ -21,6 +25,8 @@ export function parseCliArgs(args: string[]): ParsedCliArgs {
   let isWatch = false;
   let isHelp = false;
   let hasConfigOptions = false; // 설정 관련 옵션이 있는지 확인
+  let logOverride: boolean | undefined;
+  let debugOverride: boolean | undefined;
 
   for (const arg of args) {
     if (arg === '--watch') {
@@ -46,6 +52,8 @@ export function parseCliArgs(args: string[]): ParsedCliArgs {
           'namingConvention',
           'fromWithExtension',
           'excludes',
+          'log',
+          'debug',
         ].includes(key || '')
       ) {
         hasConfigOptions = true;
@@ -94,6 +102,20 @@ export function parseCliArgs(args: string[]): ParsedCliArgs {
             overrides.fromWithExtension = boolVal;
           break;
         }
+        case 'log': {
+          const boolVal = parseBoolean(val);
+          if (typeof boolVal === 'boolean') {
+            logOverride = boolVal;
+          }
+          break;
+        }
+        case 'debug': {
+          const boolVal = parseBoolean(val);
+          if (typeof boolVal === 'boolean') {
+            debugOverride = boolVal;
+          }
+          break;
+        }
         default: {
           printHelp();
           process.exit(1);
@@ -126,7 +148,7 @@ export function parseCliArgs(args: string[]): ParsedCliArgs {
     mode = 'cli-only'; // CLI 설정만, 기본값
   }
 
-  return { mode, overrides, isWatch, isHelp };
+  return { mode, overrides, isWatch, isHelp, logOverride, debugOverride };
 }
 
 /**
@@ -223,13 +245,13 @@ function generateIndex(
       const fullPath = path.resolve(folderPath);
 
       if (!fs.existsSync(fullPath)) {
-        console.error(`폴더가 존재하지 않습니다: ${folderPath}`);
+        error(`폴더가 존재하지 않습니다: ${folderPath}`);
         return;
       }
 
       // 모드별 설정 처리
       if (!config) {
-        console.error('❌ 설정 파일을 읽을 수 없습니다.');
+        error('❌ 설정 파일을 읽을 수 없습니다.');
         return;
       }
 
@@ -279,7 +301,7 @@ function generateIndex(
       });
 
       if (componentFiles.length === 0) {
-        console.log(`📁 ${folderPath}에 처리할 파일이 없습니다.`);
+        log(`📁 ${folderPath}에 처리할 파일이 없습니다.`);
         return;
       }
 
@@ -316,7 +338,7 @@ function generateIndex(
           case 'mixed':
             // 파일 내용을 분석하여 export 문 생성
             const exportInfo = analyzeFileExports(filePath);
-            console.log(`🔍 파일 분석 결과:`, {
+            info(`🔍 파일 분석 결과:`, {
               file: file,
               hasDefaultExport: exportInfo.hasDefaultExport,
               hasNamedExports: exportInfo.hasNamedExports,
@@ -379,38 +401,35 @@ function generateIndex(
       // outputFileName에 폴더가 포함되어 있는지 확인하고 필요한 폴더 생성
       const outputDir = path.dirname(indexPath);
       if (outputDir !== fullPath && !fs.existsSync(outputDir)) {
-        console.log(`📁 폴더 생성: ${outputDir}`);
+        log(`📁 폴더 생성: ${outputDir}`);
         fs.mkdirSync(outputDir, { recursive: true });
       }
 
       const indexContent = exportStatements.join('\n') + '\n';
 
       fs.writeFileSync(indexPath, indexContent, 'utf-8');
-      console.log(
-        `✅ ${indexPath} 생성 완료 (${componentFiles.length}개 파일)`
-      );
+      log(`✅ ${indexPath} 생성 완료 (${componentFiles.length}개 파일)`);
     } else {
       // folderPath가 없는 경우: 설정 파일의 targets 설정 사용
       if (!config || !config.targets || config.targets.length === 0) {
-        console.log('❌ 설정 파일에 autoIndex 설정이 없습니다.');
+        error('❌ 설정 파일에 autoIndex 설정이 없습니다.');
         return;
       }
 
-      console.log('🔍 설정 파일로 인덱스 파일 생성...');
+      log('🔍 설정 파일로 인덱스 파일 생성...');
 
       config.targets.forEach((target, index) => {
         if (target.paths && Array.isArray(target.paths)) {
           target.paths.forEach((watchPath) => {
-            console.log(`📁 처리 중: ${watchPath}`);
+            log(`📁 처리 중: ${watchPath}`);
             generateIndex(watchPath, cliOverrides);
           });
         }
       });
     }
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-    console.error('인덱스 생성 오류:', errorMessage);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    error('인덱스 생성 오류:', errorMessage);
   }
 }
 
@@ -427,11 +446,11 @@ export function startWatchMode(
 
   if (folderPath) {
     // 특정 폴더 감시
-    console.log(`🔍 파일 변경 감지 시작: ${folderPath}`);
+    log(`🔍 파일 변경 감지 시작: ${folderPath}`);
 
     const config = getConfig();
     if (!config) {
-      console.error('❌ 설정 파일을 읽을 수 없습니다.');
+      error('❌ 설정 파일을 읽을 수 없습니다.');
       return;
     }
 
@@ -450,21 +469,21 @@ export function startWatchMode(
     watcher.on('add', (filePath: string) => {
       const fileName = path.basename(filePath);
       if (fileName === outputFileName) return;
-      console.log(`📝 파일 추가: ${fileName}`);
+      log(`📝 파일 추가: ${fileName}`);
       generateIndex(folderPath, overrides);
     });
 
     watcher.on('unlink', (filePath: string) => {
       const fileName = path.basename(filePath);
       if (fileName === outputFileName) return;
-      console.log(`🗑️  파일 삭제: ${fileName}`);
+      log(`🗑️  파일 삭제: ${fileName}`);
       generateIndex(folderPath, overrides);
     });
 
     watcher.on('change', (filePath: string) => {
       const fileName = path.basename(filePath);
       if (fileName === outputFileName) return;
-      console.log(`📝 파일 변경: ${fileName}`);
+      log(`📝 파일 변경: ${fileName}`);
       generateIndex(folderPath, overrides);
     });
 
@@ -476,18 +495,18 @@ export function startWatchMode(
     // 설정 파일의 targets 설정으로 감시
     const config = getConfig();
     if (!config || !config.targets || config.targets.length === 0) {
-      console.log('❌ 설정 파일에 autoIndex 설정이 없습니다.');
+      error('❌ 설정 파일에 autoIndex 설정이 없습니다.');
       return;
     }
 
-    console.log('🔍 설정 파일로 감시 모드 시작...');
+    log('🔍 설정 파일로 감시 모드 시작...');
 
     const watchers: any[] = [];
 
     config.targets.forEach((target, index) => {
       if (target.paths && Array.isArray(target.paths)) {
         target.paths.forEach((watchPath) => {
-          console.log(`📁 감시 시작: ${watchPath}`);
+          log(`📁 감시 시작: ${watchPath}`);
 
           const targetConfig = findTargetConfig(watchPath, config, overrides);
           const outputFileName = targetConfig.outputFile || 'index.ts';
@@ -504,21 +523,21 @@ export function startWatchMode(
           watcher.on('add', (filePath: string) => {
             const fileName = path.basename(filePath);
             if (fileName === outputFileName) return;
-            console.log(`📝 파일 추가: ${fileName} (${watchPath})`);
+            log(`📝 파일 추가: ${fileName} (${watchPath})`);
             generateIndex(watchPath, overrides);
           });
 
           watcher.on('unlink', (filePath: string) => {
             const fileName = path.basename(filePath);
             if (fileName === outputFileName) return;
-            console.log(`🗑️  파일 삭제: ${fileName} (${watchPath})`);
+            log(`🗑️  파일 삭제: ${fileName} (${watchPath})`);
             generateIndex(watchPath, overrides);
           });
 
           watcher.on('change', (filePath: string) => {
             const fileName = path.basename(filePath);
             if (fileName === outputFileName) return;
-            console.log(`📝 파일 변경: ${fileName} (${watchPath})`);
+            log(`📝 파일 변경: ${fileName} (${watchPath})`);
             generateIndex(watchPath, overrides);
           });
 
@@ -529,7 +548,7 @@ export function startWatchMode(
 
     // 프로세스 종료 시 모든 감시 중지
     process.on('SIGINT', () => {
-      console.log('\n🛑 감시 모드 종료...');
+      log('\n🛑 감시 모드 종료...');
       watchers.forEach((watcher) => watcher.close());
       process.exit(0);
     });
@@ -542,12 +561,26 @@ export function startWatchMode(
  */
 export function runCli(): void {
   const args = process.argv.slice(2);
-  const { mode, overrides, isWatch, isHelp } = parseCliArgs(args);
+  const { mode, overrides, isWatch, isHelp, logOverride, debugOverride } =
+    parseCliArgs(args);
 
   // 도움말 출력
   if (isHelp) {
     printHelp();
     return;
+  }
+
+  // 로깅 설정 적용
+  if (logOverride !== undefined || debugOverride !== undefined) {
+    const currentConfig = getConfig();
+    const currentLog = currentConfig?.log ?? true;
+    const currentDebug = currentConfig?.debug ?? false;
+
+    const finalLog = logOverride !== undefined ? logOverride : currentLog;
+    const finalDebug =
+      debugOverride !== undefined ? debugOverride : currentDebug;
+
+    setLoggingConfig(finalLog, finalDebug);
   }
 
   if (mode === 'hybrid') {
@@ -560,7 +593,7 @@ export function runCli(): void {
   } else if (mode === 'cli-only') {
     // CLI 설정만 사용
     if (!overrides.paths || overrides.paths.length === 0) {
-      console.log('❌ CLI 설정 모드에서는 폴더 경로를 지정해야 합니다.');
+      error('❌ CLI 설정 모드에서는 폴더 경로를 지정해야 합니다.');
       return;
     }
 

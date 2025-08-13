@@ -13,4 +13,5 @@ export const DEFAULT_TARGETS_CONFIG: TargetConfig = {
 export const DEFAULT_CONFIG: AutoIndexConfig = {
   targets: [DEFAULT_TARGETS_CONFIG],
   log: true,
+  debug: false,
 };

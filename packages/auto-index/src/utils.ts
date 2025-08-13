@@ -1,11 +1,44 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import { DEFAULT_CONFIG } from './constant';
 import { AutoIndexConfig } from './types';
 
+// 로깅 유틸리티
+let logEnabled = true;
+let debugEnabled = false;
+
+export function setLoggingConfig(log: boolean, debug: boolean): void {
+  logEnabled = log;
+  debugEnabled = debug;
+}
+
+export function log(...args: any[]): void {
+  if (logEnabled) {
+    console.log(...args);
+  }
+}
+
+export function error(...args: any[]): void {
+  if (logEnabled) {
+    console.error(...args);
+  }
+}
+
+export function warn(...args: any[]): void {
+  if (logEnabled) {
+    console.warn(...args);
+  }
+}
+
+export function info(...args: any[]): void {
+  if (debugEnabled) {
+    console.info(...args);
+  }
+}
+
 /**
  * 설정 파일에서 autoIndex 설정을 읽어옵니다
- * @returns AutoIndexConfig 또는 undefined
+ * @returns autoIndex 설정 객체 또는 undefined
  */
 export function getConfig(): AutoIndexConfig | undefined {
   const configFiles = [
@@ -31,6 +64,8 @@ export function getConfig(): AutoIndexConfig | undefined {
           const fileConfig = config.default || config;
 
           if (fileConfig) {
+            // 로깅 설정 적용
+            setLoggingConfig(fileConfig.log ?? true, fileConfig.debug ?? false);
             // DEFAULT_CONFIG와 병합하여 기본값 채우기
             return mergeWithDefaults(fileConfig);
           }
@@ -40,17 +75,21 @@ export function getConfig(): AutoIndexConfig | undefined {
           const fileConfig = JSON.parse(content);
 
           if (fileConfig) {
+            // 로깅 설정 적용
+            setLoggingConfig(fileConfig.log ?? true, fileConfig.debug ?? false);
             // DEFAULT_CONFIG와 병합하여 기본값 채우기
             return mergeWithDefaults(fileConfig);
           }
         }
-      } catch (error) {
-        console.warn(`⚠️  설정 파일 ${configFile} 읽기 실패:`, error);
+      } catch (err) {
+        error(`⚠️  설정 파일 ${configFile} 읽기 실패:`, err);
         continue;
       }
     }
   }
 
+  // 설정 파일이 없으면 기본 로깅 설정 적용
+  setLoggingConfig(true, false);
   return undefined;
 }
 
@@ -193,7 +232,7 @@ export function analyzeFileExports(filePath: string): {
 
     const hasDefaultExport = /export\s+default\s+/.test(codeWithoutStrings);
 
-    console.log(`🔍 hasDefaultExport 디버깅:`, {
+    info(`🔍 hasDefaultExport 디버깅:`, {
       hasDefaultExport,
       hasExportDefault: /export\s+default\s+/.test(codeWithoutStrings),
       hasExportBraceDefault: /export\s+\{\s*default\s*\}/.test(
@@ -277,7 +316,7 @@ export function analyzeFileExports(filePath: string): {
       }
     });
 
-    console.log(`🔍 analyzeFileExports 디버깅:`, {
+    info(`🔍 analyzeFileExports 디버깅:`, {
       filePath,
       contentLength: content.length,
       namedExports,
@@ -286,7 +325,7 @@ export function analyzeFileExports(filePath: string): {
 
     const hasNamedExports = namedExports.length > 0;
 
-    console.log(`📊 최종 결과:`, {
+    info(`📊 최종 결과:`, {
       hasDefaultExport,
       hasNamedExports,
       namedExports,
@@ -299,8 +338,8 @@ export function analyzeFileExports(filePath: string): {
       namedExports,
       defaultExports,
     };
-  } catch (error) {
-    console.warn(`⚠️  파일 분석 실패: ${filePath}`, error);
+  } catch (err) {
+    error(`⚠️  파일 분석 실패: ${filePath}`, err);
     return {
       hasDefaultExport: false,
       hasNamedExports: false,
@@ -315,25 +354,33 @@ export function analyzeFileExports(filePath: string): {
  */
 export function printHelp(): void {
   console.log(`
-사용법: auto-index [--watch] [--paths=<경로1,경로2>] [--outputFile=파일명] [--fileExtensions=.tsx,.ts] [--exportStyle=auto] [--namingConvention=original] [--fromWithExtension=true|false]
+auto-index - 폴더를 자동으로 스캔하여 index.ts 파일을 생성하는 도구
 
-옵션:
-  --paths=<경로1,경로2>     처리할 폴더 경로 (쉼표로 구분하여 여러 경로 지정 가능)
-  --watch               감시 모드 활성화 (폴더 경로가 있으면 단일 폴더 감시, 없으면 targets 설정 사용)
-  --outputFile=<파일명> 생성할 index.ts 파일의 이름 (기본값: index.ts)
+사용법:
+  auto-index --paths=<경로1,경로2> [옵션들]
+
+필수 옵션:
+  --paths=<경로1,경로2>    처리할 폴더 경로 (쉼표로 구분하여 여러 경로 지정 가능)
+
+일반 옵션:
+  --outputFile=<파일명>     생성할 index.ts 파일의 이름 (기본값: index.ts)
   --fileExtensions=<확장자> 감시할 파일 확장자 (예: .tsx,.ts)
   --excludes=<패턴1,패턴2>  제외할 파일 패턴 (예: *.d.ts,*.png)
-  --exportStyle=<스타일> 생성할 export 스타일 (default, named, star, star-as, mixed, auto)
+  --exportStyle=<스타일>    생성할 export 스타일 (default, named, star, star-as, mixed, auto)
   --namingConvention=<규칙> 파일명 변환 규칙 (camelCase, original, PascalCase)
-  --fromWithExtension=<true|false> 파일 경로에 확장자 포함 여부 (기본값: true)
-  -h, --help            도움말 출력
+  --fromWithExtension=<true|false> 파일 경로에 확장자 포함 여부 (기본값: false)
+
+로깅 옵션:
+  --log=<true|false>       로그 출력 여부 (기본값: true)
+
+모드 옵션:
+  --watch                  감시 모드 활성화
+  -h, --help              도움말 출력
 
 예시:
-  auto-index --paths=src/components,src/hooks
-  auto-index --paths=src/components --outputFile=index.ts
-  auto-index --paths=src/components src/components/index.ts
+  auto-index --paths=src/components
   auto-index --paths=src/components --watch --exportStyle=named
-  auto-index --paths=src/components --excludes=*.d.ts,*.test.ts
-  auto-index --watch (targets 설정 사용)
+  auto-index --paths=src/components --log=false --debug=true
+  auto-index --watch
 `);
 }

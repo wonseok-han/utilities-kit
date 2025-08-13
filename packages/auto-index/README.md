@@ -167,9 +167,10 @@ module.exports = {
 
 ### 설정 옵션 설명
 
-| 옵션      | 타입       | 기본값 | 설명          |
-| --------- | ---------- | ------ | ------------- |
-| `targets` | `Target[]` | -      | 처리할 타겟들 |
+| 옵션      | 타입       | 기본값 | 설명                                                           |
+| --------- | ---------- | ------ | -------------------------------------------------------------- |
+| `targets` | `Target[]` | -      | 처리할 타겟들                                                  |
+| `log`     | `boolean`  | `true` | 일반 로그 출력 여부 (console.log, console.error, console.warn) |
 
 ### Target 옵션
 
@@ -248,6 +249,32 @@ export { formatDate, parseDate } from './utils';
 | `*.d.ts`    | TypeScript 선언 파일 제외 |
 | `*.test.ts` | 테스트 파일 제외          |
 | `*.png`     | PNG 이미지 파일 제외      |
+
+### 로깅 설정
+
+`log` 옵션으로 콘솔 출력을 제어할 수 있습니다:
+
+```json
+{
+  "log": true,    // 일반 로그 (console.log, console.error, console.warn)
+  "targets": [...]
+}
+```
+
+**로깅 레벨**:
+
+- **`log: true`**: 일반적인 작업 진행 상황, 에러, 경고 메시지 출력
+- **`log: false`**: 모든 일반 로그 비활성화
+
+**사용 예시**:
+
+```bash
+# 로그 비활성화
+auto-index --paths=src/components --log=false
+
+# 모든 로그 비활성화
+auto-index --paths=src/components --log=false
+```
 
 ## 예시
 

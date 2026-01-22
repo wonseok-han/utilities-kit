@@ -1,9 +1,11 @@
 'use client';
 
+import Color from '@tiptap/extension-color';
 import HardBreak from '@tiptap/extension-hard-break';
 import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
+import { FontSize, TextStyle } from '@tiptap/extension-text-style';
 import { Dropcursor } from '@tiptap/extensions';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -16,6 +18,7 @@ export interface TiptapEditorProps {
   onChange?: (value: string) => void;
   includeStyles?: boolean; // 스타일 포함 여부
   onImageUpload?: (file: File) => Promise<string>; // 이미지 업로드 핸들러 (파일 경로 또는 base64 반환)
+  style?: React.CSSProperties;
 }
 
 /**
@@ -67,6 +70,7 @@ export function TiptapEditor({
   includeStyles = true,
   onChange,
   onImageUpload,
+  style,
   value = '',
 }: Readonly<TiptapEditorProps>) {
   // 이미지 업로드 핸들러
@@ -95,6 +99,9 @@ export function TiptapEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
+      TextStyle, // 텍스트 스타일 (필수 - Color와 함께 사용)
+      Color, // 텍스트 색상
+      FontSize, // 폰트 크기
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -210,7 +217,10 @@ export function TiptapEditor({
   );
 
   return (
-    <div className="resize-y overflow-auto min-h-0 max-h-[600px] max-w-full bg-white border rounded flex flex-col text-black p-2">
+    <div
+      className="resize-y overflow-auto min-h-0 max-h-[600px] max-w-full bg-white border rounded flex flex-col text-black p-2"
+      style={style}
+    >
       <MenuBar editor={editor} onFileSelect={handleFileInput} />
       {editor && (
         <div className="flex-1 min-h-0 flex flex-col overflow-auto">

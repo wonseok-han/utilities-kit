@@ -286,6 +286,7 @@ export function WebEditorClient() {
           includeStyles={shouldIncludeStyles}
           onChange={setContent}
           onImageUpload={handleImageUpload}
+          style={{ height: 400 }}
           value={content}
         />
       </div>

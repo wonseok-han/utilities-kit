@@ -1,5 +1,5 @@
 import { useEditorState, type Editor } from '@tiptap/react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // SVG 아이콘 컴포넌트들
 const HighlightIcon = () => (
@@ -40,6 +40,80 @@ export function MenuBar({
   editor: Editor | null;
   onFileSelect?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
+  // 색상 팔레트 열림/닫힘 상태
+  const [isColorPaletteOpen, setIsColorPaletteOpen] = useState(false);
+  const [hoveredColorName, setHoveredColorName] = useState<string | null>(null);
+  const [palettePosition, setPalettePosition] = useState<{
+    top?: string;
+    bottom?: string;
+    left?: string;
+    right?: string;
+    marginTop?: string;
+    marginBottom?: string;
+  }>({});
+  const colorPaletteRef = useRef<HTMLDivElement>(null);
+  const colorButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 팔레트 위치 자동 조정 (fixed 포지셔닝으로 메뉴바 영역 독립)
+  useEffect(() => {
+    if (isColorPaletteOpen && colorButtonRef.current) {
+      const buttonRect = colorButtonRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      const paletteHeight = 400; // 팔레트 예상 높이 (엑셀 스타일로 더 큼)
+      const paletteWidth = 280; // 팔레트 예상 너비
+
+      const position: {
+        top?: string;
+        bottom?: string;
+        left?: string;
+        right?: string;
+      } = {};
+
+      // 세로 방향: 아래쪽 공간이 부족하면 위쪽에 표시
+      if (buttonRect.bottom + paletteHeight > viewportHeight) {
+        // 위쪽에 표시 (버튼 위쪽 기준)
+        position.bottom = `${viewportHeight - buttonRect.top + 4}px`;
+      } else {
+        // 아래쪽에 표시 (버튼 아래쪽 기준)
+        position.top = `${buttonRect.bottom + 4}px`;
+      }
+
+      // 가로 방향: 오른쪽 공간이 부족하면 왼쪽으로 조정
+      if (buttonRect.left + paletteWidth > viewportWidth) {
+        // 오른쪽 정렬 (팔레트 오른쪽을 버튼 오른쪽에 맞춤)
+        position.right = `${viewportWidth - buttonRect.right}px`;
+      } else {
+        // 왼쪽 정렬 (버튼 왼쪽에 맞춤)
+        position.left = `${buttonRect.left}px`;
+      }
+
+      setPalettePosition(position);
+    }
+  }, [isColorPaletteOpen]);
+
+  // 외부 클릭 감지하여 팔레트 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        colorPaletteRef.current &&
+        !colorPaletteRef.current.contains(event.target as Node) &&
+        colorButtonRef.current &&
+        !colorButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsColorPaletteOpen(false);
+      }
+    };
+
+    if (isColorPaletteOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isColorPaletteOpen]);
+
   const state = useEditorState({
     editor,
     selector: (ctx) => {
@@ -72,6 +146,8 @@ export function MenuBar({
           isTextAlignCenter: false,
           isTextAlignRight: false,
           isTextAlignJustify: false,
+          currentColor: null,
+          currentFontSize: null,
         };
       }
       return {
@@ -104,6 +180,24 @@ export function MenuBar({
         isTextAlignRight: ctx.editor.isActive({ textAlign: 'right' }) ?? false,
         isTextAlignJustify:
           ctx.editor.isActive({ textAlign: 'justify' }) ?? false,
+        currentColor: (() => {
+          try {
+            return ctx.editor.getAttributes('textStyle').color ?? null;
+          } catch {
+            return null;
+          }
+        })(),
+        currentFontSize: (() => {
+          try {
+            const fontSize = ctx.editor.getAttributes('textStyle').fontSize;
+            if (typeof fontSize === 'string') {
+              return fontSize.replace('px', '');
+            }
+            return null;
+          } catch {
+            return null;
+          }
+        })(),
       };
     },
   }) ?? {
@@ -134,9 +228,124 @@ export function MenuBar({
     isTextAlignCenter: false,
     isTextAlignRight: false,
     isTextAlignJustify: false,
+    currentColor: null,
+    currentFontSize: null,
   };
 
   if (!editor) return null;
+
+  // 색상 옵션 (엑셀 스타일)
+  // 자동 색상
+  const automaticColor = { name: '자동', value: null };
+
+  // 테마 색상 (6행 x 10열 = 60개)
+  const themeColors = [
+    // 첫 번째 행 (기본 테마 색상)
+    { name: '흰색', value: '#ffffff' },
+    { name: '검정', value: '#000000' },
+    { name: '회색', value: '#d0cece' },
+    { name: '다크블루', value: '#1f4e78' },
+    { name: '청록', value: '#70ad47' },
+    { name: '주황', value: '#c55a11' },
+    { name: '다크그린', value: '#385723' },
+    { name: '하늘', value: '#5b9bd5' },
+    { name: '보라', value: '#7030a0' },
+    { name: '라임', value: '#bfbf00' },
+    // 두 번째 행 (80% 어둡게)
+    { name: '회색 80%', value: '#a6a6a6' },
+    { name: '다크블루 80%', value: '#44546a' },
+    { name: '청록 80%', value: '#a9d08e' },
+    { name: '주황 80%', value: '#e2b088' },
+    { name: '다크그린 80%', value: '#9bc2e6' },
+    { name: '하늘 80%', value: '#b4c6e7' },
+    { name: '보라 80%', value: '#b1a0c7' },
+    { name: '라임 80%', value: '#d8e4bc' },
+    { name: '갈색', value: '#8b4513' },
+    { name: '올리브', value: '#808000' },
+    // 세 번째 행 (60% 어둡게)
+    { name: '회색 60%', value: '#808080' },
+    { name: '다크블루 60%', value: '#4472c4' },
+    { name: '청록 60%', value: '#92d050' },
+    { name: '주황 60%', value: '#ffc000' },
+    { name: '다크그린 60%', value: '#00b050' },
+    { name: '하늘 60%', value: '#00b0f0' },
+    { name: '보라 60%', value: '#7030a0' },
+    { name: '라임 60%', value: '#ffff00' },
+    { name: '갈색 60%', value: '#c55a11' },
+    { name: '올리브 60%', value: '#bfbf00' },
+    // 네 번째 행 (40% 어둡게)
+    { name: '회색 40%', value: '#d9d9d9' },
+    { name: '다크블루 40%', value: '#8faadc' },
+    { name: '청록 40%', value: '#c5e0b4' },
+    { name: '주황 40%', value: '#ffe699' },
+    { name: '다크그린 40%', value: '#92d050' },
+    { name: '하늘 40%', value: '#9dc3e6' },
+    { name: '보라 40%', value: '#b4a7d6' },
+    { name: '라임 40%', value: '#ffff00' },
+    { name: '갈색 40%', value: '#f4b084' },
+    { name: '올리브 40%', value: '#d9e1f2' },
+    // 다섯 번째 행 (20% 어둡게)
+    { name: '회색 20%', value: '#ededed' },
+    { name: '다크블루 20%', value: '#d0dcef' },
+    { name: '청록 20%', value: '#e2efda' },
+    { name: '주황 20%', value: '#fff2cc' },
+    { name: '다크그린 20%', value: '#c6e0b4' },
+    { name: '하늘 20%', value: '#dae3f3' },
+    { name: '보라 20%', value: '#e2d9f7' },
+    { name: '라임 20%', value: '#ffffcc' },
+    { name: '갈색 20%', value: '#fce4d6' },
+    { name: '올리브 20%', value: '#f2f2f2' },
+    // 여섯 번째 행 (10% 어둡게)
+    { name: '회색 10%', value: '#f2f2f2' },
+    { name: '다크블루 10%', value: '#e7e6f2' },
+    { name: '청록 10%', value: '#f2f2f2' },
+    { name: '주황 10%', value: '#fffbf0' },
+    { name: '다크그린 10%', value: '#e2efda' },
+    { name: '하늘 10%', value: '#e7f0f8' },
+    { name: '보라 10%', value: '#f2f0f7' },
+    { name: '라임 10%', value: '#fffff0' },
+    { name: '갈색 10%', value: '#fdf2e9' },
+    { name: '올리브 10%', value: '#fafafa' },
+  ];
+
+  // 표준 색상 (밝은 기본 색상들)
+  const standardColors = [
+    { name: '빨강', value: '#ff0000' },
+    { name: '주황', value: '#ff8000' },
+    { name: '노랑', value: '#ffff00' },
+    { name: '연두', value: '#80ff00' },
+    { name: '초록', value: '#00ff00' },
+    { name: '하늘', value: '#00ffff' },
+    { name: '파랑', value: '#0000ff' },
+    { name: '남색', value: '#000080' },
+    { name: '보라', value: '#8000ff' },
+    { name: '분홍', value: '#ff00ff' },
+  ];
+
+  // 폰트 크기 옵션
+  const fontSizes = [
+    { name: '기본', value: null },
+    { name: '8px', value: '8' },
+    { name: '10px', value: '10' },
+    { name: '12px', value: '12' },
+    { name: '14px', value: '14' },
+    { name: '16px', value: '16' },
+    { name: '18px', value: '18' },
+    { name: '20px', value: '20' },
+    { name: '24px', value: '24' },
+    { name: '28px', value: '28' },
+    { name: '32px', value: '32' },
+    { name: '36px', value: '36' },
+    { name: '48px', value: '48' },
+    { name: '56px', value: '56' },
+    { name: '64px', value: '64' },
+    { name: '72px', value: '72' },
+    { name: '80px', value: '80' },
+    { name: '88px', value: '88' },
+    { name: '96px', value: '96' },
+    { name: '104px', value: '104' },
+    { name: '112px', value: '112' },
+  ];
 
   const baseBtn =
     'px-2 py-1 rounded border border-gray-300 bg-white hover:bg-blue-50 transition text-sm min-w-[32px] text-center disabled:opacity-40';
@@ -194,6 +403,139 @@ export function MenuBar({
       >
         <HighlightIcon />
       </button>
+      {/* 텍스트 색상 선택 */}
+      <div className="relative" ref={colorPaletteRef}>
+        <button
+          className={`${baseBtn} cursor-pointer flex items-center gap-1`}
+          onClick={() => setIsColorPaletteOpen(!isColorPaletteOpen)}
+          ref={colorButtonRef}
+          title="텍스트 색상"
+          type="button"
+        >
+          <span
+            className="w-4 h-4 rounded border border-gray-400"
+            style={{
+              backgroundColor: state.currentColor || '#000000',
+            }}
+          />
+          <span className="text-xs">A</span>
+        </button>
+        {isColorPaletteOpen && (
+          <div
+            className="fixed bg-white border border-gray-300 rounded-lg shadow-lg p-3 z-50 min-w-[280px]"
+            style={palettePosition}
+          >
+            {/* 자동 색상 */}
+            <button
+              className={`w-full mb-3 px-3 py-2 text-left rounded border-2 transition-all hover:bg-gray-50 ${
+                state.currentColor === automaticColor.value
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200'
+              }`}
+              onClick={() => {
+                editor.chain().focus().unsetColor().run();
+                setIsColorPaletteOpen(false);
+              }}
+              onMouseEnter={() => setHoveredColorName(automaticColor.name)}
+              onMouseLeave={() => setHoveredColorName(null)}
+              type="button"
+            >
+              <span className="text-sm font-medium text-gray-700">
+                {automaticColor.name}
+              </span>
+            </button>
+
+            {/* 테마 색상 */}
+            <div className="mb-3">
+              <div className="text-xs font-semibold text-gray-600 mb-2">
+                테마 색
+              </div>
+              <div className="grid grid-cols-10 gap-1">
+                {themeColors.map((color) => (
+                  <button
+                    key={`theme-${color.value || 'default'}-${color.name}`}
+                    className={`w-6 h-6 rounded border transition-all hover:scale-110 ${
+                      state.currentColor === color.value
+                        ? 'border-blue-500 ring-2 ring-blue-300'
+                        : 'border-gray-300'
+                    }`}
+                    onClick={() => {
+                      editor.chain().focus().setColor(color.value).run();
+                      setIsColorPaletteOpen(false);
+                    }}
+                    onMouseEnter={() => setHoveredColorName(color.name)}
+                    onMouseLeave={() => setHoveredColorName(null)}
+                    style={{
+                      backgroundColor: color.value,
+                    }}
+                    title={color.name}
+                    type="button"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* 표준 색상 */}
+            <div className="mb-3">
+              <div className="text-xs font-semibold text-gray-600 mb-2">
+                표준 색
+              </div>
+              <div className="grid grid-cols-10 gap-1">
+                {standardColors.map((color) => (
+                  <button
+                    key={`standard-${color.value}-${color.name}`}
+                    className={`w-6 h-6 rounded border transition-all hover:scale-110 ${
+                      state.currentColor === color.value
+                        ? 'border-blue-500 ring-2 ring-blue-300'
+                        : 'border-gray-300'
+                    }`}
+                    onClick={() => {
+                      editor.chain().focus().setColor(color.value).run();
+                      setIsColorPaletteOpen(false);
+                    }}
+                    onMouseEnter={() => setHoveredColorName(color.name)}
+                    onMouseLeave={() => setHoveredColorName(null)}
+                    style={{
+                      backgroundColor: color.value,
+                    }}
+                    title={color.name}
+                    type="button"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* 색상 이름 표시 */}
+            <div className="border-t border-gray-200 pt-2">
+              <div className="text-center text-xs text-gray-500 min-h-[20px]">
+                {hoveredColorName || '\u00A0'}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* 폰트 크기 선택 */}
+      <select
+        className={`${baseBtn} cursor-pointer`}
+        onChange={(e) => {
+          const fontSize = e.target.value || null;
+          if (fontSize) {
+            // FontSize extension을 사용하여 폰트 크기 설정
+            editor.chain().focus().setFontSize(`${fontSize}px`).run();
+          } else {
+            // 폰트 크기 제거
+            editor.chain().focus().unsetFontSize().run();
+          }
+        }}
+        title="폰트 크기"
+        value={state.currentFontSize || ''}
+      >
+        {fontSizes.map((size) => (
+          <option key={size.value || 'default'} value={size.value || ''}>
+            {size.name}
+          </option>
+        ))}
+      </select>
       <button
         className={`${baseBtn} cursor-pointer ${state.isTextAlignLeft ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
         onClick={() => editor.chain().focus().setTextAlign('left').run()}

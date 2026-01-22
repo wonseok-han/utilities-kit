@@ -50,7 +50,7 @@ export function JsonFormatterClient() {
   };
 
   return (
-    <div className="flex flex-col min-h-fit h-full p-6">
+    <>
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 입력 영역 */}
         <div className="flex flex-col">
@@ -143,6 +143,6 @@ export function JsonFormatterClient() {
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }

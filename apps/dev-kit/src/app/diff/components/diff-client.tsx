@@ -282,9 +282,7 @@ export function DiffClient() {
   const [isCopiedChanged, copyChanged] = useCopyToClipboard();
 
   return (
-    <div
-      className={`${styles['diff-root']} flex flex-col min-h-fit h-full p-6`}
-    >
+    <>
       <div className="flex flex-row gap-4 mb-4">
         {!isOriginalLocked ? (
           <ActionButton
@@ -364,6 +362,6 @@ export function DiffClient() {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 }

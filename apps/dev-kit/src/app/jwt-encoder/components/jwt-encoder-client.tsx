@@ -89,7 +89,7 @@ export function JwtEncoderClient() {
   ];
 
   return (
-    <div className="flex flex-col min-h-fit h-full p-6">
+    <>
       <div className="mb-4 flex items-center space-x-4">
         <Tabs
           items={tabItems}
@@ -332,6 +332,6 @@ export function JwtEncoderClient() {
           ))}
         </div>
       </div>
-    </div>
+    </>
   );
 }

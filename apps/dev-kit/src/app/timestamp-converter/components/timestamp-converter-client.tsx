@@ -198,7 +198,7 @@ export function TimestampConverterClient() {
   }, [input]);
 
   return (
-    <div className="flex flex-col min-h-fit h-full p-6">
+    <>
       {/* ===== 상단 버튼 영역 ===== */}
       <div className="flex justify-start space-x-2 mb-4">
         <ActionButton
@@ -400,6 +400,6 @@ export function TimestampConverterClient() {
           )}
         </>
       )}
-    </div>
+    </>
   );
 }

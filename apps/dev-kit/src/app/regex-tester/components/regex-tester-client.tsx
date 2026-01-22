@@ -140,7 +140,7 @@ export function RegexTesterClient() {
   }, [pattern, testString]);
 
   return (
-    <div className="flex flex-col min-h-fit h-full p-6">
+    <>
       {/* ===== 액션 버튼들 ===== */}
       <div className="mb-4 flex justify-start space-x-2">
         <ActionButton
@@ -398,6 +398,6 @@ export function RegexTesterClient() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

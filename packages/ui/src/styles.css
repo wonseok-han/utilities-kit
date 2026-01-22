@@ -12,6 +12,11 @@
   border: none !important;
   padding: 0.5rem;
   min-height: 100px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-x: hidden;
 }
 
 .customEditor .ProseMirror h1 {

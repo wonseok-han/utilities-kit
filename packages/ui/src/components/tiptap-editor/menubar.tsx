@@ -1,4 +1,5 @@
 import { useEditorState, type Editor } from '@tiptap/react';
+import React from 'react';
 
 // SVG 아이콘 컴포넌트들
 const HighlightIcon = () => (
@@ -32,7 +33,13 @@ const AlignJustifyIcon = () => (
   </svg>
 );
 
-export function MenuBar({ editor }: { editor: Editor | null }) {
+export function MenuBar({
+  editor,
+  onFileSelect,
+}: {
+  editor: Editor | null;
+  onFileSelect?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
   const state = useEditorState({
     editor,
     selector: (ctx) => {
@@ -314,6 +321,15 @@ export function MenuBar({ editor }: { editor: Editor | null }) {
       >
         ↻
       </button>
+      <label className={`${baseBtn} cursor-pointer`} title="이미지 업로드">
+        📎
+        <input
+          accept="image/*"
+          className="hidden"
+          onChange={onFileSelect}
+          type="file"
+        />
+      </label>
     </div>
   );
 }

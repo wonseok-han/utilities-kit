@@ -58,6 +58,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/cli": "^4.1.11",
+    "@tiptap/extension-hard-break": "^3.16.0",
     "@tiptap/extension-heading": "^3.0.7",
     "@tiptap/extension-highlight": "^3.0.9",
     "@tiptap/extension-image": "^3.0.9",

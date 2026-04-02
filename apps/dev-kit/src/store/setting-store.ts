@@ -7,9 +7,6 @@ interface SettingState {
   fontSize: number;
   compactMode: boolean;
 
-  // 언어 및 지역 설정
-  language: 'ko' | 'en';
-
   // 기능 설정
   codeTheme: string;
   autoFormat: boolean;
@@ -28,7 +25,6 @@ interface SettingState {
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setFontSize: (size: number) => void;
   setCompactMode: (enabled: boolean) => void;
-  setLanguage: (language: 'ko' | 'en') => void;
   setCodeTheme: (theme: string) => void;
   setAutoFormat: (enabled: boolean) => void;
   setAutoCopy: (enabled: boolean) => void;
@@ -52,7 +48,6 @@ const defaultSettings = {
   theme: 'system' as const,
   fontSize: 14,
   compactMode: false,
-  language: 'ko' as const,
   codeTheme: 'vs-dark',
   autoFormat: true,
   autoCopy: false,
@@ -75,7 +70,6 @@ export const useSettingStore = create<SettingState>()(
       setTheme: (theme) => set({ theme }),
       setFontSize: (fontSize) => set({ fontSize }),
       setCompactMode: (compactMode) => set({ compactMode }),
-      setLanguage: (language) => set({ language }),
       setCodeTheme: (codeTheme) => set({ codeTheme }),
       setAutoFormat: (autoFormat) => set({ autoFormat }),
       setAutoCopy: (autoCopy) => set({ autoCopy }),

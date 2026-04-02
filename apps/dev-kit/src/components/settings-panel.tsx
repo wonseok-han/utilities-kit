@@ -11,11 +11,9 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
   const {
     compactMode: isCompactMode,
     fontSize,
-    language,
     resetSettings,
     setCompactMode,
     setFontSize,
-    setLanguage,
     setTheme,
     theme,
   } = useSettingStore();
@@ -131,26 +129,6 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
                     />
                   </button>
                 </div>
-              </div>
-            </div>
-
-            {/* 언어 및 지역 설정 */}
-            <div>
-              <h4 className="text-sm font-medium text-on-surface-secondary mb-3 border-b border-border-light pb-1">
-                언어 및 지역
-              </h4>
-              <div>
-                <label className="block text-sm font-medium text-on-surface-secondary mb-2">
-                  언어
-                </label>
-                <select
-                  className="w-full bg-input-bg border border-input-border rounded-md px-3 py-2 text-on-surface focus:ring-2 focus:ring-accent focus:border-transparent"
-                  onChange={(e) => setLanguage(e.target.value as 'ko' | 'en')}
-                  value={language}
-                >
-                  <option value="ko">🇰🇷 한국어</option>
-                  <option value="en">🇺🇸 English</option>
-                </select>
               </div>
             </div>
 

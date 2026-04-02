@@ -406,19 +406,21 @@ export function MenuBar({
       {/* 텍스트 색상 선택 */}
       <div className="relative" ref={colorPaletteRef}>
         <button
-          className={`${baseBtn} cursor-pointer flex items-center gap-1`}
+          className={`${baseBtn} cursor-pointer`}
           onClick={() => setIsColorPaletteOpen(!isColorPaletteOpen)}
           ref={colorButtonRef}
           title="텍스트 색상"
           type="button"
         >
-          <span
-            className="w-4 h-4 rounded border border-border"
-            style={{
-              backgroundColor: state.currentColor || '#000000',
-            }}
-          />
-          <span className="text-xs">A</span>
+          <span className="relative">
+            A
+            <span
+              className="absolute -bottom-0.5 left-0 right-0 h-1 rounded-sm"
+              style={{
+                backgroundColor: state.currentColor || 'currentColor',
+              }}
+            />
+          </span>
         </button>
         {isColorPaletteOpen && (
           <div

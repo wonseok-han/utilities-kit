@@ -272,31 +272,33 @@ function SettingsPanelContent({ onClose }: { onClose?: () => void }) {
   );
 }
 
-export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
+export function SettingsPanel({ isOpen = false, onClose }: SettingsPanelProps) {
   return (
     <>
       {/* 모바일 오버레이 배경 */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden"
           onClick={onClose}
         />
       )}
 
       {/* 모바일: fixed 풀스크린 (아래에서 위로) */}
       <div
-        className={`md:hidden fixed inset-0 z-50 bg-surface transform transition-transform duration-300 ease-in-out ${
+        className={`md:hidden fixed inset-0 z-50 bg-surface transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
         <SettingsPanelContent onClose={onClose} />
       </div>
 
-      {/* 데스크톱: flex 레이아웃 안에서 push */}
+      {/* 데스크톱: flex 레이아웃 안에서 push (항상 렌더링, 너비로 제어) */}
       <div
-        className={`hidden md:block h-full overflow-hidden shrink-0 transition-[width,min-width] duration-300 ease-in-out ${
-          isOpen ? 'w-80 min-w-80' : 'w-0 min-w-0'
-        }`}
+        className="hidden md:flex shrink-0 h-full overflow-hidden transition-[width,min-width] duration-300 ease-in-out"
+        style={{
+          width: isOpen ? '20rem' : '0',
+          minWidth: isOpen ? '20rem' : '0',
+        }}
       >
         <div className="w-80 h-full bg-surface border-l border-border">
           <SettingsPanelContent onClose={onClose} />

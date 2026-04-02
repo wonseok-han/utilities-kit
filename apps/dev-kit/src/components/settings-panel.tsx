@@ -103,16 +103,7 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
 
   return (
     <>
-      {/* 배경 오버레이 - 데스크톱 */}
-      {isOpen && (
-        <div
-          className="fixed top-0 left-0 bottom-0 bg-black/40 z-40 transition-opacity duration-300 md:block hidden"
-          onClick={onClose}
-          style={{ right: '320px' }}
-        />
-      )}
-
-      {/* 배경 오버레이 - 모바일 */}
+      {/* 배경 오버레이 - 모바일만 */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 md:hidden"
@@ -120,13 +111,13 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
         />
       )}
 
-      {/* 설정 패널 */}
+      {/* 모바일: fixed 풀스크린 / 데스크톱: flex 안에서 밀어내기 */}
       <div
-        className={`fixed bg-surface transform transition-transform duration-300 ease-in-out z-50 inset-0 md:inset-auto md:right-0 md:top-0 md:h-full md:w-80 md:border-l border-border ${
-          isOpen
-            ? 'translate-y-0 md:translate-x-0'
-            : 'translate-y-full md:translate-y-0 md:translate-x-full'
-        }`}
+        className={`bg-surface border-border transition-all duration-300 ease-in-out
+          fixed inset-0 z-50 transform md:transform-none
+          md:relative md:inset-auto md:z-auto md:border-l
+          ${isOpen ? 'translate-y-0 md:w-80 md:min-w-80' : 'translate-y-full md:w-0 md:min-w-0 md:overflow-hidden md:border-l-0'}
+        `}
       >
         <div className="flex flex-col h-full">
           {/* 헤더 */}

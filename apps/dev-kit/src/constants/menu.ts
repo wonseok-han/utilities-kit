@@ -36,6 +36,12 @@ export const SIDEBAR_MENU_ITEMS: MenuItemType[] = [
     path: '/diff',
   },
   {
+    id: 'url-encoder',
+    label: 'URL Encoder',
+    icon: 'url',
+    path: '/url-encoder',
+  },
+  {
     id: 'web-editor',
     label: 'Web Editor',
     icon: 'webEditor',

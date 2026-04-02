@@ -61,8 +61,8 @@ body,
   --spacing-scale: 0.75;
 }
 
-/* 폰트 사이즈 적용 */
-body {
+/* 폰트 사이즈 적용 (html에 설정하여 rem 기반 Tailwind 유틸리티도 비례 스케일링) */
+html {
   font-size: var(--app-font-size);
 }
 

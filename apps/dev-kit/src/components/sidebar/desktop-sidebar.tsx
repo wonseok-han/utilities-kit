@@ -112,7 +112,7 @@ export function DesktopSidebar({
 
             {/* 텍스트를 absolute로 배치하여 레이아웃에 영향 없음 */}
             <span
-              className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${
+              className={`absolute left-12 right-3 truncate transition-all duration-300 ${
                 isOpen
                   ? 'opacity-100 transform scale-x-100 delay-100'
                   : 'opacity-0 transform scale-x-0 origin-left pointer-events-none'

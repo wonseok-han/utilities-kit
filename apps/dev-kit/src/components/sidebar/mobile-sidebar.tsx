@@ -89,7 +89,7 @@ export function MobileSidebar({
               >
                 {getSidebarIcon(item.icon)}
               </svg>
-              <span className="text-sm font-medium">{item.label}</span>
+              <span className="text-sm font-medium truncate">{item.label}</span>
             </div>
           ))}
         </nav>

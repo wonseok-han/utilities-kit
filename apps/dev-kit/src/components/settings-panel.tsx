@@ -294,7 +294,7 @@ export function SettingsPanel({ isOpen = false, onClose }: SettingsPanelProps) {
 
       {/* 데스크톱: flex 레이아웃 안에서 push (항상 렌더링, 너비로 제어) */}
       <div
-        className="hidden md:flex shrink-0 h-full overflow-hidden transition-[width,min-width] duration-300 ease-in-out"
+        className="max-md:hidden flex shrink-0 h-full overflow-hidden transition-[width,min-width] duration-300 ease-in-out"
         style={{
           width: isOpen ? '20rem' : '0',
           minWidth: isOpen ? '20rem' : '0',

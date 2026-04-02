@@ -1,7 +1,11 @@
 'use client';
 
 import Image from '@tiptap/extension-image';
-import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
+import {
+  type NodeViewProps,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+} from '@tiptap/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 type HandleDirection = 'nw' | 'ne' | 'sw' | 'se';
@@ -33,13 +37,13 @@ function ResizableImageView({
   node,
   selected,
   updateAttributes,
-}: {
-  node: {
-    attrs: { alt?: string; src: string; title?: string; width?: number };
+}: NodeViewProps) {
+  const attrs = node.attrs as {
+    alt?: string;
+    src: string;
+    title?: string;
+    width?: number;
   };
-  selected: boolean;
-  updateAttributes: (attrs: Record<string, unknown>) => void;
-}) {
   const [isResizing, setIsResizing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const startX = useRef(0);
@@ -85,18 +89,18 @@ function ResizableImageView({
         data-drag-handle
         className="inline-block relative group"
         style={{
-          width: node.attrs.width ? `${node.attrs.width}px` : undefined,
+          width: attrs.width ? `${attrs.width}px` : undefined,
         }}
       >
         <img
-          alt={node.attrs.alt || ''}
+          alt={attrs.alt || ''}
           className={`block max-w-full h-auto rounded pointer-events-none select-none ${
             selected ? 'ring-2 ring-blue-500' : ''
           }`}
           ref={imgRef}
-          src={node.attrs.src}
+          src={attrs.src}
           style={{ width: '100%' }}
-          title={node.attrs.title || undefined}
+          title={attrs.title || undefined}
         />
         {selected &&
           (

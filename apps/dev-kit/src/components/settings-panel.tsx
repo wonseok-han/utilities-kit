@@ -7,10 +7,94 @@ export interface SettingsPanelProps {
   onClose?: () => void;
 }
 
+/** 미니 레이아웃 프리뷰 - 사이드바+콘텐츠 형태로 테마를 시각화 */
+function ThemePreview({ mode }: { mode: 'light' | 'dark' | 'system' }) {
+  const light = { sidebar: '#dfe6ee', content: '#ffffff', text: '#c0c8d2' };
+  const dark = { sidebar: '#1f2937', content: '#111827', text: '#374151' };
+
+  if (mode === 'system') {
+    return (
+      <svg
+        className="w-full h-full"
+        fill="none"
+        viewBox="0 0 48 34"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect fill={dark.sidebar} height="34" rx="4" width="48" />
+        {/* 다크 반쪽 */}
+        <clipPath id="darkHalf">
+          <rect height="34" width="24" />
+        </clipPath>
+        <g clipPath="url(#darkHalf)">
+          <rect fill={dark.sidebar} height="34" rx="4" width="48" />
+          <rect
+            fill={dark.content}
+            height="30"
+            rx="3"
+            width="33"
+            x="13"
+            y="2"
+          />
+          <rect fill={dark.text} height="2" rx="1" width="8" x="2" y="8" />
+          <rect fill={dark.text} height="2" rx="1" width="6" x="2" y="13" />
+          <rect fill={dark.text} height="2" rx="1" width="7" x="2" y="18" />
+        </g>
+        {/* 라이트 반쪽 */}
+        <clipPath id="lightHalf">
+          <rect height="34" width="24" x="24" />
+        </clipPath>
+        <g clipPath="url(#lightHalf)">
+          <rect fill={light.sidebar} height="34" rx="4" width="48" />
+          <rect
+            fill={light.content}
+            height="30"
+            rx="3"
+            width="33"
+            x="13"
+            y="2"
+          />
+          <rect fill={light.text} height="2" rx="1" width="8" x="2" y="8" />
+          <rect fill={light.text} height="2" rx="1" width="6" x="2" y="13" />
+          <rect fill={light.text} height="2" rx="1" width="7" x="2" y="18" />
+        </g>
+        {/* 대각선 구분 */}
+        <line
+          stroke="#9ca3af"
+          strokeWidth="0.5"
+          x1="24"
+          x2="24"
+          y1="0"
+          y2="34"
+        />
+      </svg>
+    );
+  }
+
+  const c = mode === 'light' ? light : dark;
+  return (
+    <svg
+      className="w-full h-full"
+      fill="none"
+      viewBox="0 0 48 34"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect fill={c.sidebar} height="34" rx="4" width="48" />
+      <rect fill={c.content} height="30" rx="3" width="33" x="13" y="2" />
+      {/* 사이드바 메뉴 라인 */}
+      <rect fill={c.text} height="2" rx="1" width="8" x="2" y="8" />
+      <rect fill={c.text} height="2" rx="1" width="6" x="2" y="13" />
+      <rect fill={c.text} height="2" rx="1" width="7" x="2" y="18" />
+      {/* 콘텐츠 라인 */}
+      <rect fill={c.text} height="2" rx="1" width="16" x="17" y="8" />
+      <rect fill={c.text} height="2" rx="1" width="12" x="17" y="13" />
+    </svg>
+  );
+}
+
 const THEME_OPTIONS = [
-  { value: 'light', label: '라이트', icon: '☀️' },
-  { value: 'dark', label: '다크', icon: '🌙' },
-  { value: 'system', label: '시스템', icon: '🌗' },
+  { value: 'light', label: '라이트' },
+  { value: 'dark', label: '다크' },
+  { value: 'system', label: '시스템' },
 ] as const;
 
 export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
@@ -99,14 +183,16 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
                 {THEME_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
-                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all cursor-pointer ${
+                    className={`flex flex-col items-center gap-2 p-2.5 rounded-xl border-2 transition-all cursor-pointer ${
                       theme === opt.value
-                        ? 'border-accent bg-accent/10'
-                        : 'border-border hover:border-border-light hover:bg-surface-elevated/50'
+                        ? 'border-accent bg-accent/10 shadow-sm'
+                        : 'border-border hover:border-on-surface-muted/30'
                     }`}
                     onClick={() => setTheme(opt.value)}
                   >
-                    <span className="text-xl">{opt.icon}</span>
+                    <div className="w-full aspect-[48/34] rounded-md overflow-hidden border border-border/50">
+                      <ThemePreview mode={opt.value} />
+                    </div>
                     <span
                       className={`text-xs font-medium ${
                         theme === opt.value

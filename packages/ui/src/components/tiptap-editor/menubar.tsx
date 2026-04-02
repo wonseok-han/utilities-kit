@@ -385,7 +385,9 @@ export function MenuBar({
         title="코드 (Inline Code)"
         type="button"
       >
-        {'</>'}
+        <span className="font-mono text-[11px] px-0.5 rounded bg-surface-elevated/50">
+          {'{}'}
+        </span>
       </button>
       <button
         className={`${baseBtn} cursor-pointer ${state.isParagraph ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
@@ -406,19 +408,21 @@ export function MenuBar({
       {/* 텍스트 색상 선택 */}
       <div className="relative" ref={colorPaletteRef}>
         <button
-          className={`${baseBtn} cursor-pointer flex items-center gap-1`}
+          className={`${baseBtn} cursor-pointer`}
           onClick={() => setIsColorPaletteOpen(!isColorPaletteOpen)}
           ref={colorButtonRef}
           title="텍스트 색상"
           type="button"
         >
-          <span
-            className="w-4 h-4 rounded border border-border"
-            style={{
-              backgroundColor: state.currentColor || '#000000',
-            }}
-          />
-          <span className="text-xs">A</span>
+          <span className="relative">
+            A
+            <span
+              className="absolute -bottom-0.5 left-0 right-0 h-1 rounded-sm"
+              style={{
+                backgroundColor: state.currentColor || 'currentColor',
+              }}
+            />
+          </span>
         </button>
         {isColorPaletteOpen && (
           <div
@@ -618,7 +622,20 @@ export function MenuBar({
         title="코드 블록 (Code Block)"
         type="button"
       >
-        {'</>'}
+        <svg
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="16"
+        >
+          <path
+            d="M8 6L2 12l6 6M16 6l6 6-6 6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
       <button
         className={`${baseBtn} cursor-pointer`}

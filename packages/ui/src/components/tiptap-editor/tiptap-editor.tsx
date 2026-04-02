@@ -3,7 +3,6 @@
 import Color from '@tiptap/extension-color';
 import HardBreak from '@tiptap/extension-hard-break';
 import Highlight from '@tiptap/extension-highlight';
-import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import { FontSize, TextStyle } from '@tiptap/extension-text-style';
 import { Dropcursor } from '@tiptap/extensions';
@@ -12,6 +11,7 @@ import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect } from 'react';
 
 import { MenuBar } from './menubar';
+import { ResizableImage } from './resizable-image';
 
 export interface TiptapEditorProps {
   value?: string;
@@ -103,10 +103,10 @@ export function TiptapEditor({
       Color, // 텍스트 색상
       FontSize, // 폰트 크기
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ['heading', 'paragraph', 'image'],
       }),
       Highlight,
-      Image.configure({
+      ResizableImage.configure({
         inline: true,
         allowBase64: true,
       }),
@@ -218,23 +218,18 @@ export function TiptapEditor({
 
   return (
     <div
-      className="resize-y overflow-auto min-h-0 max-h-[600px] max-w-full bg-surface-deep border border-border rounded flex flex-col text-on-surface p-2"
+      className="flex flex-col max-w-full bg-surface-deep border border-border rounded text-on-surface overflow-hidden"
       style={style}
     >
-      <MenuBar editor={editor} onFileSelect={handleFileInput} />
+      <div className="shrink-0 p-2 pb-0">
+        <MenuBar editor={editor} onFileSelect={handleFileInput} />
+      </div>
       {editor && (
-        <div className="flex-1 min-h-0 flex flex-col overflow-auto">
+        <div className="flex-1 min-h-0 overflow-auto p-2">
           <EditorContent
-            className={`customEditor flex-1 min-h-0 h-full w-full block outline-none text-on-surface`}
+            className="customEditor text-on-surface [&_.tiptap]:outline-none [&_.tiptap]:h-full"
             editor={editor}
-            style={{
-              minHeight: 0,
-              width: '100%',
-              height: '100%',
-              outline: 'none',
-              boxShadow: 'none',
-              borderColor: 'transparent',
-            }}
+            style={{ height: '100%' }}
           />
         </div>
       )}

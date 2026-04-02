@@ -1,322 +1,216 @@
 'use client';
 
-import { TiptapEditor, useSnackbar } from '@repo/ui';
+import { ActionButton, Tabs, TiptapEditor, useSnackbar } from '@repo/ui';
 import { useEditorStore } from '@store/editor-store';
 import parserHtml from 'prettier/plugins/html';
 import prettier from 'prettier/standalone';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-/**
- * Web Editor 클라이언트 컴포넌트
- *
- * 클라이언트에서 처리되는 모든 동적 로직을 담당합니다:
- * - 상태 관리 (Zustand store)
- * - Tiptap 에디터 관리
- * - HTML 포맷팅
- * - 사용자 인터랙션 처리
- * - HTML 에디터 렌더링
- */
+const TAB_ITEMS = [
+  { id: 'editor', label: 'Editor' },
+  { id: 'html', label: 'HTML' },
+];
+
+/** 이스케이프/유니코드/엔티티 디코딩 */
+function decodeHtml(str: string): string {
+  // 유니코드 이스케이프
+  let decoded = str.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+    String.fromCodePoint(Number.parseInt(hex, 16))
+  );
+  // 이스케이프 시퀀스
+  decoded = decoded
+    .replace(/\\n/g, '<br />')
+    .replace(/\\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;')
+    .replace(/\\r/g, '')
+    .replace(/\\\\/g, '\\')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'");
+  // HTML 엔티티
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = decoded;
+  return textarea.value;
+}
+
+/** prettier로 HTML 포맷팅 */
+async function formatHtml(html: string): Promise<string> {
+  try {
+    return await prettier.format(html, {
+      parser: 'html',
+      plugins: [parserHtml],
+      printWidth: 80,
+      tabWidth: 2,
+    });
+  } catch {
+    return html;
+  }
+}
+
 export function WebEditorClient() {
   const {
     content,
     setContent,
-    setShouldIncludeStyles,
     setUploadMode,
     shouldIncludeStyles,
     uploadMode,
   } = useEditorStore();
 
-  // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
+  const [activeTab, setActiveTab] = useState('editor');
+  const [htmlValue, setHtmlValue] = useState('');
+  const isTabSwitching = useRef(false);
 
-  // ===== 초기 데이터 설정 (컴포넌트 마운트 시 한 번만) =====
+  // 마운트 시 초기화
   useEffect(() => {
-    if (!content) {
-      setContent('');
-    }
-    if (shouldIncludeStyles === undefined) {
-      setShouldIncludeStyles(true);
-    }
+    if (!content) setContent('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 빈 의존성 배열로 마운트 시 한 번만 실행
+  }, []);
 
-  // ===== HTML 변환 함수 =====
-  const convertToHtml = () => {
-    if (!content) {
-      showSnackbar({
-        message: '변환할 내용이 없습니다.',
-        type: 'warning',
-        position: 'bottom-right',
-        autoHideDuration: 3000,
-      });
-      return;
-    }
+  // 탭 전환 핸들러
+  const handleTabChange = useCallback(
+    async (tab: string) => {
+      isTabSwitching.current = true;
 
-    try {
-      const result = prettier.format(content, {
-        parser: 'html',
-        plugins: [parserHtml],
-        printWidth: 80,
-        tabWidth: 2,
-        useTabs: false,
-        semi: true,
-        singleQuote: false,
-        bracketSameLine: false,
-        htmlWhitespaceSensitivity: 'css',
-        htmlEntities: true,
-      });
-
-      // Promise인 경우 처리
-      if (result instanceof Promise) {
-        result
-          .then((formattedHtml) => {
-            setHtmlValue(String(formattedHtml));
-            showSnackbar({
-              message: 'HTML로 변환되었습니다.',
-              type: 'success',
-              position: 'bottom-right',
-              autoHideDuration: 3000,
-            });
-          })
-          .catch((error) => {
-            console.error('HTML 포맷팅 오류:', error);
-            showSnackbar({
-              message: 'HTML 포맷팅 중 오류가 발생했습니다.',
-              type: 'error',
-              position: 'bottom-right',
-              autoHideDuration: 6000,
-            });
-            setHtmlValue(content);
-          });
-      } else {
-        // 동기 함수인 경우
-        setHtmlValue(String(result));
-        showSnackbar({
-          message: 'HTML로 변환되었습니다.',
-          type: 'success',
-          position: 'bottom-right',
-          autoHideDuration: 3000,
-        });
-      }
-    } catch (error) {
-      console.error('HTML 포맷팅 오류:', error);
-      showSnackbar({
-        message: 'HTML 포맷팅 중 오류가 발생했습니다.',
-        type: 'error',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-      setHtmlValue(content);
-    }
-  };
-
-  // ===== 유니코드 이스케이프 시퀀스 디코딩 =====
-  const decodeUnicodeEscapes = (str: string): string => {
-    return str.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => {
-      return String.fromCodePoint(Number.parseInt(hex, 16));
-    });
-  };
-
-  // ===== HTML 엔티티 디코딩 =====
-  const decodeHtmlEntities = (str: string): string => {
-    const textarea = document.createElement('textarea');
-    textarea.innerHTML = str;
-    return textarea.value;
-  };
-
-  // ===== 이스케이프 시퀀스 디코딩 =====
-  const decodeEscapeSequences = (str: string): string => {
-    return str
-      .replace(/\\n/g, '<br />') // \n -> <br /> 태그
-      .replace(/\\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;') // \t -> 4개의 공백 (탭)
-      .replace(/\\r/g, '') // \r -> 제거 (캐리지 리턴은 HTML에서 불필요)
-      .replace(/\\\\/g, '\\') // \\ -> 단일 백슬래시
-      .replace(/\\"/g, '"') // \" -> 따옴표
-      .replace(/\\'/g, "'"); // \' -> 작은따옴표
-  };
-
-  // ===== HTML 문자열을 에디터에 적용 =====
-  const handleApplyHtml = () => {
-    try {
-      if (!htmlValue.trim()) {
-        showSnackbar({
-          message: 'HTML 문자열을 입력해주세요.',
-          type: 'warning',
-          position: 'bottom-right',
-          autoHideDuration: 3000,
-        });
-        return;
+      if (tab === 'html') {
+        // Editor → HTML: 에디터 내용을 포맷팅하여 HTML textarea에 표시
+        const formatted = await formatHtml(content);
+        setHtmlValue(formatted);
+      } else if (tab === 'editor' && activeTab === 'html') {
+        // HTML → Editor: HTML textarea 내용을 에디터에 적용
+        if (htmlValue.trim()) {
+          const decoded = decodeHtml(htmlValue);
+          setContent(decoded);
+        }
       }
 
-      // 유니코드 이스케이프 시퀀스 디코딩 (예: \u003e -> >, \u003c -> <)
-      let decodedHtml = decodeUnicodeEscapes(htmlValue);
+      setActiveTab(tab);
+      isTabSwitching.current = false;
+    },
+    [content, htmlValue, activeTab, setContent]
+  );
 
-      // 일반 이스케이프 시퀀스 디코딩 (예: \n -> 개행, \t -> 탭)
-      decodedHtml = decodeEscapeSequences(decodedHtml);
-
-      // HTML 엔티티 디코딩 (예: &lt; -> <, &gt; -> >)
-      decodedHtml = decodeHtmlEntities(decodedHtml);
-
-      setContent(decodedHtml);
+  // 복사
+  const handleCopy = async () => {
+    const text = activeTab === 'html' ? htmlValue : content;
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
       showSnackbar({
-        message: 'HTML이 에디터에 적용되었습니다.',
+        message: '복사 완료',
         type: 'success',
         position: 'bottom-right',
-        autoHideDuration: 3000,
+        autoHideDuration: 2000,
       });
-    } catch (error) {
-      console.error('HTML 적용 오류:', error);
+    } catch {
       showSnackbar({
-        message: 'HTML 적용 중 오류가 발생했습니다.',
+        message: '복사에 실패했습니다.',
         type: 'error',
         position: 'bottom-right',
-        autoHideDuration: 6000,
+        autoHideDuration: 4000,
       });
     }
   };
 
-  // ===== HTML 편집 상태 =====
-  const [htmlValue, setHtmlValue] = useState('');
+  // 이미지 업로드 핸들러
+  const handleImageUpload = useCallback(
+    async (file: File): Promise<string> => {
+      if (!file.type.startsWith('image/')) {
+        throw new Error('이미지 파일만 업로드할 수 있습니다.');
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('파일 크기는 5MB를 초과할 수 없습니다.');
+      }
 
-  // ===== 이미지 업로드 핸들러 =====
-  const handleImageUpload = async (file: File): Promise<string> => {
-    // 파일 타입 검증 (이미지만 허용)
-    if (!file.type.startsWith('image/')) {
-      throw new Error('이미지 파일만 업로드할 수 있습니다.');
-    }
+      if (uploadMode === 'base64') {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (typeof reader.result === 'string') resolve(reader.result);
+            else reject(new Error('파일 읽기 실패'));
+          };
+          reader.onerror = () => reject(new Error('파일 읽기 오류'));
+          reader.readAsDataURL(file);
+        });
+      }
 
-    // 파일 크기 제한 (5MB)
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    if (file.size > MAX_FILE_SIZE) {
-      throw new Error('파일 크기는 5MB를 초과할 수 없습니다.');
-    }
-
-    if (uploadMode === 'base64') {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            resolve(reader.result);
-          } else {
-            reject(new Error('파일 읽기 실패'));
-          }
-        };
-        reader.onerror = () => reject(new Error('파일 읽기 오류'));
-        reader.readAsDataURL(file);
-      });
-    }
-    // API를 통한 업로드
-    try {
       const formData = new FormData();
       formData.append('file', file);
-
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
-
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || '업로드 실패');
       }
-
       const data = await response.json();
       return data.url || data.path;
-    } catch (error) {
-      console.error('파일 업로드 오류:', error);
-      showSnackbar({
-        message: error instanceof Error ? error.message : '파일 업로드 실패',
-        type: 'error',
-        position: 'bottom-right',
-        autoHideDuration: 6000,
-      });
-      throw error;
-    }
-  };
+    },
+    [uploadMode]
+  );
 
   return (
-    <>
-      {/* ===== 에디터 설정 영역 ===== */}
-      <div className="mb-6">
-        <div className="mb-4 flex items-center gap-4 flex-wrap">
-          {/* FIXME: 에디터로 설정이 즉각 반영안되고 에디터 내의 내용을 수정해야만 적용되어서 임시 주석처리 */}
-          {/* <label className="flex items-center gap-2 text-gray-300">
-            <input
-              checked={shouldIncludeStyles}
-              className="rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-400"
-              onChange={(e) => setShouldIncludeStyles(e.target.checked)}
-              type="checkbox"
-            />
-            <span>스타일 포함 (인라인 CSS)</span>
-          </label> */}
-          <div className="flex items-center gap-2 text-on-surface-secondary">
-            <span className="text-sm">이미지 업로드 모드:</span>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input
-                checked={uploadMode === 'base64'}
-                className="rounded border-border bg-surface-elevated text-accent focus:ring-accent"
-                name="uploadMode"
-                onChange={() => setUploadMode('base64')}
-                type="radio"
-                value="base64"
-              />
-              <span className="text-sm">Base64</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer">
-              <input
-                checked={uploadMode === 'api'}
-                className="rounded border-border bg-surface-elevated text-accent focus:ring-accent"
-                name="uploadMode"
-                onChange={() => setUploadMode('api')}
-                type="radio"
-                value="api"
-              />
-              <span className="text-sm">서버 API</span>
-            </label>
+    <div className="flex flex-col flex-1 min-h-0">
+      {/* 툴바 */}
+      <div className="flex flex-wrap items-center gap-3 mb-3">
+        <Tabs items={TAB_ITEMS} onChange={handleTabChange} value={activeTab} />
+
+        <div className="flex-1" />
+
+        {/* 이미지 업로드 모드 (에디터 탭일 때만) */}
+        {activeTab === 'editor' && (
+          <div className="flex items-center gap-2 text-on-surface-muted">
+            <span className="text-xs">이미지:</span>
+            <button
+              className={`px-2 py-0.5 text-xs rounded border transition-colors cursor-pointer ${
+                uploadMode === 'base64'
+                  ? 'bg-accent/10 border-accent text-accent'
+                  : 'border-border text-on-surface-muted hover:border-on-surface-muted/30'
+              }`}
+              onClick={() => setUploadMode('base64')}
+            >
+              Base64
+            </button>
+            <button
+              className={`px-2 py-0.5 text-xs rounded border transition-colors cursor-pointer ${
+                uploadMode === 'api'
+                  ? 'bg-accent/10 border-accent text-accent'
+                  : 'border-border text-on-surface-muted hover:border-on-surface-muted/30'
+              }`}
+              onClick={() => setUploadMode('api')}
+            >
+              API
+            </button>
           </div>
-          <button
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition"
-            onClick={convertToHtml}
-            type="button"
-          >
-            HTML로 변환
-          </button>
-        </div>
-        <TiptapEditor
-          includeStyles={shouldIncludeStyles}
-          onChange={setContent}
-          onImageUpload={handleImageUpload}
-          style={{ height: 400 }}
-          value={content}
-        />
+        )}
+
+        <ActionButton
+          feedbackText="복사 완료"
+          onClick={handleCopy}
+          variant="secondary"
+        >
+          복사
+        </ActionButton>
       </div>
 
-      {/* ===== HTML 결과 영역 ===== */}
-      <div>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-on-surface-secondary">
-            HTML 결과
-          </h2>
-          <button
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition"
-            onClick={handleApplyHtml}
-            type="button"
-          >
-            HTML을 에디터에 적용
-          </button>
-        </div>
-        <div
-          className="border border-border rounded-lg overflow-hidden resize-y min-h-[200px] max-h-[600px]"
-          style={{ height: 400 }}
-        >
+      {/* 에디터 / HTML 영역 */}
+      <div className="flex-1 min-h-[400px] rounded-lg overflow-hidden border border-border">
+        {activeTab === 'editor' ? (
+          <TiptapEditor
+            includeStyles={shouldIncludeStyles}
+            onChange={setContent}
+            onImageUpload={handleImageUpload}
+            style={{ height: '100%' }}
+            value={content}
+          />
+        ) : (
           <textarea
-            className="w-full h-full p-4 bg-surface text-on-surface font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full h-full p-4 bg-surface-deep text-on-surface font-mono text-sm resize-none focus:outline-none"
             onChange={(e) => setHtmlValue(e.target.value)}
-            placeholder="HTML 코드가 여기에 표시됩니다. 'HTML로 변환' 버튼을 클릭하세요."
+            placeholder="HTML 코드를 직접 편집할 수 있습니다. Editor 탭으로 전환하면 에디터에 적용됩니다."
             value={htmlValue}
           />
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

@@ -61,27 +61,23 @@ export function DesktopSidebar({
           </div>
         ) : (
           <button
-            className="group relative w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-500 hover:via-blue-600 hover:to-indigo-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 border border-blue-500/20 cursor-pointer text-white"
+            className="w-10 h-10 flex items-center justify-center rounded-lg text-on-surface-muted hover:text-on-surface hover:bg-surface-elevated transition-colors cursor-pointer"
             onClick={onToggle}
             title="사이드바 펼치기"
           >
             <svg
-              className="w-4 h-4 text-white transition-transform duration-300 group-hover:scale-110 drop-shadow-sm"
+              className="w-5 h-5"
               fill="none"
               stroke="currentColor"
+              strokeWidth="2"
               viewBox="0 0 24 24"
             >
               <path
-                d="M4 6h16M4 12h16M4 18h16"
+                d="M13 5l7 7-7 7M5 5l7 7-7 7"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2.5"
               />
             </svg>
-            {/* 내부 글로우 효과 */}
-            <div className="absolute inset-0.5 bg-gradient-to-br from-white/15 to-transparent rounded-lg pointer-events-none" />
-            {/* 호버 시 펄스 효과 */}
-            <div className="absolute inset-0 rounded-xl bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
           </button>
         )}
       </div>

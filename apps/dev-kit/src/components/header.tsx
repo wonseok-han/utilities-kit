@@ -6,12 +6,16 @@ import { useSidebarStore } from '@store/sidebar-store';
 import Link from 'next/link';
 
 export interface HeaderProps {
-  onToggleSettingsPanel?: () => void;
+  isHistoryPanelOpen?: boolean;
   isSettingsPanelOpen?: boolean;
+  onToggleHistoryPanel?: () => void;
+  onToggleSettingsPanel?: () => void;
 }
 
 export function Header({
+  isHistoryPanelOpen = false,
   isSettingsPanelOpen = false,
+  onToggleHistoryPanel,
   onToggleSettingsPanel,
 }: HeaderProps) {
   const isMobile = useIsMobile();
@@ -69,8 +73,32 @@ export function Header({
             <IconGithub className="w-4 h-4" />
           </Link>
 
+          {/* 히스토리 패널 토글 */}
+          <button
+            className={`p-1 rounded-md transition-colors cursor-pointer ${
+              isHistoryPanelOpen
+                ? 'text-on-surface bg-surface-elevated'
+                : 'text-on-surface-secondary hover:text-on-surface hover:bg-surface-elevated'
+            }`}
+            onClick={onToggleHistoryPanel}
+            title={isHistoryPanelOpen ? '기록 닫기' : '기록 열기'}
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
           {/* 설정패널 토글 버튼 */}
-          {/* TODO: 추후 추가 예정 */}
           <button
             className={`p-1 rounded-md transition-colors cursor-pointer ${
               isSettingsPanelOpen

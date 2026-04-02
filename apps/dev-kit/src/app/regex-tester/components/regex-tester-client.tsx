@@ -1,6 +1,5 @@
 'use client';
 
-import { ToolHistory } from '@components/tool-history';
 import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useRegexStore } from '@store/regex-store';
@@ -114,12 +113,7 @@ export function RegexTesterClient() {
     testString,
   } = useRegexStore();
 
-  const {
-    addEntry,
-    clearAll: clearHistory,
-    entries,
-    removeEntry,
-  } = useToolHistory('regex-tester');
+  const { addEntry } = useToolHistory('regex-tester');
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -412,18 +406,6 @@ export function RegexTesterClient() {
           </div>
         </div>
       </div>
-
-      {/* ===== 히스토리 ===== */}
-      <ToolHistory
-        entries={entries}
-        onClear={clearHistory}
-        onRemove={removeEntry}
-        onRestore={(input) => {
-          const parts = input.split(' / ');
-          setPattern(parts[0] ?? '');
-          setTestString(parts.slice(1).join(' / '));
-        }}
-      />
     </>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { ToolHistory } from '@components/tool-history';
 import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useBase64Store } from '@store/base64-store';
@@ -59,12 +58,7 @@ export function Base64EncoderClient() {
     setMode,
     swapMode,
   } = useBase64Store();
-  const {
-    addEntry,
-    clearAll: clearHistory,
-    entries,
-    removeEntry,
-  } = useToolHistory('base64-encoder');
+  const { addEntry } = useToolHistory('base64-encoder');
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -229,13 +223,6 @@ export function Base64EncoderClient() {
           ))}
         </div>
       </section>
-
-      <ToolHistory
-        entries={entries}
-        onClear={clearHistory}
-        onRemove={removeEntry}
-        onRestore={setInput}
-      />
     </>
   );
 }

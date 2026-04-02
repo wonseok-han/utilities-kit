@@ -1,6 +1,5 @@
 'use client';
 
-import { ToolHistory } from '@components/tool-history';
 import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useJwtStore } from '@store';
@@ -60,12 +59,7 @@ export function JwtEncoderClient() {
     setPayloadInput,
     swapMode,
   } = useJwtStore();
-  const {
-    addEntry,
-    clearAll: clearHistory,
-    entries,
-    removeEntry,
-  } = useToolHistory('jwt-encoder');
+  const { addEntry } = useToolHistory('jwt-encoder');
 
   // ===== 현재 모드에 맞는 output 계산 =====
   const output = mode === 'encode' ? encodeOutput : decodeOutput;
@@ -87,19 +81,6 @@ export function JwtEncoderClient() {
         position: 'bottom-right',
         autoHideDuration: 6000,
       });
-    }
-  };
-
-  // ===== 히스토리 복원 핸들러 =====
-  const handleRestore = (value: string) => {
-    if (value.includes('|||')) {
-      const parts = value.split('|||');
-      setHeaderInput(parts[0] ?? '');
-      setPayloadInput(parts[1] ?? '');
-      setMode('encode');
-    } else {
-      setInput(value);
-      setMode('decode');
     }
   };
 
@@ -361,13 +342,6 @@ export function JwtEncoderClient() {
           ))}
         </div>
       </div>
-
-      <ToolHistory
-        entries={entries}
-        onClear={clearHistory}
-        onRemove={removeEntry}
-        onRestore={handleRestore}
-      />
     </>
   );
 }

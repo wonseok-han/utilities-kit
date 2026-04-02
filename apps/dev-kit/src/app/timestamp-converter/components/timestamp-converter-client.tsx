@@ -2,7 +2,6 @@
 
 import type { Dayjs } from '@repo/shared/date';
 
-import { ToolHistory } from '@components/tool-history';
 import { useToolHistory } from '@hooks/use-tool-history';
 import {
   formatDate,
@@ -108,12 +107,7 @@ export function TimestampConverterClient() {
     setSelectedFormats,
     setSelectedTimezones,
   } = useTimestampConverterStore();
-  const {
-    addEntry,
-    clearAll: clearHistory,
-    entries,
-    removeEntry,
-  } = useToolHistory('timestamp-converter');
+  const { addEntry } = useToolHistory('timestamp-converter');
   const [parsed, setParsed] = useState<Dayjs | null>(null);
   const [inputType, setInputType] = useState<ParsedDateType>('invalid');
   const [error, setError] = useState<string | null>(null);
@@ -256,16 +250,6 @@ export function TimestampConverterClient() {
           ))}
         </div>
       </div>
-
-      {/* ===== 히스토리 ===== */}
-      <ToolHistory
-        entries={entries}
-        onClear={clearHistory}
-        onRemove={removeEntry}
-        onRestore={(input) => {
-          setInput(input);
-        }}
-      />
 
       {/* ===== 타임존/포맷 선택: 라벨+전체, 배지는 wrap, 간격 축소 ===== */}
       <div className="flex flex-col gap-1 mb-2">

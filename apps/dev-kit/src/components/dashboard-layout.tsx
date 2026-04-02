@@ -6,9 +6,10 @@ import { useDeviceStore } from '@store/device-store';
 import { useSettingStore } from '@store/setting-store';
 import { useSidebarStore } from '@store/sidebar-store';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { Header } from './header';
+import { HistoryPanel } from './history-panel';
 import { LayoutSkeleton } from './layout-skeleton';
 import { SettingsPanel } from './settings-panel';
 import { Sidebar } from './sidebar/sidebar';
@@ -27,6 +28,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     toggle: onToggleSidebar,
   } = useSidebarStore();
   const { isSettingsPanelOpen, toggleSettingsPanel } = useSettingStore();
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const toggleHistory = useCallback(() => setIsHistoryOpen((v) => !v), []);
   const isMobile = useIsMobile();
   const {
     hasHydrated: hasDeviceHydrated,
@@ -97,7 +100,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex-1 flex flex-col transition-all duration-300">
         {/* 헤더 */}
         <Header
+          isHistoryPanelOpen={isHistoryOpen}
           isSettingsPanelOpen={isSettingsPanelOpen}
+          onToggleHistoryPanel={toggleHistory}
           onToggleSettingsPanel={toggleSettingsPanel}
         />
 
@@ -107,7 +112,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
 
-      {/* 우측 설정 패널 */}
+      {/* 우측 패널들 */}
+      <HistoryPanel isOpen={isHistoryOpen} onClose={toggleHistory} />
       <SettingsPanel
         isOpen={isSettingsPanelOpen}
         onClose={toggleSettingsPanel}

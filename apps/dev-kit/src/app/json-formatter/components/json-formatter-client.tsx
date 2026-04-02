@@ -1,6 +1,5 @@
 'use client';
 
-import { ToolHistory } from '@components/tool-history';
 import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useJsonStore } from '@store';
@@ -40,12 +39,7 @@ export function JsonFormatterClient() {
     output,
     setInput,
   } = useJsonStore();
-  const {
-    addEntry,
-    clearAll: clearHistory,
-    entries,
-    removeEntry,
-  } = useToolHistory('json-formatter');
+  const { addEntry } = useToolHistory('json-formatter');
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -166,13 +160,6 @@ export function JsonFormatterClient() {
           ))}
         </div>
       </div>
-
-      <ToolHistory
-        entries={entries}
-        onClear={clearHistory}
-        onRemove={removeEntry}
-        onRestore={setInput}
-      />
     </>
   );
 }

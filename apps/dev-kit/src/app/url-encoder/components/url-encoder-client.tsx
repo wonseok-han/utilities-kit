@@ -83,7 +83,20 @@ export function UrlEncoderClient() {
   const [error, setError] = useState('');
   const [parsedParams, setParsedParams] = useState<ParsedParam[]>([]);
   const { showSnackbar } = useSnackbar();
-  const { addEntry } = useToolHistory('url-encoder', setInput);
+  const handleHistoryRestore = useCallback(
+    (value: string) => {
+      const sep = value.indexOf('::');
+      if (sep !== -1) {
+        const savedMode = value.slice(0, sep) as 'encode' | 'decode';
+        setMode(savedMode);
+        setInput(value.slice(sep + 2));
+      } else {
+        setInput(value);
+      }
+    },
+    [setInput]
+  );
+  const { addEntry } = useToolHistory('url-encoder', handleHistoryRestore);
 
   const process = useCallback(() => {
     if (!input.trim()) {
@@ -107,7 +120,7 @@ export function UrlEncoderClient() {
         }
       }
       setError('');
-      addEntry(input);
+      addEntry(`${mode}::${input}`);
     } catch {
       setError(
         mode === 'encode'

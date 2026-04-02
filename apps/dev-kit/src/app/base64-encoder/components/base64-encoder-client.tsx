@@ -3,6 +3,7 @@
 import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useBase64Store } from '@store/base64-store';
+import { useCallback } from 'react';
 
 // 탭 아이템 정의
 const TAB_ITEMS = [
@@ -58,7 +59,20 @@ export function Base64EncoderClient() {
     setMode,
     swapMode,
   } = useBase64Store();
-  const { addEntry } = useToolHistory('base64-encoder', setInput);
+  const handleHistoryRestore = useCallback(
+    (value: string) => {
+      const sep = value.indexOf('::');
+      if (sep !== -1) {
+        const savedMode = value.slice(0, sep) as 'encode' | 'decode';
+        setMode(savedMode);
+        setInput(value.slice(sep + 2));
+      } else {
+        setInput(value);
+      }
+    },
+    [setInput, setMode]
+  );
+  const { addEntry } = useToolHistory('base64-encoder', handleHistoryRestore);
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -129,7 +143,7 @@ export function Base64EncoderClient() {
                 feedbackText="완료"
                 onClick={() => {
                   if (input) {
-                    addEntry(input);
+                    addEntry(`${mode}::${input}`);
                     processText();
                   }
                 }}

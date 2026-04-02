@@ -54,6 +54,23 @@ function truncate(text: string, max: number): string {
   return `${text.slice(0, max)}...`;
 }
 
+/** 저장된 입력에서 표시용 텍스트 추출 (mode:: 접두사, ||| 구분자 정리) */
+function displayText(input: string, label?: string): string {
+  if (label) return label;
+  let text = input;
+  // mode::value 형태의 접두사 제거
+  const modeSep = text.indexOf('::');
+  if (modeSep !== -1 && modeSep < 10) {
+    text = text.slice(modeSep + 2);
+  }
+  // JWT의 ||| 구분자 → 보기 좋게
+  if (text.includes('|||')) {
+    const parts = text.split('|||');
+    return truncate(`Header + Payload: ${parts[0]?.slice(0, 20) ?? ''}...`, 50);
+  }
+  return truncate(text, 50);
+}
+
 function HistoryPanelContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const toolId = TOOL_ID_MAP[pathname] || '';
@@ -136,7 +153,7 @@ function HistoryPanelContent({ onClose }: { onClose?: () => void }) {
                     title="클릭하여 복원"
                   >
                     <p className="text-sm font-mono text-on-surface truncate">
-                      {entry.label || truncate(entry.input, 50)}
+                      {displayText(entry.input, entry.label)}
                     </p>
                     <p className="text-[11px] text-on-surface-muted mt-0.5">
                       {formatTime(entry.timestamp)}

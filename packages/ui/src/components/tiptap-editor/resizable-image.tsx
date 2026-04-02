@@ -81,7 +81,11 @@ function ResizableImageView({
   }, [isResizing, updateAttributes]);
 
   return (
-    <NodeViewWrapper as="span" className="inline-block relative">
+    <NodeViewWrapper
+      data-drag-handle
+      as="span"
+      className="inline-block relative"
+    >
       <span
         className="inline-block relative group"
         style={{
@@ -89,11 +93,12 @@ function ResizableImageView({
         }}
       >
         <img
-          draggable
           alt={node.attrs.alt || ''}
           className={`block max-w-full h-auto rounded ${
             selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
           }`}
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
           ref={imgRef}
           src={node.attrs.src}
           style={{ width: '100%' }}
@@ -119,6 +124,8 @@ function ResizableImageView({
 }
 
 export const ResizableImage = Image.extend({
+  draggable: true,
+
   addAttributes() {
     return {
       ...this.parent?.(),

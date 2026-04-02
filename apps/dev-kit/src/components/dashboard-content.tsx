@@ -180,6 +180,29 @@ const tools: ToolDef[] = [
     ),
   },
   {
+    id: 'color-converter',
+    title: 'Color Converter',
+    description: 'HEX, RGB, HSL 색상 값을 변환하고 미리보기하세요',
+    color: 'purple',
+    onboarding: '색상 값을 변환하거나 확인하고 싶다면?',
+    tags: ['HEX', 'RGB', 'HSL'],
+    icon: (
+      <svg
+        className="w-5 h-5 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        />
+      </svg>
+    ),
+  },
+  {
     id: 'web-editor',
     title: 'Web Editor',
     description: 'WYSIWYG 에디터로 손쉽게 문서를 작성하세요',

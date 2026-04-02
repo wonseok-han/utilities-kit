@@ -42,6 +42,12 @@ export const SIDEBAR_MENU_ITEMS: MenuItemType[] = [
     path: '/url-encoder',
   },
   {
+    id: 'color-converter',
+    label: 'Color Converter',
+    icon: 'color',
+    path: '/color-converter',
+  },
+  {
     id: 'web-editor',
     label: 'Web Editor',
     icon: 'webEditor',

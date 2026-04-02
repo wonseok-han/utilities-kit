@@ -7,15 +7,9 @@ import { useEffect } from 'react';
  * 설정 스토어의 값을 DOM에 실제 적용하는 프로바이더 컴포넌트.
  * - theme → <html data-theme="light|dark">
  * - fontSize → CSS 변수 --app-font-size
- * - compactMode → <html data-compact="true|false">
  */
 export function SettingsProvider() {
-  const {
-    compactMode: isCompactMode,
-    fontSize,
-    hasHydrated,
-    theme,
-  } = useSettingStore();
+  const { fontSize, hasHydrated, theme } = useSettingStore();
 
   // 테마 적용
   useEffect(() => {
@@ -50,15 +44,6 @@ export function SettingsProvider() {
       `${fontSize}px`
     );
   }, [fontSize, hasHydrated]);
-
-  // 컴팩트 모드 적용
-  useEffect(() => {
-    if (!hasHydrated) return;
-    document.documentElement.setAttribute(
-      'data-compact',
-      String(isCompactMode)
-    );
-  }, [isCompactMode, hasHydrated]);
 
   return null;
 }

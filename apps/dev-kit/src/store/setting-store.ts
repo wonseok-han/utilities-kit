@@ -5,7 +5,6 @@ interface SettingState {
   // 외관 설정
   theme: 'light' | 'dark' | 'system';
   fontSize: number;
-  compactMode: boolean;
 
   // 기능 설정
   codeTheme: string;
@@ -24,7 +23,6 @@ interface SettingState {
   // 액션들
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setFontSize: (size: number) => void;
-  setCompactMode: (enabled: boolean) => void;
   setCodeTheme: (theme: string) => void;
   setAutoFormat: (enabled: boolean) => void;
   setAutoCopy: (enabled: boolean) => void;
@@ -47,7 +45,6 @@ interface SettingState {
 const defaultSettings = {
   theme: 'system' as const,
   fontSize: 14,
-  compactMode: false,
   codeTheme: 'vs-dark',
   autoFormat: true,
   autoCopy: false,
@@ -69,7 +66,6 @@ export const useSettingStore = create<SettingState>()(
       // 액션들
       setTheme: (theme) => set({ theme }),
       setFontSize: (fontSize) => set({ fontSize }),
-      setCompactMode: (compactMode) => set({ compactMode }),
       setCodeTheme: (codeTheme) => set({ codeTheme }),
       setAutoFormat: (autoFormat) => set({ autoFormat }),
       setAutoCopy: (autoCopy) => set({ autoCopy }),

@@ -8,15 +8,8 @@ export interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
-  const {
-    compactMode: isCompactMode,
-    fontSize,
-    resetSettings,
-    setCompactMode,
-    setFontSize,
-    setTheme,
-    theme,
-  } = useSettingStore();
+  const { fontSize, resetSettings, setFontSize, setTheme, theme } =
+    useSettingStore();
   return (
     <>
       {/* 배경 오버레이 - 설정패널 영역을 제외한 나머지 화면 */}
@@ -109,25 +102,6 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
                   <div className="text-right text-sm text-on-surface-muted mt-1">
                     {fontSize}px
                   </div>
-                </div>
-
-                {/* 컴팩트 모드 */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-on-surface-muted">
-                    컴팩트 모드
-                  </span>
-                  <button
-                    className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
-                      isCompactMode ? 'bg-blue-500' : 'bg-surface-skeleton'
-                    }`}
-                    onClick={() => setCompactMode(!isCompactMode)}
-                  >
-                    <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                        isCompactMode ? 'translate-x-5' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
                 </div>
               </div>
             </div>

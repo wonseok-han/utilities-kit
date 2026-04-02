@@ -31,9 +31,6 @@ body,
 
   /* 폰트 사이즈 */
   --app-font-size: 14px;
-
-  /* 컴팩트 모드 간격 */
-  --spacing-scale: 1;
 }
 
 /* 라이트 테마 */
@@ -56,23 +53,9 @@ body,
   --color-warning: #d97706; /* amber-600 */
 }
 
-/* 컴팩트 모드 */
-[data-compact='true'] {
-  --spacing-scale: 0.75;
-}
-
 /* 폰트 사이즈 적용 (html에 설정하여 rem 기반 Tailwind 유틸리티도 비례 스케일링) */
 html {
   font-size: var(--app-font-size);
-}
-
-/* 컴팩트 모드: 주요 간격 조정 */
-[data-compact='true'] .compact-p {
-  padding: calc(1rem * var(--spacing-scale));
-}
-
-[data-compact='true'] .compact-gap {
-  gap: calc(1rem * var(--spacing-scale));
 }
 
 /* Tailwind v4 @theme: CSS 변수를 Tailwind 유틸리티로 매핑 */

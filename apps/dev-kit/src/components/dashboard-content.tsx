@@ -1,15 +1,30 @@
 'use client';
 
 import { ToolCard } from '@repo/ui';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 
-const toolCards = [
+const RECENT_TOOLS_KEY = 'dev-kit-recent-tools';
+const MAX_RECENT = 3;
+
+interface ToolDef {
+  id: string;
+  title: string;
+  description: string;
+  color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo' | 'emerald';
+  icon: React.ReactNode;
+  onboarding: string;
+  tags: string[];
+}
+
+const tools: ToolDef[] = [
   {
     id: 'json-formatter',
     title: 'JSON Formatter',
     description: 'JSON 데이터를 예쁘게 포맷하고 검증하세요',
-    color: 'blue' as const,
+    color: 'blue',
+    onboarding: 'JSON을 정리하거나 검증하고 싶다면?',
+    tags: ['포맷', '검증', '압축'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -30,7 +45,9 @@ const toolCards = [
     id: 'base64-encoder',
     title: 'Base64 Encoder',
     description: '텍스트와 파일을 Base64로 인코딩/디코딩',
-    color: 'green' as const,
+    color: 'green',
+    onboarding: '텍스트를 인코딩/디코딩하고 싶다면?',
+    tags: ['Base64', '인코딩', '디코딩'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -51,7 +68,9 @@ const toolCards = [
     id: 'jwt-encoder',
     title: 'JWT Encoder',
     description: 'JWT 토큰을 생성하고 디코딩하여 분석하세요',
-    color: 'red' as const,
+    color: 'red',
+    onboarding: 'JWT 토큰을 분석하거나 생성하고 싶다면?',
+    tags: ['JWT', 'Header', 'Payload'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -72,7 +91,9 @@ const toolCards = [
     id: 'regex-tester',
     title: 'Regex Tester',
     description: '정규식 패턴을 테스트하고 매치 결과를 확인하세요',
-    color: 'purple' as const,
+    color: 'purple',
+    onboarding: '정규식을 테스트하고 싶다면?',
+    tags: ['패턴', '매치', '플래그'],
     icon: (
       <svg
         className="w-6 h-6"
@@ -90,10 +111,35 @@ const toolCards = [
     ),
   },
   {
+    id: 'timestamp-converter',
+    title: 'Timestamp Converter',
+    description: 'Unix Timestamp와 날짜/시간을 상호 변환하세요',
+    color: 'orange',
+    onboarding: '타임스탬프를 변환하고 싶다면?',
+    tags: ['Unix', '타임존', 'ISO 8601'],
+    icon: (
+      <svg
+        className="w-5 h-5 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        />
+      </svg>
+    ),
+  },
+  {
     id: 'diff',
     title: 'Diff Comparator',
     description: '두 텍스트의 차이점을 한눈에 비교하세요',
-    color: 'indigo' as const,
+    color: 'indigo',
+    onboarding: '두 텍스트를 비교하고 싶다면?',
+    tags: ['Diff', 'Side by Side', 'Inline'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -114,7 +160,9 @@ const toolCards = [
     id: 'web-editor',
     title: 'Web Editor',
     description: 'WYSIWYG 에디터로 손쉽게 문서를 작성하세요',
-    color: 'emerald' as const,
+    color: 'emerald',
+    onboarding: 'HTML 문서를 작성하고 싶다면?',
+    tags: ['WYSIWYG', 'HTML', 'Tiptap'],
     icon: (
       <svg
         className="w-6 h-6"
@@ -132,124 +180,150 @@ const toolCards = [
       </svg>
     ),
   },
-  {
-    id: 'timestamp-converter',
-    title: 'Timestamp Converter',
-    description: 'Unix Timestamp와 날짜/시간을 상호 변환하세요',
-    color: 'orange' as const,
-    icon: (
-      <svg
-        className="w-5 h-5 text-white"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-        />
-      </svg>
-    ),
-  },
 ];
+
+const toolsMap = new Map(tools.map((t) => [t.id, t]));
+
+function getRecentToolIds(): string[] {
+  try {
+    const stored = localStorage.getItem(RECENT_TOOLS_KEY);
+    if (!stored) return [];
+    const ids = JSON.parse(stored) as string[];
+    return ids.filter((id) => toolsMap.has(id));
+  } catch {
+    return [];
+  }
+}
+
+function addRecentTool(id: string) {
+  const recent = getRecentToolIds().filter((t) => t !== id);
+  recent.unshift(id);
+  localStorage.setItem(
+    RECENT_TOOLS_KEY,
+    JSON.stringify(recent.slice(0, MAX_RECENT))
+  );
+}
 
 export function DashboardContent() {
   const router = useRouter();
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const pathname = usePathname();
+  const [recentIds, setRecentIds] = useState<string[]>([]);
 
-  const handleToolCardClick = (tool: string) => {
-    router.push(`/${tool}`);
-  };
-
-  // 자동 슬라이드 전환
   useEffect(() => {
-    const getSlidesPerView = () => {
-      if (window.innerWidth < 1024) return 1;
-      if (window.innerWidth < 1280) return 2;
-      return 3;
-    };
-
-    const interval = setInterval(() => {
-      const slidesPerView = getSlidesPerView();
-      setCurrentSlide(
-        (prev) => (prev + 1) % Math.ceil(toolCards.length / slidesPerView)
-      );
-    }, 5000);
-
-    return () => clearInterval(interval);
+    setRecentIds(getRecentToolIds());
   }, []);
 
+  useEffect(() => {
+    if (pathname === '/') {
+      setRecentIds(getRecentToolIds());
+    }
+  }, [pathname]);
+
+  const handleToolClick = useCallback(
+    (id: string) => {
+      addRecentTool(id);
+      setRecentIds(getRecentToolIds());
+      router.push(`/${id}`);
+    },
+    [router]
+  );
+
+  const recentTools = recentIds
+    .map((id) => toolsMap.get(id))
+    .filter(Boolean) as ToolDef[];
+
   return (
-    <div className="flex flex-col h-full items-center justify-center p-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-normal text-accent mb-4">
-          Welcome to Dev Kit
-        </h1>
-        <p className="text-on-surface-muted text-lg">
-          개발자를 위한 필수 도구들을 한 곳에서!!
-        </p>
+    <div className="flex flex-col h-full overflow-y-auto p-6 md:p-8">
+      {/* 헤더 */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-on-surface mb-2">Dev Kit</h1>
+        <p className="text-on-surface-muted">무엇을 하고 싶으세요?</p>
       </div>
 
-      {/* 도구 카드 캐러셀 */}
-      <div className="w-full mx-auto mb-8">
-        <div
-          aria-roledescription="carousel"
-          className="relative min-w-full mx-auto rounded-lg overflow-hidden max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl"
-          role="region"
-        >
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-          >
-            {toolCards.map((tool) => (
-              <div
+      {/* 최근 사용 */}
+      {recentTools.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-3">
+            최근 사용
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {recentTools.map((tool) => (
+              <ToolCard
                 key={tool.id}
-                aria-roledescription="slide"
-                className="min-w-0 shrink-0 grow-0 basis-full pl-1 lg:basis-1/2 xl:basis-1/3"
-                role="group"
-              >
-                <div className="p-1">
-                  <ToolCard
-                    color={tool.color}
-                    description={tool.description}
-                    icon={tool.icon}
-                    onClick={() => handleToolCardClick(tool.id)}
-                    title={tool.title}
-                  />
-                </div>
-              </div>
+                color={tool.color}
+                description={tool.description}
+                icon={tool.icon}
+                onClick={() => handleToolClick(tool.id)}
+                title={tool.title}
+              />
             ))}
           </div>
+        </section>
+      )}
 
-          {/* 인디케이터 */}
-          <div className="flex justify-center mt-4 space-x-2">
-            {(() => {
-              const getSlidesPerView = () => {
-                if (window.innerWidth < 1024) return 1;
-                if (window.innerWidth < 1280) return 2;
-                return 3;
-              };
-              const slidesPerView = getSlidesPerView();
-              return Array.from(
-                { length: Math.ceil(toolCards.length / slidesPerView) },
-                (_, index) => (
-                  <button
-                    key={index}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      index === currentSlide
-                        ? 'bg-accent'
-                        : 'bg-surface-skeleton'
-                    }`}
-                    onClick={() => setCurrentSlide(index)}
+      {/* 온보딩 카드 */}
+      <section>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {tools.map((tool) => (
+            <button
+              key={tool.id}
+              className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border bg-surface-deep hover:border-accent/40 hover:shadow-lg transition-all cursor-pointer text-left min-h-[160px] overflow-hidden"
+              onClick={() => handleToolClick(tool.id)}
+            >
+              {/* 배경 장식 */}
+              <div
+                className={`absolute -right-4 -top-4 w-24 h-24 bg-${tool.color}-600/10 rounded-full blur-2xl transition-transform duration-300 group-hover:scale-150`}
+              />
+
+              {/* 질문 + 설명 */}
+              <div className="relative z-10">
+                <p className="text-lg font-medium text-on-surface leading-snug">
+                  {tool.onboarding}
+                </p>
+                <p className="text-sm text-on-surface-muted mt-1.5 leading-relaxed">
+                  {tool.description}
+                </p>
+                {/* 태그 */}
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {tool.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-0.5 text-[11px] rounded-full bg-surface-elevated/60 text-on-surface-muted"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* 도구명 + 아이콘 */}
+              <div className="flex items-center gap-2.5 mt-5 relative z-10">
+                <div
+                  className={`w-8 h-8 bg-${tool.color}-600 rounded-lg flex items-center justify-center shrink-0`}
+                >
+                  {tool.icon}
+                </div>
+                <span className="text-sm font-semibold text-on-surface-muted group-hover:text-accent transition-colors">
+                  {tool.title}
+                </span>
+                <svg
+                  className="w-4 h-4 text-on-surface-muted/0 group-hover:text-accent group-hover:translate-x-1 transition-all ml-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M9 5l7 7-7 7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
-                )
-              );
-            })()}
-          </div>
+                </svg>
+              </div>
+            </button>
+          ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

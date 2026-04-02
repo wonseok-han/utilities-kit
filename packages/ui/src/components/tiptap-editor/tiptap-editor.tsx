@@ -3,7 +3,6 @@
 import Color from '@tiptap/extension-color';
 import HardBreak from '@tiptap/extension-hard-break';
 import Highlight from '@tiptap/extension-highlight';
-import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import { FontSize, TextStyle } from '@tiptap/extension-text-style';
 import { Dropcursor } from '@tiptap/extensions';
@@ -12,6 +11,7 @@ import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect } from 'react';
 
 import { MenuBar } from './menubar';
+import { ResizableImage } from './resizable-image';
 
 export interface TiptapEditorProps {
   value?: string;
@@ -106,7 +106,7 @@ export function TiptapEditor({
         types: ['heading', 'paragraph', 'image'],
       }),
       Highlight,
-      Image.configure({
+      ResizableImage.configure({
         inline: true,
         allowBase64: true,
       }),

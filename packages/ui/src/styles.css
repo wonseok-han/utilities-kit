@@ -184,6 +184,27 @@
   padding: 0.1rem 0.3rem;
 }
 
+/* 이미지 스타일 */
+.customEditor .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: outline 0.15s ease;
+}
+
+.customEditor .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* 이미지 드래그 시 크기 조절 가능하도록 */
+.customEditor .ProseMirror img {
+  resize: both;
+  overflow: hidden;
+  display: inline-block;
+}
+
 .monaco-editor {
   position: absolute !important;
 }

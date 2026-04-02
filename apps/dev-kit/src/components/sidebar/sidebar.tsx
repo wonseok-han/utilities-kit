@@ -1,8 +1,8 @@
 'use client';
 
-import IconLogo from '@assets/icons/icon-logo.svg';
 import { useDeviceStore } from '@store/device-store';
 import { getCurrentPageInfo } from '@utils/menu';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { memo } from 'react';
 
@@ -41,7 +41,12 @@ export const Sidebar = memo(function Sidebar({
 
   const Title = (
     <div className="relative flex items-center space-x-2 ml-2 mt-2">
-      <IconLogo />
+      <Image
+        alt="Dev Kit Logo"
+        height={38}
+        src="/favicon-pixel-clean.png"
+        width={38}
+      />
       <span
         className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${
           isOpen || isMobile

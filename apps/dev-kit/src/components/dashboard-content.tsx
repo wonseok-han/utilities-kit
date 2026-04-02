@@ -256,7 +256,7 @@ export function DashboardContent() {
       {/* 온보딩 - 유스케이스 기반 도구 안내 */}
       <section>
         <h2 className="text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-3">
-          이런 일을 하고 싶다면
+          도구
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {tools.map((tool) => (

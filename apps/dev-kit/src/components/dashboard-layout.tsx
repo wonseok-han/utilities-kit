@@ -38,6 +38,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleMenuItemClick = (path: string) => {
     router.push(path);
 
+    // 최근 사용 도구 기록
+    const toolId = path.replace('/', '');
+    if (toolId) {
+      try {
+        const key = 'dev-kit-recent-tools';
+        const stored = localStorage.getItem(key);
+        const recent = stored ? (JSON.parse(stored) as string[]) : [];
+        const updated = [toolId, ...recent.filter((t) => t !== toolId)].slice(
+          0,
+          3
+        );
+        localStorage.setItem(key, JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+    }
+
     // 모바일에서 메뉴 클릭 시 사이드바 닫기
     if (isDeviceMobile) {
       closeSidebar();

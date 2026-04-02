@@ -33,24 +33,24 @@ body,
   --app-font-size: 14px;
 }
 
-/* 라이트 테마 (블루 틴트) */
+/* 라이트 테마 */
 [data-theme='light'] {
-  --color-surface: #f8fafc; /* slate-50 */
-  --color-surface-deep: #ffffff;
-  --color-surface-elevated: #e2e8f0; /* slate-200 */
-  --color-surface-skeleton: #cbd5e1; /* slate-300 */
-  --color-on-surface: #0f172a; /* slate-900 */
-  --color-on-surface-secondary: #475569; /* slate-600 */
-  --color-on-surface-muted: #64748b; /* slate-500 */
-  --color-border: #e2e8f0; /* slate-200 */
-  --color-border-light: #f1f5f9; /* slate-100 */
-  --color-input-bg: #f1f5f9; /* slate-100 */
-  --color-input-border: #cbd5e1; /* slate-300 */
-  --color-accent: #3b82f6; /* blue-500 */
-  --color-accent-hover: #2563eb; /* blue-600 */
-  --color-danger: #ef4444; /* red-500 */
-  --color-success: #22c55e; /* green-500 */
-  --color-warning: #f59e0b; /* amber-500 */
+  --color-surface: #eef2f7; /* 사이드바/헤더 - 눈에 띄는 라이트 블루그레이 */
+  --color-surface-deep: #ffffff; /* 메인 콘텐츠 - 깨끗한 화이트 */
+  --color-surface-elevated: #dfe6ee; /* 호버/활성 배경 */
+  --color-surface-skeleton: #c9d3df; /* 스켈레톤/비활성 */
+  --color-on-surface: #1a2332; /* 본문 텍스트 - 진한 네이비 블랙 */
+  --color-on-surface-secondary: #3d4f63; /* 보조 텍스트 */
+  --color-on-surface-muted: #6b7f95; /* 비활성 텍스트 */
+  --color-border: #d5dde6; /* 경계선 */
+  --color-border-light: #e8edf3; /* 약한 경계선 */
+  --color-input-bg: #f5f7fa; /* 입력 필드 배경 */
+  --color-input-border: #c9d3df; /* 입력 필드 경계선 */
+  --color-accent: #2563eb; /* blue-600 - 선명한 포인트 */
+  --color-accent-hover: #1d4ed8; /* blue-700 */
+  --color-danger: #dc2626; /* red-600 */
+  --color-success: #16a34a; /* green-600 */
+  --color-warning: #d97706; /* amber-600 */
 }
 
 /* 폰트 사이즈 적용 (html에 설정하여 rem 기반 Tailwind 유틸리티도 비례 스케일링) */

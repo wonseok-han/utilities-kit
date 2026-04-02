@@ -4,7 +4,32 @@ import Image from '@tiptap/extension-image';
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-/** 리사이즈 가능한 이미지 NodeView */
+type HandleDirection = 'nw' | 'ne' | 'sw' | 'se';
+
+const HANDLE_STYLES: Record<
+  HandleDirection,
+  { position: string; cursor: string }
+> = {
+  nw: { position: 'top-0 left-0 rounded-br-sm', cursor: 'cursor-nw-resize' },
+  ne: { position: 'top-0 right-0 rounded-bl-sm', cursor: 'cursor-ne-resize' },
+  sw: {
+    position: 'bottom-0 left-0 rounded-tr-sm',
+    cursor: 'cursor-sw-resize',
+  },
+  se: {
+    position: 'bottom-0 right-0 rounded-tl-sm',
+    cursor: 'cursor-se-resize',
+  },
+};
+
+// 좌측 핸들은 드래그 방향을 반전
+const DIRECTION_MULTIPLIER: Record<HandleDirection, number> = {
+  nw: -1,
+  ne: 1,
+  sw: -1,
+  se: 1,
+};
+
 function ResizableImageView({
   node,
   selected,
@@ -13,27 +38,32 @@ function ResizableImageView({
   node: {
     attrs: { src: string; alt?: string; title?: string; width?: number };
   };
-  updateAttributes: (attrs: Record<string, unknown>) => void;
   selected: boolean;
+  updateAttributes: (attrs: Record<string, unknown>) => void;
 }) {
   const [isResizing, setIsResizing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const startX = useRef(0);
   const startWidth = useRef(0);
+  const multiplier = useRef(1);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsResizing(true);
-    startX.current = e.clientX;
-    startWidth.current = imgRef.current?.offsetWidth || 300;
-  }, []);
+  const handleMouseDown = useCallback(
+    (direction: HandleDirection, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsResizing(true);
+      startX.current = e.clientX;
+      startWidth.current = imgRef.current?.offsetWidth || 300;
+      multiplier.current = DIRECTION_MULTIPLIER[direction];
+    },
+    []
+  );
 
   useEffect(() => {
     if (!isResizing) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const diff = e.clientX - startX.current;
+      const diff = (e.clientX - startX.current) * multiplier.current;
       const newWidth = Math.max(50, startWidth.current + diff);
       updateAttributes({ width: newWidth });
     };
@@ -69,20 +99,25 @@ function ResizableImageView({
           style={{ width: '100%' }}
           title={node.attrs.title || undefined}
         />
-        {/* 리사이즈 핸들 (우하단) */}
-        {selected && (
-          <span
-            className="absolute bottom-0 right-0 w-3 h-3 bg-blue-500 cursor-se-resize rounded-tl-sm"
-            onMouseDown={handleMouseDown}
-            style={{ touchAction: 'none' }}
-          />
-        )}
+        {selected &&
+          (
+            Object.entries(HANDLE_STYLES) as [
+              HandleDirection,
+              (typeof HANDLE_STYLES)[HandleDirection],
+            ][]
+          ).map(([dir, style]) => (
+            <span
+              key={dir}
+              className={`absolute w-3 h-3 bg-blue-500 ${style.cursor} ${style.position}`}
+              onMouseDown={(e) => handleMouseDown(dir, e)}
+              style={{ touchAction: 'none' }}
+            />
+          ))}
       </span>
     </NodeViewWrapper>
   );
 }
 
-/** Image 확장에 리사이즈 NodeView를 추가한 커스텀 확장 */
 export const ResizableImage = Image.extend({
   addAttributes() {
     return {

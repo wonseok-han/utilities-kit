@@ -91,7 +91,7 @@ function ResizableImageView({
         <img
           alt={node.attrs.alt || ''}
           className={`block max-w-full h-auto rounded pointer-events-none select-none ${
-            selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+            selected ? 'ring-2 ring-blue-500' : ''
           }`}
           ref={imgRef}
           src={node.attrs.src}

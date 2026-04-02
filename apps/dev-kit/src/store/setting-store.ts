@@ -17,8 +17,9 @@ interface SettingState {
   maxHistoryItems: number;
   debugMode: boolean;
 
-  // 설정 패널 상태
+  // 패널 상태
   isSettingsPanelOpen: boolean;
+  isHistoryPanelOpen: boolean;
 
   // 액션들
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
@@ -34,6 +35,7 @@ interface SettingState {
   setDebugMode: (enabled: boolean) => void;
   setIsSettingsPanelOpen: (open: boolean) => void;
   toggleSettingsPanel: () => void;
+  toggleHistoryPanel: () => void;
 
   // 설정 초기화
   resetSettings: () => void;
@@ -55,6 +57,7 @@ const defaultSettings = {
   maxHistoryItems: 50,
   debugMode: false,
   isSettingsPanelOpen: false,
+  isHistoryPanelOpen: false,
 };
 
 export const useSettingStore = create<SettingState>()(
@@ -79,6 +82,8 @@ export const useSettingStore = create<SettingState>()(
         set({ isSettingsPanelOpen }),
       toggleSettingsPanel: () =>
         set((state) => ({ isSettingsPanelOpen: !state.isSettingsPanelOpen })),
+      toggleHistoryPanel: () =>
+        set((state) => ({ isHistoryPanelOpen: !state.isHistoryPanelOpen })),
 
       // 설정 초기화
       resetSettings: () => set({ ...defaultSettings }),

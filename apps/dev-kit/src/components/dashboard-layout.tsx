@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 import { Header } from './header';
+import { HistoryPanel } from './history-panel';
 import { LayoutSkeleton } from './layout-skeleton';
 import { SettingsPanel } from './settings-panel';
 import { Sidebar } from './sidebar/sidebar';
@@ -26,7 +27,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     open: openSidebar,
     toggle: onToggleSidebar,
   } = useSidebarStore();
-  const { isSettingsPanelOpen, toggleSettingsPanel } = useSettingStore();
+  const {
+    isHistoryPanelOpen,
+    isSettingsPanelOpen,
+    toggleHistoryPanel,
+    toggleSettingsPanel,
+  } = useSettingStore();
   const isMobile = useIsMobile();
   const {
     hasHydrated: hasDeviceHydrated,
@@ -97,7 +103,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex-1 flex flex-col transition-all duration-300">
         {/* 헤더 */}
         <Header
+          isHistoryPanelOpen={isHistoryPanelOpen}
           isSettingsPanelOpen={isSettingsPanelOpen}
+          onToggleHistoryPanel={toggleHistoryPanel}
           onToggleSettingsPanel={toggleSettingsPanel}
         />
 
@@ -107,7 +115,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
       </div>
 
-      {/* 우측 설정 패널 */}
+      {/* 우측 패널들 */}
+      <HistoryPanel isOpen={isHistoryPanelOpen} onClose={toggleHistoryPanel} />
       <SettingsPanel
         isOpen={isSettingsPanelOpen}
         onClose={toggleSettingsPanel}

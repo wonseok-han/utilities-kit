@@ -1,7 +1,9 @@
 'use client';
 
+import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useBase64Store } from '@store/base64-store';
+import { useCallback } from 'react';
 
 // 탭 아이템 정의
 const TAB_ITEMS = [
@@ -47,7 +49,7 @@ const SAMPLE_DATA = [
  */
 export function Base64EncoderClient() {
   const {
-    clearAll,
+    clearAll: clearBase64,
     error,
     input,
     mode,
@@ -57,6 +59,20 @@ export function Base64EncoderClient() {
     setMode,
     swapMode,
   } = useBase64Store();
+  const handleHistoryRestore = useCallback(
+    (value: string) => {
+      const sep = value.indexOf('::');
+      if (sep !== -1) {
+        const savedMode = value.slice(0, sep) as 'encode' | 'decode';
+        setMode(savedMode);
+        setInput(value.slice(sep + 2));
+      } else {
+        setInput(value);
+      }
+    },
+    [setInput, setMode]
+  );
+  const { addEntry } = useToolHistory('base64-encoder', handleHistoryRestore);
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -125,7 +141,12 @@ export function Base64EncoderClient() {
               <ActionButton
                 disabled={!input}
                 feedbackText="완료"
-                onClick={() => input && processText()}
+                onClick={() => {
+                  if (input) {
+                    addEntry(`${mode}::${input}`);
+                    processText();
+                  }
+                }}
                 variant="primary"
               >
                 {mode === 'encode' ? '인코딩' : '디코딩'}
@@ -141,7 +162,7 @@ export function Base64EncoderClient() {
               <ActionButton
                 disabled={!input && !output}
                 feedbackText="초기화 완료"
-                onClick={() => (input || output) && clearAll()}
+                onClick={() => (input || output) && clearBase64()}
                 variant="danger"
               >
                 초기화

@@ -1,7 +1,9 @@
 'use client';
 
+import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useJwtStore } from '@store';
+import { useCallback } from 'react';
 
 // ===== 샘플 데이터 정의 =====
 const SAMPLE_DATA = [
@@ -43,7 +45,7 @@ const SAMPLE_DATA = [
  */
 export function JwtEncoderClient() {
   const {
-    clearAll,
+    clearAll: clearJwt,
     decodeOutput,
     encodeOutput,
     error,
@@ -58,6 +60,23 @@ export function JwtEncoderClient() {
     setPayloadInput,
     swapMode,
   } = useJwtStore();
+
+  const handleHistoryRestore = useCallback(
+    (value: string) => {
+      if (value.includes('|||')) {
+        const parts = value.split('|||');
+        setHeaderInput(parts[0] ?? '');
+        setPayloadInput(parts[1] ?? '');
+        setMode('encode');
+      } else {
+        setInput(value);
+        setMode('decode');
+      }
+    },
+    [setHeaderInput, setPayloadInput, setMode, setInput]
+  );
+
+  const { addEntry } = useToolHistory('jwt-encoder', handleHistoryRestore);
 
   // ===== 현재 모드에 맞는 output 계산 =====
   const output = mode === 'encode' ? encodeOutput : decodeOutput;
@@ -106,7 +125,12 @@ export function JwtEncoderClient() {
             <ActionButton
               disabled={!headerInput || !payloadInput}
               feedbackText="완료"
-              onClick={() => headerInput && payloadInput && processText()}
+              onClick={() => {
+                if (headerInput && payloadInput) {
+                  addEntry(`${headerInput}|||${payloadInput}`, 'JWT Encode');
+                  processText();
+                }
+              }}
               variant="primary"
             >
               JWT 생성
@@ -123,7 +147,7 @@ export function JwtEncoderClient() {
               disabled={!headerInput && !payloadInput && !output}
               feedbackText="초기화 완료"
               onClick={() =>
-                (headerInput || payloadInput || output) && clearAll()
+                (headerInput || payloadInput || output) && clearJwt()
               }
               variant="danger"
             >
@@ -220,7 +244,12 @@ export function JwtEncoderClient() {
             <ActionButton
               disabled={!input}
               feedbackText="완료"
-              onClick={() => input && processText()}
+              onClick={() => {
+                if (input) {
+                  addEntry(input, 'JWT Decode');
+                  processText();
+                }
+              }}
               variant="primary"
             >
               디코딩
@@ -236,7 +265,7 @@ export function JwtEncoderClient() {
             <ActionButton
               disabled={!input && !output}
               feedbackText="초기화 완료"
-              onClick={() => (input || output) && clearAll()}
+              onClick={() => (input || output) && clearJwt()}
               variant="danger"
             >
               초기화

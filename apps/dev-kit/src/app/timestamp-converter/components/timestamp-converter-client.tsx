@@ -2,6 +2,7 @@
 
 import type { Dayjs } from '@repo/shared/date';
 
+import { useToolHistory } from '@hooks/use-tool-history';
 import {
   formatDate,
   getRelative,
@@ -98,7 +99,7 @@ function Badge({
 export function TimestampConverterClient() {
   // ===== zustand store 사용 =====
   const {
-    clearAll,
+    clearAll: clearTimestamp,
     input,
     selectedFormats,
     selectedTimezones,
@@ -106,6 +107,7 @@ export function TimestampConverterClient() {
     setSelectedFormats,
     setSelectedTimezones,
   } = useTimestampConverterStore();
+  const { addEntry } = useToolHistory('timestamp-converter', setInput);
   const [parsed, setParsed] = useState<Dayjs | null>(null);
   const [inputType, setInputType] = useState<ParsedDateType>('invalid');
   const [error, setError] = useState<string | null>(null);
@@ -169,7 +171,7 @@ export function TimestampConverterClient() {
 
   // ===== 입력값, 결과 모두 초기화 =====
   const handleReset = () => {
-    clearAll();
+    clearTimestamp();
     setParsed(null);
     setInputType('invalid');
     setError(null);
@@ -190,6 +192,7 @@ export function TimestampConverterClient() {
     } else {
       setParsed(parsedDate);
       setError(null);
+      addEntry(v);
     }
   };
 

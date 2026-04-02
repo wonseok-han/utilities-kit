@@ -1,8 +1,9 @@
 'use client';
 
+import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useRegexStore } from '@store/regex-store';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 // ===== 샘플 데이터 정의 =====
 const SAMPLE_PATTERNS = [
@@ -100,7 +101,7 @@ const SAMPLE_TEST_STRINGS = [
  */
 export function RegexTesterClient() {
   const {
-    clearAll,
+    clearAll: clearRegex,
     error,
     flags,
     matches,
@@ -111,6 +112,21 @@ export function RegexTesterClient() {
     testRegex,
     testString,
   } = useRegexStore();
+
+  const handleHistoryRestore = useCallback(
+    (value: string) => {
+      const separatorIndex = value.indexOf(' / ');
+      if (separatorIndex !== -1) {
+        setPattern(value.slice(0, separatorIndex));
+        setTestString(value.slice(separatorIndex + 3));
+      } else {
+        setPattern(value);
+      }
+    },
+    [setPattern, setTestString]
+  );
+
+  const { addEntry } = useToolHistory('regex-tester', handleHistoryRestore);
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -136,6 +152,7 @@ export function RegexTesterClient() {
   useEffect(() => {
     if (pattern && testString) {
       testRegex();
+      addEntry(`${pattern} / ${testString}`, pattern);
     }
   }, [pattern, testString]);
 
@@ -146,7 +163,7 @@ export function RegexTesterClient() {
         <ActionButton
           disabled={!pattern && !testString && !matches}
           feedbackText="초기화 완료"
-          onClick={clearAll}
+          onClick={clearRegex}
           variant="danger"
         >
           초기화

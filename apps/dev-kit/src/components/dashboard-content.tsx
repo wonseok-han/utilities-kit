@@ -157,6 +157,29 @@ const tools: ToolDef[] = [
     ),
   },
   {
+    id: 'url-encoder',
+    title: 'URL Encoder',
+    description: 'URL을 인코딩/디코딩하고 쿼리 파라미터를 파싱하세요',
+    color: 'blue',
+    onboarding: 'URL을 인코딩/디코딩하고 싶다면?',
+    tags: ['encode', 'decode', '쿼리 파싱'],
+    icon: (
+      <svg
+        className="w-5 h-5 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+        />
+      </svg>
+    ),
+  },
+  {
     id: 'web-editor',
     title: 'Web Editor',
     description: 'WYSIWYG 에디터로 손쉽게 문서를 작성하세요',

@@ -3,13 +3,13 @@
 import Color from '@tiptap/extension-color';
 import HardBreak from '@tiptap/extension-hard-break';
 import Highlight from '@tiptap/extension-highlight';
-import Image from '@tiptap/extension-image';
 import TextAlign from '@tiptap/extension-text-align';
 import { FontSize, TextStyle } from '@tiptap/extension-text-style';
 import { Dropcursor } from '@tiptap/extensions';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import React, { useEffect } from 'react';
+import ImageResize from 'tiptap-extension-resize-image';
 
 import { MenuBar } from './menubar';
 
@@ -103,10 +103,10 @@ export function TiptapEditor({
       Color, // 텍스트 색상
       FontSize, // 폰트 크기
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ['heading', 'paragraph', 'image'],
       }),
       Highlight,
-      Image.configure({
+      ImageResize.configure({
         inline: true,
         allowBase64: true,
       }),

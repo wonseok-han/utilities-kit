@@ -253,30 +253,48 @@ export function DashboardContent() {
         </section>
       )}
 
-      {/* 온보딩 - 유스케이스 기반 도구 안내 */}
+      {/* 온보딩 카드 */}
       <section>
-        <h2 className="text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-3">
-          도구
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {tools.map((tool) => (
             <button
               key={tool.id}
-              className="group flex items-center gap-4 p-4 rounded-xl border border-border bg-surface-deep hover:border-accent/40 hover:bg-accent/5 transition-all cursor-pointer text-left"
+              className="group relative flex flex-col justify-between p-6 rounded-2xl border border-border bg-surface-deep hover:border-accent/40 hover:shadow-lg transition-all cursor-pointer text-left min-h-[160px] overflow-hidden"
               onClick={() => handleToolClick(tool.id)}
             >
+              {/* 배경 장식 */}
               <div
-                className={`w-10 h-10 bg-${tool.color}-600 rounded-lg flex items-center justify-center shrink-0`}
-              >
-                {tool.icon}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm text-on-surface-muted mb-0.5">
-                  {tool.onboarding}
-                </p>
-                <p className="text-sm font-semibold text-on-surface group-hover:text-accent transition-colors">
+                className={`absolute -right-4 -top-4 w-24 h-24 bg-${tool.color}-600/10 rounded-full blur-2xl transition-transform duration-300 group-hover:scale-150`}
+              />
+
+              {/* 질문 */}
+              <p className="text-lg font-medium text-on-surface leading-snug relative z-10">
+                {tool.onboarding}
+              </p>
+
+              {/* 도구명 + 아이콘 */}
+              <div className="flex items-center gap-2.5 mt-4 relative z-10">
+                <div
+                  className={`w-8 h-8 bg-${tool.color}-600 rounded-lg flex items-center justify-center shrink-0`}
+                >
+                  {tool.icon}
+                </div>
+                <span className="text-sm font-semibold text-on-surface-muted group-hover:text-accent transition-colors">
                   {tool.title}
-                </p>
+                </span>
+                <svg
+                  className="w-4 h-4 text-on-surface-muted/0 group-hover:text-accent group-hover:translate-x-1 transition-all ml-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M9 5l7 7-7 7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
             </button>
           ))}

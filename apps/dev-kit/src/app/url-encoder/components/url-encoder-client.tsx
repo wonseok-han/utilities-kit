@@ -8,6 +8,8 @@ const TAB_ITEMS = [
   { id: 'decode', label: '디코딩' },
 ];
 
+type EncodeType = 'uri' | 'component';
+
 const SAMPLE_DATA = [
   {
     label: 'URL with 한글',
@@ -16,7 +18,7 @@ const SAMPLE_DATA = [
   },
   {
     label: '인코딩된 URL',
-    data: 'https%3A%2F%2Fexample.com%2Fsearch%3Fq%3D%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94%26lang%3Dko',
+    data: 'https://example.com/search?q=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94&lang=ko',
     isEncoded: true,
   },
   {
@@ -24,30 +26,49 @@ const SAMPLE_DATA = [
     data: 'name=%ED%99%8D%EA%B8%B8%EB%8F%99&age=30&city=Seoul&tags=%5B%22dev%22%2C%22web%22%5D',
     isEncoded: true,
   },
+  {
+    label: 'Component 인코딩',
+    data: 'https://example.com/path?key=value',
+    isEncoded: false,
+  },
 ];
 
 interface ParsedParam {
   key: string;
+  rawKey: string;
+  rawValue: string;
   value: string;
 }
 
 function parseQueryParams(input: string): ParsedParam[] {
   try {
-    // URL에서 쿼리스트링 추출, 또는 직접 쿼리스트링인 경우
     let queryString = input;
+    // URL에서 ? 이후 추출
     if (input.includes('?')) {
-      queryString = input.split('?')[1] || '';
+      queryString = input.split('?').slice(1).join('?');
     }
-    // &로 시작하면 제거
     queryString = queryString.replace(/^&/, '');
     if (!queryString) return [];
 
-    const params = new URLSearchParams(queryString);
-    const result: ParsedParam[] = [];
-    params.forEach((value, key) => {
-      result.push({ key, value });
+    // 수동 파싱 (raw 값도 보존)
+    return queryString.split('&').map((pair) => {
+      const eqIndex = pair.indexOf('=');
+      const rawKey = eqIndex === -1 ? pair : pair.slice(0, eqIndex);
+      const rawValue = eqIndex === -1 ? '' : pair.slice(eqIndex + 1);
+      let key = rawKey;
+      let value = rawValue;
+      try {
+        key = decodeURIComponent(rawKey);
+      } catch {
+        /* keep raw */
+      }
+      try {
+        value = decodeURIComponent(rawValue);
+      } catch {
+        /* keep raw */
+      }
+      return { key, rawKey, rawValue, value };
     });
-    return result;
   } catch {
     return [];
   }
@@ -55,6 +76,7 @@ function parseQueryParams(input: string): ParsedParam[] {
 
 export function UrlEncoderClient() {
   const [mode, setMode] = useState<'encode' | 'decode'>('encode');
+  const [encodeType, setEncodeType] = useState<EncodeType>('uri');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
@@ -71,9 +93,16 @@ export function UrlEncoderClient() {
 
     try {
       if (mode === 'encode') {
-        setOutput(encodeURIComponent(input));
+        setOutput(
+          encodeType === 'uri' ? encodeURI(input) : encodeURIComponent(input)
+        );
       } else {
-        setOutput(decodeURIComponent(input));
+        // 디코딩은 자동 감지: component 먼저 시도, 실패하면 URI
+        try {
+          setOutput(decodeURIComponent(input));
+        } catch {
+          setOutput(decodeURI(input));
+        }
       }
       setError('');
     } catch {
@@ -85,13 +114,14 @@ export function UrlEncoderClient() {
       setOutput('');
     }
 
-    // 쿼리 파라미터 파싱 (디코딩 모드에서)
-    if (mode === 'decode') {
-      setParsedParams(parseQueryParams(input));
+    // 쿼리 파라미터 파싱 (양쪽 모드 모두)
+    const target = mode === 'decode' ? input : input;
+    if (target.includes('?') || target.includes('=')) {
+      setParsedParams(parseQueryParams(target));
     } else {
       setParsedParams([]);
     }
-  }, [input, mode]);
+  }, [input, mode, encodeType]);
 
   useEffect(() => {
     process();
@@ -131,12 +161,41 @@ export function UrlEncoderClient() {
   return (
     <>
       {/* 모드 선택 */}
-      <div className="mb-4 flex items-center gap-4">
+      <div className="mb-4 flex flex-wrap items-center gap-4">
         <Tabs
           items={TAB_ITEMS}
           onChange={(v) => setMode(v as 'encode' | 'decode')}
           value={mode}
         />
+
+        {/* 인코딩 타입 (인코딩 모드일 때만) */}
+        {mode === 'encode' && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-on-surface-muted">방식:</span>
+            <button
+              className={`px-2.5 py-1 text-xs rounded-lg border transition-colors cursor-pointer ${
+                encodeType === 'uri'
+                  ? 'bg-accent/10 border-accent text-accent'
+                  : 'border-border text-on-surface-muted hover:border-on-surface-muted/30'
+              }`}
+              onClick={() => setEncodeType('uri')}
+              title="URL 구조(://?&= 등)를 유지하고 값만 인코딩"
+            >
+              encodeURI
+            </button>
+            <button
+              className={`px-2.5 py-1 text-xs rounded-lg border transition-colors cursor-pointer ${
+                encodeType === 'component'
+                  ? 'bg-accent/10 border-accent text-accent'
+                  : 'border-border text-on-surface-muted hover:border-on-surface-muted/30'
+              }`}
+              onClick={() => setEncodeType('component')}
+              title="모든 특수문자를 인코딩 (쿼리 파라미터 값에 적합)"
+            >
+              encodeURIComponent
+            </button>
+          </div>
+        )}
       </div>
 
       {/* 메인 영역 */}
@@ -217,13 +276,13 @@ export function UrlEncoderClient() {
           <div className="divide-y divide-border">
             {parsedParams.map((param) => (
               <div
-                key={`${param.key}-${param.value}`}
+                key={`${param.rawKey}-${param.rawValue}`}
                 className="flex items-center px-4 py-2.5 gap-4"
               >
                 <span className="text-sm font-mono font-semibold text-accent min-w-[120px] shrink-0">
                   {param.key}
                 </span>
-                <span className="text-sm font-mono text-on-surface break-all">
+                <span className="text-sm font-mono text-on-surface break-all flex-1">
                   {param.value}
                 </span>
                 <button

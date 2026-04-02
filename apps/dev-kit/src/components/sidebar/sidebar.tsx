@@ -43,9 +43,9 @@ export const Sidebar = memo(function Sidebar({
     <div className="relative flex items-center space-x-2 ml-2 mt-2">
       <Image
         alt="Dev Kit Logo"
-        height={38}
+        height={32}
         src="/favicon-pixel-clean.png"
-        width={38}
+        width={32}
       />
       <span
         className={`absolute left-12 whitespace-nowrap transition-all duration-300 overflow-hidden ${

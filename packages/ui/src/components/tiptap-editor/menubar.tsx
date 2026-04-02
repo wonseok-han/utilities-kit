@@ -379,13 +379,13 @@ export function MenuBar({
         <span className="line-through">S</span>
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isCode ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
+        className={`${baseBtn} cursor-pointer font-mono ${state.isCode ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         disabled={!state.canCode}
         onClick={() => editor.chain().focus().toggleCode().run()}
         title="코드 (Inline Code)"
         type="button"
       >
-        {'</>'}
+        {'<>'}
       </button>
       <button
         className={`${baseBtn} cursor-pointer ${state.isParagraph ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
@@ -620,7 +620,20 @@ export function MenuBar({
         title="코드 블록 (Code Block)"
         type="button"
       >
-        {'</>'}
+        <svg
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="16"
+        >
+          <path
+            d="M8 6L2 12l6 6M16 6l6 6-6 6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
       <button
         className={`${baseBtn} cursor-pointer`}

@@ -14,6 +14,7 @@ interface ToolDef {
   color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo' | 'emerald';
   icon: React.ReactNode;
   onboarding: string;
+  tags: string[];
 }
 
 const tools: ToolDef[] = [
@@ -23,6 +24,7 @@ const tools: ToolDef[] = [
     description: 'JSON 데이터를 예쁘게 포맷하고 검증하세요',
     color: 'blue',
     onboarding: 'JSON을 정리하거나 검증하고 싶다면?',
+    tags: ['포맷', '검증', '압축'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -45,6 +47,7 @@ const tools: ToolDef[] = [
     description: '텍스트와 파일을 Base64로 인코딩/디코딩',
     color: 'green',
     onboarding: '텍스트를 인코딩/디코딩하고 싶다면?',
+    tags: ['Base64', '인코딩', '디코딩'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -67,6 +70,7 @@ const tools: ToolDef[] = [
     description: 'JWT 토큰을 생성하고 디코딩하여 분석하세요',
     color: 'red',
     onboarding: 'JWT 토큰을 분석하거나 생성하고 싶다면?',
+    tags: ['JWT', 'Header', 'Payload'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -89,6 +93,7 @@ const tools: ToolDef[] = [
     description: '정규식 패턴을 테스트하고 매치 결과를 확인하세요',
     color: 'purple',
     onboarding: '정규식을 테스트하고 싶다면?',
+    tags: ['패턴', '매치', '플래그'],
     icon: (
       <svg
         className="w-6 h-6"
@@ -111,6 +116,7 @@ const tools: ToolDef[] = [
     description: 'Unix Timestamp와 날짜/시간을 상호 변환하세요',
     color: 'orange',
     onboarding: '타임스탬프를 변환하고 싶다면?',
+    tags: ['Unix', '타임존', 'ISO 8601'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -133,6 +139,7 @@ const tools: ToolDef[] = [
     description: '두 텍스트의 차이점을 한눈에 비교하세요',
     color: 'indigo',
     onboarding: '두 텍스트를 비교하고 싶다면?',
+    tags: ['Diff', 'Side by Side', 'Inline'],
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -155,6 +162,7 @@ const tools: ToolDef[] = [
     description: 'WYSIWYG 에디터로 손쉽게 문서를 작성하세요',
     color: 'emerald',
     onboarding: 'HTML 문서를 작성하고 싶다면?',
+    tags: ['WYSIWYG', 'HTML', 'Tiptap'],
     icon: (
       <svg
         className="w-6 h-6"
@@ -267,13 +275,29 @@ export function DashboardContent() {
                 className={`absolute -right-4 -top-4 w-24 h-24 bg-${tool.color}-600/10 rounded-full blur-2xl transition-transform duration-300 group-hover:scale-150`}
               />
 
-              {/* 질문 */}
-              <p className="text-lg font-medium text-on-surface leading-snug relative z-10">
-                {tool.onboarding}
-              </p>
+              {/* 질문 + 설명 */}
+              <div className="relative z-10">
+                <p className="text-lg font-medium text-on-surface leading-snug">
+                  {tool.onboarding}
+                </p>
+                <p className="text-sm text-on-surface-muted mt-1.5 leading-relaxed">
+                  {tool.description}
+                </p>
+                {/* 태그 */}
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {tool.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-0.5 text-[11px] rounded-full bg-surface-elevated/60 text-on-surface-muted"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
               {/* 도구명 + 아이콘 */}
-              <div className="flex items-center gap-2.5 mt-4 relative z-10">
+              <div className="flex items-center gap-2.5 mt-5 relative z-10">
                 <div
                   className={`w-8 h-8 bg-${tool.color}-600 rounded-lg flex items-center justify-center shrink-0`}
                 >

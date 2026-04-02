@@ -1,5 +1,7 @@
 'use client';
 
+import { ToolHistory } from '@components/tool-history';
+import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useBase64Store } from '@store/base64-store';
 
@@ -47,7 +49,7 @@ const SAMPLE_DATA = [
  */
 export function Base64EncoderClient() {
   const {
-    clearAll,
+    clearAll: clearBase64,
     error,
     input,
     mode,
@@ -57,6 +59,12 @@ export function Base64EncoderClient() {
     setMode,
     swapMode,
   } = useBase64Store();
+  const {
+    addEntry,
+    clearAll: clearHistory,
+    entries,
+    removeEntry,
+  } = useToolHistory('base64-encoder');
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -125,7 +133,12 @@ export function Base64EncoderClient() {
               <ActionButton
                 disabled={!input}
                 feedbackText="완료"
-                onClick={() => input && processText()}
+                onClick={() => {
+                  if (input) {
+                    addEntry(input);
+                    processText();
+                  }
+                }}
                 variant="primary"
               >
                 {mode === 'encode' ? '인코딩' : '디코딩'}
@@ -141,7 +154,7 @@ export function Base64EncoderClient() {
               <ActionButton
                 disabled={!input && !output}
                 feedbackText="초기화 완료"
-                onClick={() => (input || output) && clearAll()}
+                onClick={() => (input || output) && clearBase64()}
                 variant="danger"
               >
                 초기화
@@ -216,6 +229,13 @@ export function Base64EncoderClient() {
           ))}
         </div>
       </section>
+
+      <ToolHistory
+        entries={entries}
+        onClear={clearHistory}
+        onRemove={removeEntry}
+        onRestore={setInput}
+      />
     </>
   );
 }

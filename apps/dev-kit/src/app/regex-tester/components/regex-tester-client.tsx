@@ -1,5 +1,7 @@
 'use client';
 
+import { ToolHistory } from '@components/tool-history';
+import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useRegexStore } from '@store/regex-store';
 import { useEffect } from 'react';
@@ -100,7 +102,7 @@ const SAMPLE_TEST_STRINGS = [
  */
 export function RegexTesterClient() {
   const {
-    clearAll,
+    clearAll: clearRegex,
     error,
     flags,
     matches,
@@ -111,6 +113,13 @@ export function RegexTesterClient() {
     testRegex,
     testString,
   } = useRegexStore();
+
+  const {
+    addEntry,
+    clearAll: clearHistory,
+    entries,
+    removeEntry,
+  } = useToolHistory('regex-tester');
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -136,6 +145,7 @@ export function RegexTesterClient() {
   useEffect(() => {
     if (pattern && testString) {
       testRegex();
+      addEntry(`${pattern} / ${testString}`, pattern);
     }
   }, [pattern, testString]);
 
@@ -146,7 +156,7 @@ export function RegexTesterClient() {
         <ActionButton
           disabled={!pattern && !testString && !matches}
           feedbackText="초기화 완료"
-          onClick={clearAll}
+          onClick={clearRegex}
           variant="danger"
         >
           초기화
@@ -402,6 +412,18 @@ export function RegexTesterClient() {
           </div>
         </div>
       </div>
+
+      {/* ===== 히스토리 ===== */}
+      <ToolHistory
+        entries={entries}
+        onClear={clearHistory}
+        onRemove={removeEntry}
+        onRestore={(input) => {
+          const parts = input.split(' / ');
+          setPattern(parts[0] ?? '');
+          setTestString(parts.slice(1).join(' / '));
+        }}
+      />
     </>
   );
 }

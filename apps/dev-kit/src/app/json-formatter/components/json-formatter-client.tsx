@@ -1,5 +1,7 @@
 'use client';
 
+import { ToolHistory } from '@components/tool-history';
+import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useJsonStore } from '@store';
 
@@ -29,8 +31,21 @@ const SAMPLE_DATA = [
  * - 에러 처리
  */
 export function JsonFormatterClient() {
-  const { clearAll, error, formatJson, input, minifyJson, output, setInput } =
-    useJsonStore();
+  const {
+    clearAll: clearJson,
+    error,
+    formatJson,
+    input,
+    minifyJson,
+    output,
+    setInput,
+  } = useJsonStore();
+  const {
+    addEntry,
+    clearAll: clearHistory,
+    entries,
+    removeEntry,
+  } = useToolHistory('json-formatter');
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();
@@ -62,7 +77,12 @@ export function JsonFormatterClient() {
               <ActionButton
                 disabled={!input}
                 feedbackText="정렬 완료"
-                onClick={() => input && formatJson()}
+                onClick={() => {
+                  if (input) {
+                    addEntry(input);
+                    formatJson();
+                  }
+                }}
                 variant="primary"
               >
                 정렬
@@ -70,7 +90,12 @@ export function JsonFormatterClient() {
               <ActionButton
                 disabled={!input}
                 feedbackText="압축 완료"
-                onClick={() => input && minifyJson()}
+                onClick={() => {
+                  if (input) {
+                    addEntry(input);
+                    minifyJson();
+                  }
+                }}
                 variant="success"
               >
                 압축
@@ -78,7 +103,7 @@ export function JsonFormatterClient() {
               <ActionButton
                 disabled={!input}
                 feedbackText="초기화 완료"
-                onClick={() => input && clearAll()}
+                onClick={() => input && clearJson()}
                 variant="danger"
               >
                 초기화
@@ -141,6 +166,13 @@ export function JsonFormatterClient() {
           ))}
         </div>
       </div>
+
+      <ToolHistory
+        entries={entries}
+        onClear={clearHistory}
+        onRemove={removeEntry}
+        onRestore={setInput}
+      />
     </>
   );
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { ToolHistory } from '@components/tool-history';
+import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -82,6 +84,12 @@ export function UrlEncoderClient() {
   const [error, setError] = useState('');
   const [parsedParams, setParsedParams] = useState<ParsedParam[]>([]);
   const { showSnackbar } = useSnackbar();
+  const {
+    addEntry,
+    clearAll: clearHistory,
+    entries,
+    removeEntry,
+  } = useToolHistory('url-encoder');
 
   const process = useCallback(() => {
     if (!input.trim()) {
@@ -105,6 +113,7 @@ export function UrlEncoderClient() {
         }
       }
       setError('');
+      addEntry(input);
     } catch {
       setError(
         mode === 'encode'
@@ -121,7 +130,7 @@ export function UrlEncoderClient() {
     } else {
       setParsedParams([]);
     }
-  }, [input, mode, encodeType]);
+  }, [input, mode, encodeType, addEntry]);
 
   useEffect(() => {
     process();
@@ -329,6 +338,16 @@ export function UrlEncoderClient() {
           ))}
         </div>
       </div>
+
+      {/* ===== 히스토리 ===== */}
+      <ToolHistory
+        entries={entries}
+        onClear={clearHistory}
+        onRemove={removeEntry}
+        onRestore={(input) => {
+          setInput(input);
+        }}
+      />
     </>
   );
 }

@@ -2,6 +2,8 @@
 
 import type { Dayjs } from '@repo/shared/date';
 
+import { ToolHistory } from '@components/tool-history';
+import { useToolHistory } from '@hooks/use-tool-history';
 import {
   formatDate,
   getRelative,
@@ -98,7 +100,7 @@ function Badge({
 export function TimestampConverterClient() {
   // ===== zustand store 사용 =====
   const {
-    clearAll,
+    clearAll: clearTimestamp,
     input,
     selectedFormats,
     selectedTimezones,
@@ -106,6 +108,12 @@ export function TimestampConverterClient() {
     setSelectedFormats,
     setSelectedTimezones,
   } = useTimestampConverterStore();
+  const {
+    addEntry,
+    clearAll: clearHistory,
+    entries,
+    removeEntry,
+  } = useToolHistory('timestamp-converter');
   const [parsed, setParsed] = useState<Dayjs | null>(null);
   const [inputType, setInputType] = useState<ParsedDateType>('invalid');
   const [error, setError] = useState<string | null>(null);
@@ -169,7 +177,7 @@ export function TimestampConverterClient() {
 
   // ===== 입력값, 결과 모두 초기화 =====
   const handleReset = () => {
-    clearAll();
+    clearTimestamp();
     setParsed(null);
     setInputType('invalid');
     setError(null);
@@ -190,6 +198,7 @@ export function TimestampConverterClient() {
     } else {
       setParsed(parsedDate);
       setError(null);
+      addEntry(v);
     }
   };
 
@@ -247,6 +256,16 @@ export function TimestampConverterClient() {
           ))}
         </div>
       </div>
+
+      {/* ===== 히스토리 ===== */}
+      <ToolHistory
+        entries={entries}
+        onClear={clearHistory}
+        onRemove={removeEntry}
+        onRestore={(input) => {
+          setInput(input);
+        }}
+      />
 
       {/* ===== 타임존/포맷 선택: 라벨+전체, 배지는 wrap, 간격 축소 ===== */}
       <div className="flex flex-col gap-1 mb-2">

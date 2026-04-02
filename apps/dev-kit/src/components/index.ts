@@ -5,3 +5,4 @@ export * from './layout-skeleton';
 export * from './page-wrapper';
 export * from './settings-panel';
 export * from './settings-provider';
+export * from './tool-history';

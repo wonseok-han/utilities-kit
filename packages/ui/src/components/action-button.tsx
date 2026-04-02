@@ -15,20 +15,20 @@ export interface ActionButtonProps {
 
 const variantStyles = {
   primary: {
-    default: 'bg-blue-600 hover:bg-blue-700',
-    feedback: 'bg-blue-500 hover:bg-blue-600',
+    default: 'bg-blue-600 hover:bg-blue-700 text-white',
+    feedback: 'bg-blue-500 hover:bg-blue-600 text-white',
   },
   success: {
-    default: 'bg-green-600 hover:bg-green-700',
-    feedback: 'bg-green-500 hover:bg-green-600',
+    default: 'bg-green-600 hover:bg-green-700 text-white',
+    feedback: 'bg-green-500 hover:bg-green-600 text-white',
   },
   danger: {
-    default: 'bg-red-600 hover:bg-red-700',
-    feedback: 'bg-red-500 hover:bg-red-600',
+    default: 'bg-red-600 hover:bg-red-700 text-white',
+    feedback: 'bg-red-500 hover:bg-red-600 text-white',
   },
   secondary: {
-    default: 'bg-gray-600 hover:bg-gray-700',
-    feedback: 'bg-gray-500 hover:bg-gray-600',
+    default: 'bg-surface-elevated hover:bg-surface-skeleton text-on-surface',
+    feedback: 'bg-surface-skeleton hover:bg-surface-elevated text-on-surface',
   },
 };
 
@@ -70,7 +70,7 @@ export function ActionButton({
 
   return (
     <button
-      className={`text-white rounded transition-all ${variantClass} ${sizeClass} ${disabledClass} ${className}`}
+      className={`rounded transition-all ${variantClass} ${sizeClass} ${disabledClass} ${className}`}
       disabled={isActive || disabled}
       onClick={handleClick}
     >

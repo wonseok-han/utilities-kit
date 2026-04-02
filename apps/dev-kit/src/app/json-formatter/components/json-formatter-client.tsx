@@ -55,7 +55,7 @@ export function JsonFormatterClient() {
         {/* 입력 영역 */}
         <div className="flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-on-surface-secondary">
               입력 (JSON)
             </label>
             <div className="flex space-x-2">
@@ -95,7 +95,7 @@ export function JsonFormatterClient() {
         {/* 출력 영역 */}
         <div className="flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-on-surface-secondary">
               출력 결과
             </label>
             {output && (
@@ -111,8 +111,8 @@ export function JsonFormatterClient() {
           <div className="flex-1 relative">
             <CodeTextarea readOnly className="h-full w-full" value={output} />
             {error && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-90 rounded-lg">
-                <div className="text-red-400 text-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-surface bg-opacity-90 rounded-lg">
+                <div className="text-danger text-center">
                   <div className="mb-2">❌</div>
                   <div>{error}</div>
                 </div>
@@ -123,12 +123,10 @@ export function JsonFormatterClient() {
       </div>
 
       {/* 샘플 데이터 */}
-      <div className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
-        <h3 className="text-sm font-medium text-gray-300 mb-2">
+      <div className="mt-6 bg-surface rounded-lg p-4 border border-border">
+        <h3 className="text-sm font-medium text-on-surface-secondary mb-2">
           샘플 입력{' '}
-          <span className="text-xs text-blue-400">
-            (버튼을 누르면 자동 입력)
-          </span>
+          <span className="text-xs text-accent">(버튼을 누르면 자동 입력)</span>
         </h3>
         <div className="flex flex-wrap gap-2">
           {SAMPLE_DATA.map((sample) => (

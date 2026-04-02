@@ -227,10 +227,10 @@ export function DashboardContent({
       {/* 메인 웰컴 섹션 */}
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-normal text-blue-400 mb-4">
+          <h1 className="text-4xl font-normal text-accent mb-4">
             Welcome to Dev Kit
           </h1>
-          <p className="text-gray-400 text-lg">
+          <p className="text-on-surface-muted text-lg">
             개발자를 위한 필수 도구들을 한 곳에서!!
           </p>
         </div>
@@ -281,7 +281,9 @@ export function DashboardContent({
                     <button
                       key={index}
                       className={`w-2 h-2 rounded-full transition-colors ${
-                        index === currentSlide ? 'bg-blue-400' : 'bg-gray-600'
+                        index === currentSlide
+                          ? 'bg-accent'
+                          : 'bg-surface-skeleton'
                       }`}
                       onClick={() => setCurrentSlide(index)}
                     />
@@ -294,9 +296,9 @@ export function DashboardContent({
       </div>
 
       {/* 최신 CVE 섹션 */}
-      <div className="p-8 border-t border-gray-700">
+      <div className="p-8 border-t border-border">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-medium text-gray-300">
+          <h3 className="text-lg font-medium text-on-surface-secondary">
             최신 CVE 보안 취약점
           </h3>
           <ActionButton onClick={handleViewMoreCVEs} variant="secondary">
@@ -309,11 +311,11 @@ export function DashboardContent({
             {Array.from({ length: 6 }, (_, i) => (
               <div
                 key={i}
-                className="bg-gray-800 border border-gray-700 rounded-lg p-4 animate-pulse"
+                className="bg-surface border border-border rounded-lg p-4 animate-pulse"
               >
-                <div className="h-4 bg-gray-700 rounded mb-2" />
-                <div className="h-3 bg-gray-700 rounded mb-4" />
-                <div className="h-3 bg-gray-700 rounded" />
+                <div className="h-4 bg-surface-elevated rounded mb-2" />
+                <div className="h-3 bg-surface-elevated rounded mb-4" />
+                <div className="h-3 bg-surface-elevated rounded" />
               </div>
             ))}
           </div>
@@ -328,7 +330,9 @@ export function DashboardContent({
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-400">최신 CVE 데이터를 불러오는 중...</p>
+            <p className="text-on-surface-muted">
+              최신 CVE 데이터를 불러오는 중...
+            </p>
           </div>
         )}
       </div>

@@ -33,22 +33,22 @@ export function MobileSidebar({
 
       {/* 모바일 사이드바 */}
       <div
-        className={`fixed left-0 top-0 h-full w-full bg-gray-800 flex flex-col z-50 transform transition-transform duration-300 ${
+        className={`fixed left-0 top-0 h-full w-full bg-surface flex flex-col z-50 transform transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* 헤더 */}
-        <div className="p-4 border-b border-gray-700">
+        <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between">
             <button
-              className="text-lg font-semibold text-white hover:text-blue-400 transition-colors cursor-pointer"
+              className="text-lg font-semibold text-on-surface hover:text-accent transition-colors cursor-pointer"
               onClick={() => onItemClick?.('/')}
               title="대시보드로 이동"
             >
               {title}
             </button>
             <button
-              className="p-2 text-gray-400 hover:text-white rounded-lg transition-colors hover:bg-gray-700 cursor-pointer"
+              className="p-2 text-on-surface-muted hover:text-on-surface rounded-lg transition-colors hover:bg-surface-elevated cursor-pointer"
               onClick={onToggle}
               title="사이드바 닫기"
             >
@@ -76,8 +76,8 @@ export function MobileSidebar({
               key={item.id}
               className={`flex items-center px-4 py-3 rounded-lg cursor-pointer transition-colors ${
                 activeItem === item.id
-                  ? 'bg-gray-700 text-white'
-                  : 'text-gray-300 hover:bg-gray-700'
+                  ? 'bg-surface-elevated text-on-surface'
+                  : 'text-on-surface-secondary hover:bg-surface-elevated'
               }`}
               onClick={() => onItemClick?.(item.path)}
             >
@@ -89,7 +89,7 @@ export function MobileSidebar({
               >
                 {getSidebarIcon(item.icon)}
               </svg>
-              <span className="text-sm font-medium">{item.label}</span>
+              <span className="text-sm font-medium truncate">{item.label}</span>
             </div>
           ))}
         </nav>

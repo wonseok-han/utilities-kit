@@ -76,7 +76,7 @@ function Badge({
   return (
     <button
       className={`px-3 py-1 rounded-full border text-sm font-medium transition-colors cursor-pointer min-w-fit
-        ${selected ? 'bg-blue-600 text-white border-blue-600' : 'bg-gray-800 text-gray-300 border-gray-600 hover:bg-blue-900 hover:text-white'}`}
+        ${selected ? 'bg-accent text-on-surface border-accent' : 'bg-surface text-on-surface-secondary border-border hover:bg-accent/20 hover:text-on-surface'}`}
       onClick={onClick}
       type="button"
     >
@@ -228,12 +228,10 @@ export function TimestampConverterClient() {
       </div>
 
       {/* ===== 샘플 데이터 ===== */}
-      <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-4">
-        <h3 className="text-sm font-medium text-gray-300 mb-2">
+      <div className="bg-surface rounded-lg p-4 border border-border mb-4">
+        <h3 className="text-sm font-medium text-on-surface-secondary mb-2">
           샘플 입력{' '}
-          <span className="text-xs text-blue-400">
-            (버튼을 누르면 자동 입력)
-          </span>
+          <span className="text-xs text-accent">(버튼을 누르면 자동 입력)</span>
         </h3>
 
         <div className="flex flex-wrap gap-2">
@@ -253,7 +251,9 @@ export function TimestampConverterClient() {
       {/* ===== 타임존/포맷 선택: 라벨+전체, 배지는 wrap, 간격 축소 ===== */}
       <div className="flex flex-col gap-1 mb-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-gray-400 text-xs min-w-fit">타임존 필터:</span>
+          <span className="text-on-surface-muted text-xs min-w-fit">
+            타임존 필터:
+          </span>
           <Badge onClick={handleTimezoneAll} selected={isAllTimezonesSelected}>
             전체
           </Badge>
@@ -271,7 +271,9 @@ export function TimestampConverterClient() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap mb-4">
-          <span className="text-gray-400 text-xs min-w-fit">포맷 필터:</span>
+          <span className="text-on-surface-muted text-xs min-w-fit">
+            포맷 필터:
+          </span>
           <Badge onClick={handleFormatAll} selected={isAllFormatsSelected}>
             전체
           </Badge>
@@ -295,35 +297,35 @@ export function TimestampConverterClient() {
           {parsed && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
               {/* ===== 타임존별 변환 ===== */}
-              <div className="bg-gray-900/80 border border-gray-700 rounded-2xl shadow-md p-4 mb-2">
-                <div className="text-base font-bold text-blue-400 mb-3 flex items-center gap-2">
+              <div className="bg-surface-deep/80 border border-border rounded-2xl shadow-md p-4 mb-2">
+                <div className="text-base font-bold text-accent mb-3 flex items-center gap-2">
                   <span>🌐</span> 타임존별 변환
                 </div>
-                <div className="divide-y divide-gray-700">
+                <div className="divide-y divide-border">
                   {TIMEZONES.filter((tz) =>
                     selectedTimezones.includes(tz.value)
                   ).map((tz) => (
                     <div
                       key={tz.value}
-                      className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
+                      className="flex items-center gap-3 px-3 py-2 hover:bg-surface-elevated transition"
                     >
-                      <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
+                      <span className="text-on-surface-muted font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
                         {tz.icon} {tz.label}
-                        <span className="text-gray-500 text-sm">
+                        <span className="text-on-surface-muted text-sm">
                           {`(${tz.value})`}
                         </span>
                       </span>
-                      <span className="font-mono text-sm text-white flex-1 text-right">
+                      <span className="font-mono text-sm text-on-surface flex-1 text-right">
                         {formatDate(
                           parsed,
                           'YYYY-MM-DD HH:mm:ss',
                           tz.value
-                        ) || <span className="text-gray-500">-</span>}
+                        ) || <span className="text-on-surface-muted">-</span>}
                       </span>
                     </div>
                   ))}
                   {selectedTimezones.length === 0 && (
-                    <div className="text-gray-500 text-sm px-3 py-2">
+                    <div className="text-on-surface-muted text-sm px-3 py-2">
                       표시할 타임존이 없습니다.
                     </div>
                   )}
@@ -331,11 +333,11 @@ export function TimestampConverterClient() {
               </div>
 
               {/* ===== 포맷별 변환 ===== */}
-              <div className="bg-gray-900/80 border border-gray-700 rounded-2xl shadow-md p-4 mb-2">
-                <div className="text-base font-bold text-blue-400 mb-3 flex items-center gap-2">
+              <div className="bg-surface-deep/80 border border-border rounded-2xl shadow-md p-4 mb-2">
+                <div className="text-base font-bold text-accent mb-3 flex items-center gap-2">
                   <span>🕒</span> 포맷별 변환
                 </div>
-                <div className="divide-y divide-gray-700">
+                <div className="divide-y divide-border">
                   {FORMATS.filter((fmt) =>
                     selectedFormats.includes(fmt.value)
                   ).map((fmt) => {
@@ -364,13 +366,13 @@ export function TimestampConverterClient() {
                     return (
                       <div
                         key={fmt.value}
-                        className="flex items-center gap-3 px-3 py-2 hover:bg-gray-700 transition"
+                        className="flex items-center gap-3 px-3 py-2 hover:bg-surface-elevated transition"
                       >
-                        <span className="text-gray-400 font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
+                        <span className="text-on-surface-muted font-medium min-w-[60px] flex flex-col justify-center gap-1 h-12">
                           {fmt.icon} {fmt.label}
                         </span>
                         <span
-                          className={`font-mono text-sm flex-1 text-right ${value && value !== '-' ? 'text-white' : 'text-gray-500'}`}
+                          className={`font-mono text-sm flex-1 text-right ${value && value !== '-' ? 'text-on-surface' : 'text-on-surface-muted'}`}
                         >
                           {value || '-'}
                         </span>
@@ -378,7 +380,7 @@ export function TimestampConverterClient() {
                     );
                   })}
                   {selectedFormats.length === 0 && (
-                    <div className="text-gray-500 text-sm px-3 py-2">
+                    <div className="text-on-surface-muted text-sm px-3 py-2">
                       표시할 포맷이 없습니다.
                     </div>
                   )}
@@ -389,11 +391,11 @@ export function TimestampConverterClient() {
 
           {/* ===== 상대적 시간: 결과 박스와 통일된 스타일 ===== */}
           {parsed && (
-            <div className="bg-gray-900/80 border border-gray-700 rounded-2xl shadow-md p-4 flex items-center gap-4 mb-4">
-              <h3 className="text-base font-bold text-blue-400 mr-4 flex items-center gap-2">
+            <div className="bg-surface-deep/80 border border-border rounded-2xl shadow-md p-4 flex items-center gap-4 mb-4">
+              <h3 className="text-base font-bold text-accent mr-4 flex items-center gap-2">
                 ⏳ 지금으로부터
               </h3>
-              <span className="font-mono text-lg text-white flex-1">
+              <span className="font-mono text-lg text-on-surface flex-1">
                 {toKoreanRelative(getRelative(parsed))}
               </span>
             </div>

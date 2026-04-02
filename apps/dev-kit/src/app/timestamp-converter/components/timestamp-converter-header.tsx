@@ -7,10 +7,10 @@
 export function TimestampConverterHeader() {
   return (
     <div className="mb-6">
-      <h1 className="mb-2 text-2xl font-bold text-white">
+      <h1 className="mb-2 text-2xl font-bold text-on-surface">
         Timestamp Converter
       </h1>
-      <p className="text-gray-400">
+      <p className="text-on-surface-muted">
         Unix Timestamp(초/밀리초)와 날짜/시간을 상호 변환하고, 다양한 타임존 및
         포맷으로 결과를 확인하세요.
       </p>

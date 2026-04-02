@@ -159,7 +159,7 @@ export function RegexTesterClient() {
           {/* ===== 정규식 패턴 입력 ===== */}
           <div className="flex flex-col">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-300">
+              <label className="text-sm font-medium text-on-surface-secondary">
                 정규식 패턴
               </label>
               <ActionButton
@@ -180,7 +180,7 @@ export function RegexTesterClient() {
 
           {/* ===== 플래그 설정 ===== */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-300 mb-2">
+            <label className="text-sm font-medium text-on-surface-secondary mb-2">
               플래그
             </label>
             <div className="flex space-x-2">
@@ -188,7 +188,7 @@ export function RegexTesterClient() {
                 <label key={flag} className="flex items-center space-x-2">
                   <input
                     checked={flags.includes(flag)}
-                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 text-accent bg-surface-elevated border-border rounded focus:ring-accent focus:ring-2"
                     onChange={(e) => {
                       if (e.target.checked) {
                         setFlags(flags + flag);
@@ -198,11 +198,13 @@ export function RegexTesterClient() {
                     }}
                     type="checkbox"
                   />
-                  <span className="text-sm text-gray-300">{flag}</span>
+                  <span className="text-sm text-on-surface-secondary">
+                    {flag}
+                  </span>
                 </label>
               ))}
             </div>
-            <div className="mt-2 text-xs text-gray-500">
+            <div className="mt-2 text-xs text-on-surface-muted">
               플래그는 선택사항입니다. g: 전역 검색, i: 대소문자 무시, m:
               멀티라인, s: .이 개행 포함, u: 유니코드, y: sticky
             </div>
@@ -211,7 +213,7 @@ export function RegexTesterClient() {
           {/* ===== 테스트 문자열 입력 ===== */}
           <div className="flex flex-col flex-1">
             <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-gray-300">
+              <label className="text-sm font-medium text-on-surface-secondary">
                 테스트할 문자열
               </label>
               <ActionButton
@@ -234,7 +236,7 @@ export function RegexTesterClient() {
         {/* ===== 결과 영역 ===== */}
         <div className="flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-on-surface-secondary">
               매치 결과
             </label>
             {matches && (
@@ -251,8 +253,8 @@ export function RegexTesterClient() {
             {/* ===== 매치 결과 표 ===== */}
             {matches && matches.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="min-w-full text-sm text-left text-gray-300 border border-gray-700 rounded-lg">
-                  <thead className="bg-gray-700 text-gray-200">
+                <table className="min-w-full text-sm text-left text-on-surface-secondary border border-border rounded-lg">
+                  <thead className="bg-surface-elevated text-on-surface-secondary">
                     <tr>
                       <th className="px-3 py-2">번호</th>
                       <th className="px-3 py-2">매치된 문자열</th>
@@ -264,10 +266,10 @@ export function RegexTesterClient() {
                     {matches.map((m, idx) => (
                       <tr
                         key={`${m[0]}-${m.index ?? idx}`}
-                        className="border-t border-gray-700"
+                        className="border-t border-border"
                       >
                         <td className="px-3 py-2">{idx + 1}</td>
-                        <td className="px-3 py-2 font-mono text-blue-300">
+                        <td className="px-3 py-2 font-mono text-accent-hover">
                           {m[0]}
                         </td>
                         <td className="px-3 py-2">{m.index ?? '-'}</td>
@@ -295,8 +297,8 @@ export function RegexTesterClient() {
               />
             )}
             {error && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-90 rounded-lg">
-                <div className="text-red-400 text-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-surface bg-opacity-90 rounded-lg">
+                <div className="text-danger text-center">
                   <div className="mb-2">❌</div>
                   <div>{error}</div>
                 </div>
@@ -305,20 +307,22 @@ export function RegexTesterClient() {
           </div>
 
           {/* ===== 매치 통계 ===== */}
-          <div className="mt-4 p-3 bg-gray-800 rounded-lg border border-gray-700">
-            <h4 className="text-sm font-medium text-gray-300 mb-2">
+          <div className="mt-4 p-3 bg-surface rounded-lg border border-border">
+            <h4 className="text-sm font-medium text-on-surface-secondary mb-2">
               매치 통계
             </h4>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-on-surface-muted">
               {matches === null ? (
-                <div className="text-gray-500">테스트를 실행해주세요.</div>
+                <div className="text-on-surface-muted">
+                  테스트를 실행해주세요.
+                </div>
               ) : (
                 <>
                   <div className="flex items-center space-x-2">
                     <span>총 매치 수:</span>
                     <span
                       className={
-                        matches.length > 0 ? 'text-green-400' : 'text-red-400'
+                        matches.length > 0 ? 'text-success' : 'text-danger'
                       }
                     >
                       {matches.length}
@@ -327,13 +331,13 @@ export function RegexTesterClient() {
                   {matches.length > 0 && matches[0] && (
                     <div className="mt-1">
                       첫 번째 매치:{' '}
-                      <span className="text-blue-400">
+                      <span className="text-accent">
                         &quot;{matches[0][0]}&quot;
                       </span>
                     </div>
                   )}
                   {matches.length === 0 && (
-                    <div className="mt-1 text-red-400">
+                    <div className="mt-1 text-danger">
                       패턴이 문자열에서 찾을 수 없습니다.
                     </div>
                   )}
@@ -347,10 +351,10 @@ export function RegexTesterClient() {
       {/* ===== 샘플 데이터 ===== */}
       <div className="mt-6 space-y-4">
         {/* ===== 샘플 패턴 ===== */}
-        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <h3 className="text-sm font-medium text-gray-300 mb-3">
+        <div className="bg-surface rounded-lg p-4 border border-border">
+          <h3 className="text-sm font-medium text-on-surface-secondary mb-3">
             샘플 정규식 패턴{' '}
-            <span className="text-xs text-blue-400">
+            <span className="text-xs text-accent">
               (버튼을 누르면 자동 입력)
             </span>
           </h3>
@@ -367,7 +371,7 @@ export function RegexTesterClient() {
               >
                 <div className="text-left">
                   <div className="font-medium">{sample.label}</div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-on-surface-muted">
                     {sample.description}
                   </div>
                 </div>
@@ -377,10 +381,10 @@ export function RegexTesterClient() {
         </div>
 
         {/* ===== 샘플 테스트 문자열 ===== */}
-        <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <h3 className="text-sm font-medium text-gray-300 mb-3">
+        <div className="bg-surface rounded-lg p-4 border border-border">
+          <h3 className="text-sm font-medium text-on-surface-secondary mb-3">
             샘플 테스트 문자열{' '}
-            <span className="text-xs text-blue-400">
+            <span className="text-xs text-accent">
               (버튼을 누르면 자동 입력)
             </span>
           </h3>

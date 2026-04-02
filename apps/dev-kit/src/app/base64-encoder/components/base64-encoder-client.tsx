@@ -118,7 +118,7 @@ export function Base64EncoderClient() {
         {/* 입력 영역 */}
         <section className="flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-on-surface-secondary">
               입력 ({getInputLabel()})
             </label>
             <div className="flex space-x-2">
@@ -159,7 +159,7 @@ export function Base64EncoderClient() {
         {/* 출력 영역 */}
         <section className="flex flex-col">
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-on-surface-secondary">
               출력 ({getOutputLabel()})
             </label>
             {output && (
@@ -182,10 +182,10 @@ export function Base64EncoderClient() {
             {error && (
               <div
                 aria-live="polite"
-                className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-90 rounded-lg"
+                className="absolute inset-0 flex items-center justify-center bg-surface bg-opacity-90 rounded-lg"
                 role="alert"
               >
-                <div className="text-red-400 text-center">
+                <div className="text-danger text-center">
                   <div aria-hidden="true" className="mb-2">
                     ❌
                   </div>
@@ -198,12 +198,10 @@ export function Base64EncoderClient() {
       </div>
 
       {/* 샘플 데이터 섹션 */}
-      <section className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
-        <h3 className="text-sm font-medium text-gray-300 mb-2">
+      <section className="mt-6 bg-surface rounded-lg p-4 border border-border">
+        <h3 className="text-sm font-medium text-on-surface-secondary mb-2">
           샘플 입력{' '}
-          <span className="text-xs text-blue-400">
-            (버튼을 누르면 자동 입력)
-          </span>
+          <span className="text-xs text-accent">(버튼을 누르면 자동 입력)</span>
         </h3>
         <div className="flex flex-wrap gap-2">
           {SAMPLE_DATA.map((sample) => (

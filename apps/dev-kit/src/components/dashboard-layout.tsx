@@ -68,7 +68,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="flex h-[100dvh] bg-gray-800 text-white fixed inset-0">
+    <div className="flex h-[100dvh] bg-surface text-on-surface fixed inset-0">
       {/* 사이드바 */}
       <Sidebar
         isOpen={isSidebarOpen}
@@ -85,7 +85,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
 
         {/* 메인 영역 */}
-        <main className="flex-1 overflow-auto p-2 mx-2 mb-2 bg-gray-900 rounded-t-2xl min-h-0">
+        <main className="flex-1 overflow-auto p-2 mx-2 mb-2 bg-surface-deep rounded-t-2xl min-h-0">
           {children}
         </main>
       </div>

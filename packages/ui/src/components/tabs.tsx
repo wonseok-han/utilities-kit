@@ -35,10 +35,10 @@ export function Tabs({ className = '', items, onChange, value }: TabsProps) {
   return (
     <div className={`relative ${className}`}>
       {/* 탭 컨테이너 */}
-      <div className="flex bg-gray-800 rounded-lg p-1 border border-gray-700 relative">
+      <div className="flex bg-surface rounded-lg p-1 border border-border relative">
         {/* 슬라이딩 인디케이터 */}
         <div
-          className="absolute inset-y-1 bg-blue-600 rounded-md transition-all duration-200 ease-out"
+          className="absolute inset-y-1 bg-accent rounded-md transition-all duration-200 ease-out"
           style={{
             width: indicatorStyle.width,
             transform: `translateX(${indicatorStyle.left}px)`,
@@ -54,8 +54,8 @@ export function Tabs({ className = '', items, onChange, value }: TabsProps) {
                 relative z-10 px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200
                 ${
                   value === item.id
-                    ? 'text-white font-semibold'
-                    : 'text-gray-400 hover:text-gray-200'
+                    ? 'text-on-surface font-semibold'
+                    : 'text-on-surface-muted hover:text-on-surface-secondary'
                 }
               `}
               onClick={() => onChange(item.id)}

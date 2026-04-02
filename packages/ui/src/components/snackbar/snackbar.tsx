@@ -74,7 +74,7 @@ export function Snackbar({
       case 'info':
         return 'bg-blue-900/90 border-blue-700 text-blue-100';
       default:
-        return 'bg-gray-900/90 border-gray-700 text-gray-100';
+        return 'bg-surface-deep/90 border-border text-on-surface';
     }
   };
 

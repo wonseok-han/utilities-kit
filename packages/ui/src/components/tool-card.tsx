@@ -29,7 +29,7 @@ export function ToolCard({
 }: ToolCardProps) {
   return (
     <div
-      className="bg-gray-800 border border-gray-700 rounded-lg p-4 hover:bg-gray-750 cursor-pointer transition-colors"
+      className="bg-surface border border-border rounded-lg p-4 hover:bg-surface-elevated cursor-pointer transition-colors"
       onClick={onClick}
     >
       <div className="flex items-start space-x-3">
@@ -39,8 +39,8 @@ export function ToolCard({
           {icon}
         </div>
         <div className="flex-1">
-          <h4 className="font-medium text-white mb-1">{title}</h4>
-          <p className="text-sm text-gray-400">{description}</p>
+          <h4 className="font-medium text-on-surface mb-1">{title}</h4>
+          <p className="text-sm text-on-surface-muted">{description}</p>
         </div>
       </div>
     </div>

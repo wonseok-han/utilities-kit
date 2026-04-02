@@ -7,10 +7,10 @@
 export function JwtEncoderHeader() {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-bold text-white mb-2">
+      <h1 className="text-2xl font-bold text-on-surface mb-2">
         JWT Encoder/Decoder
       </h1>
-      <p className="text-gray-400">
+      <p className="text-on-surface-muted">
         JWT 토큰을 생성하거나 디코딩하여 Header와 Payload를 확인해보세요.
       </p>
     </div>

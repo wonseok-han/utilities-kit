@@ -7,14 +7,14 @@
 export function RegexTesterHeader() {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-bold text-white mb-2">Regex Tester</h1>
-      <p className="text-gray-400">
+      <h1 className="text-2xl font-bold text-on-surface mb-2">Regex Tester</h1>
+      <p className="text-on-surface-muted">
         <strong>정규식(Regular Expression)</strong>은 문자열에서 원하는 패턴을
         찾거나 변환할 때 사용하는 특수한 문법입니다.
         <br />
         아래 예시와 팁을 참고해서 직접 패턴을 입력해보세요!
       </p>
-      <ul className="text-xs text-blue-300 mt-2 list-disc list-inside">
+      <ul className="text-xs text-accent-hover mt-2 list-disc list-inside">
         <li>
           <b>이메일 찾기:</b>{' '}
           <code>{'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'}</code>{' '}
@@ -44,12 +44,12 @@ export function RegexTesterHeader() {
           <b>샘플 버튼</b>을 눌러 바로 결과를 확인할 수 있습니다.
         </li>
       </ul>
-      <div className="mt-4 flex items-center gap-3 p-4 bg-gray-800/90 border border-gray-600 rounded-lg shadow">
+      <div className="mt-4 flex items-center gap-3 p-4 bg-surface/90 border border-border rounded-lg shadow">
         <span className="text-2xl">💡</span>
-        <span className="text-sm text-gray-200">
+        <span className="text-sm text-on-surface-secondary">
           <strong>정규식이 처음이라면?</strong>{' '}
           <a
-            className="underline text-blue-400 hover:text-blue-300 font-semibold"
+            className="underline text-accent hover:text-accent-hover font-semibold"
             href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Regular_Expressions"
             rel="noopener noreferrer"
             target="_blank"

@@ -18,13 +18,13 @@ export function Header({
   const { toggle: onToggleSidebar } = useSidebarStore();
 
   return (
-    <header className="bg-gray-800 px-6 py-2">
+    <header className="bg-surface px-6 py-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           {/* 모바일 햄버거 메뉴 버튼 */}
           {isMobile && (
             <button
-              className="p-2 mr-3 text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+              className="p-2 mr-3 text-on-surface-secondary hover:text-on-surface hover:bg-surface-elevated rounded-md transition-colors"
               onClick={onToggleSidebar}
               title="메뉴 열기"
             >
@@ -45,7 +45,7 @@ export function Header({
           )}
 
           {isMobile && (
-            <div className="flex items-center gap-3 text-white">
+            <div className="flex items-center gap-3 text-on-surface">
               <div className="relative flex items-center">
                 <IconLogo />
                 <span
@@ -61,7 +61,7 @@ export function Header({
         <div className="flex items-center space-x-2">
           <Link
             aria-label="GitHub Repository"
-            className="hover:text-gray-200 transition-colors duration-200 p-1 rounded hover:bg-gray-700/50 p-1"
+            className="hover:text-on-surface-secondary transition-colors duration-200 p-1 rounded hover:bg-surface-elevated/50 p-1"
             href="https://github.com/wonseok-han/utilities-kit"
             rel="noopener noreferrer"
             target="_blank"
@@ -72,10 +72,10 @@ export function Header({
           {/* 설정패널 토글 버튼 */}
           {/* TODO: 추후 추가 예정 */}
           <button
-            className={`p-1 rounded-md transition-colors cursor-pointer hidden ${
+            className={`p-1 rounded-md transition-colors cursor-pointer ${
               isSettingsPanelOpen
-                ? 'text-white bg-gray-700'
-                : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                ? 'text-on-surface bg-surface-elevated'
+                : 'text-on-surface-secondary hover:text-on-surface hover:bg-surface-elevated'
             }`}
             onClick={onToggleSettingsPanel}
             title={isSettingsPanelOpen ? '설정패널 닫기' : '설정패널 열기'}

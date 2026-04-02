@@ -113,10 +113,10 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
 
       {/* 모바일: fixed 풀스크린 / 데스크톱: flex 안에서 밀어내기 */}
       <div
-        className={`bg-surface border-border transition-all duration-300 ease-in-out
+        className={`bg-surface transition-[margin] duration-300 ease-in-out
           fixed inset-0 z-50 transform md:transform-none
-          md:relative md:inset-auto md:z-auto md:border-l
-          ${isOpen ? 'translate-y-0 md:w-80 md:min-w-80' : 'translate-y-full md:w-0 md:min-w-0 md:overflow-hidden md:border-l-0'}
+          md:relative md:inset-auto md:z-auto md:w-80 md:min-w-80 md:border-l border-border
+          ${isOpen ? 'translate-y-0 md:mr-0' : 'translate-y-full md:-mr-80'}
         `}
       >
         <div className="flex flex-col h-full">

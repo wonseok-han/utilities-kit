@@ -8,26 +8,25 @@ type HandleDirection = 'nw' | 'ne' | 'sw' | 'se';
 
 const HANDLE_STYLES: Record<
   HandleDirection,
-  { position: string; cursor: string }
+  { cursor: string; position: string }
 > = {
-  nw: { position: 'top-0 left-0 rounded-br-sm', cursor: 'cursor-nw-resize' },
   ne: { position: 'top-0 right-0 rounded-bl-sm', cursor: 'cursor-ne-resize' },
-  sw: {
-    position: 'bottom-0 left-0 rounded-tr-sm',
-    cursor: 'cursor-sw-resize',
-  },
+  nw: { position: 'top-0 left-0 rounded-br-sm', cursor: 'cursor-nw-resize' },
   se: {
     position: 'bottom-0 right-0 rounded-tl-sm',
     cursor: 'cursor-se-resize',
   },
+  sw: {
+    position: 'bottom-0 left-0 rounded-tr-sm',
+    cursor: 'cursor-sw-resize',
+  },
 };
 
-// 좌측 핸들은 드래그 방향을 반전
 const DIRECTION_MULTIPLIER: Record<HandleDirection, number> = {
-  nw: -1,
   ne: 1,
-  sw: -1,
+  nw: -1,
   se: 1,
+  sw: -1,
 };
 
 function ResizableImageView({
@@ -36,7 +35,7 @@ function ResizableImageView({
   updateAttributes,
 }: {
   node: {
-    attrs: { src: string; alt?: string; title?: string; width?: number };
+    attrs: { alt?: string; src: string; title?: string; width?: number };
   };
   selected: boolean;
   updateAttributes: (attrs: Record<string, unknown>) => void;
@@ -47,7 +46,7 @@ function ResizableImageView({
   const startWidth = useRef(0);
   const multiplier = useRef(1);
 
-  const handleMouseDown = useCallback(
+  const handleResizeStart = useCallback(
     (direction: HandleDirection, e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -81,12 +80,9 @@ function ResizableImageView({
   }, [isResizing, updateAttributes]);
 
   return (
-    <NodeViewWrapper
-      data-drag-handle
-      as="span"
-      className="inline-block relative"
-    >
+    <NodeViewWrapper draggable as="span" className="inline-block relative">
       <span
+        data-drag-handle
         className="inline-block relative group"
         style={{
           width: node.attrs.width ? `${node.attrs.width}px` : undefined,
@@ -94,11 +90,9 @@ function ResizableImageView({
       >
         <img
           alt={node.attrs.alt || ''}
-          className={`block max-w-full h-auto rounded ${
+          className={`block max-w-full h-auto rounded pointer-events-none select-none ${
             selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
           }`}
-          draggable={false}
-          onDragStart={(e) => e.preventDefault()}
           ref={imgRef}
           src={node.attrs.src}
           style={{ width: '100%' }}
@@ -113,8 +107,8 @@ function ResizableImageView({
           ).map(([dir, style]) => (
             <span
               key={dir}
-              className={`absolute w-3 h-3 bg-blue-500 ${style.cursor} ${style.position}`}
-              onMouseDown={(e) => handleMouseDown(dir, e)}
+              className={`absolute w-3 h-3 bg-blue-500 ${style.cursor} ${style.position} z-10`}
+              onMouseDown={(e) => handleResizeStart(dir, e)}
               style={{ touchAction: 'none' }}
             />
           ))}

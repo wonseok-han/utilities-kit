@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { SettingsProvider } from '@components/settings-provider';
 import { SnackbarManager } from '@repo/ui';
 import { Analytics } from '@vercel/analytics/next';
 import localFont from 'next/font/local';
@@ -40,6 +41,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
       >
+        <SettingsProvider />
         {children}
         <Analytics />
         <SnackbarManager maxSnackbars={5} />

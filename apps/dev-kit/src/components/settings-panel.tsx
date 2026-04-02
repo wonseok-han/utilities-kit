@@ -294,7 +294,7 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
 
       {/* 데스크톱: flex 레이아웃 안에서 push */}
       <div
-        className={`hidden md:block h-full overflow-hidden transition-[width,min-width] duration-300 ease-in-out ${
+        className={`hidden md:block h-full overflow-hidden shrink-0 transition-[width,min-width] duration-300 ease-in-out ${
           isOpen ? 'w-80 min-w-80' : 'w-0 min-w-0'
         }`}
       >

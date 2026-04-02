@@ -314,7 +314,7 @@ export function DiffClient() {
         {/* Original (입력 후 변경불가) */}
         <div className="flex flex-col min-h-[120px]">
           <div className="flex flex-row items-center mb-2">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-on-surface-secondary">
               Original (원본, 입력 후 변경불가)
             </label>
             <div className="flex-1" />
@@ -339,7 +339,7 @@ export function DiffClient() {
         {/* Changed (항상 입력 가능) */}
         <div className="flex flex-col min-h-[120px]">
           <div className="flex flex-row items-center mb-2">
-            <label className="text-sm font-medium text-gray-300">
+            <label className="text-sm font-medium text-on-surface-secondary">
               Changed (변경본, 자유 입력)
             </label>
             <div className="flex-1" />

@@ -38,17 +38,19 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
         />
       )}
 
-      {/* 설정 패널 */}
+      {/* 설정 패널 - 모바일: 풀스크린(아래에서 위로), 데스크톱: 우측 패널 */}
       <div
-        className={`fixed right-0 top-0 h-full w-full md:w-80 bg-gray-800 md:border-l border-gray-700 transform transition-transform duration-300 ease-in-out z-50 ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed bg-surface transform transition-transform duration-300 ease-in-out z-50 inset-0 md:inset-auto md:right-0 md:top-0 md:h-full md:w-80 md:border-l border-border ${
+          isOpen
+            ? 'translate-y-0 md:translate-x-0'
+            : 'translate-y-full md:translate-y-0 md:translate-x-full'
         }`}
       >
         <div className="p-4 h-full overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-white">설정</h3>
+            <h3 className="text-lg font-medium text-on-surface">설정</h3>
             <button
-              className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+              className="text-on-surface-muted hover:text-on-surface transition-colors cursor-pointer"
               onClick={onClose}
             >
               <svg
@@ -70,17 +72,17 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
           <div className="space-y-6">
             {/* 외관 설정 */}
             <div>
-              <h4 className="text-sm font-medium text-gray-300 mb-3 border-b border-gray-600 pb-1">
+              <h4 className="text-sm font-medium text-on-surface-secondary mb-3 border-b border-border-light pb-1">
                 외관
               </h4>
               <div className="space-y-3">
                 {/* 테마 설정 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-on-surface-secondary mb-2">
                     테마
                   </label>
                   <select
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full bg-input-bg border border-input-border rounded-md px-3 py-2 text-on-surface focus:ring-2 focus:ring-accent focus:border-transparent"
                     onChange={(e) =>
                       setTheme(e.target.value as 'light' | 'dark' | 'system')
                     }
@@ -94,11 +96,11 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
 
                 {/* 폰트 크기 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-on-surface-secondary mb-2">
                     폰트 크기
                   </label>
                   <input
-                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-2 bg-surface-elevated rounded-lg appearance-none cursor-pointer slider"
                     max="20"
                     min="10"
                     onChange={(e) => setFontSize(parseInt(e.target.value))}
@@ -106,35 +108,43 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
                     type="range"
                     value={fontSize}
                   />
-                  <div className="text-right text-sm text-gray-400 mt-1">
+                  <div className="text-right text-sm text-on-surface-muted mt-1">
                     {fontSize}px
                   </div>
                 </div>
 
                 {/* 컴팩트 모드 */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">컴팩트 모드</span>
+                  <span className="text-sm text-on-surface-muted">
+                    컴팩트 모드
+                  </span>
                   <button
-                    className={`w-5 h-5 rounded-full transition-colors ${
-                      isCompactMode ? 'bg-blue-500' : 'bg-gray-600'
+                    className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${
+                      isCompactMode ? 'bg-blue-500' : 'bg-surface-skeleton'
                     }`}
                     onClick={() => setCompactMode(!isCompactMode)}
-                  />
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                        isCompactMode ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
             </div>
 
             {/* 언어 및 지역 설정 */}
             <div>
-              <h4 className="text-sm font-medium text-gray-300 mb-3 border-b border-gray-600 pb-1">
+              <h4 className="text-sm font-medium text-on-surface-secondary mb-3 border-b border-border-light pb-1">
                 언어 및 지역
               </h4>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-on-surface-secondary mb-2">
                   언어
                 </label>
                 <select
-                  className="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full bg-input-bg border border-input-border rounded-md px-3 py-2 text-on-surface focus:ring-2 focus:ring-accent focus:border-transparent"
                   onChange={(e) => setLanguage(e.target.value as 'ko' | 'en')}
                   value={language}
                 >
@@ -145,11 +155,10 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
             </div>
 
             {/* 초기화 버튼 */}
-            <div className="pt-4 border-t border-gray-600">
+            <div className="pt-4 border-t border-border-light">
               <button
                 className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors text-sm"
                 onClick={() => {
-                  // 모든 설정을 기본값으로 초기화
                   resetSettings();
                 }}
               >

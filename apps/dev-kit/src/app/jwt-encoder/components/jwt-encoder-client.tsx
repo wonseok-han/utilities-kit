@@ -135,7 +135,7 @@ export function JwtEncoderClient() {
             {/* Header 입력 */}
             <div className="flex flex-col">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-300">
+                <label className="text-sm font-medium text-on-surface-secondary">
                   Header (헤더)
                 </label>
                 <ActionButton
@@ -159,7 +159,7 @@ export function JwtEncoderClient() {
             {/* Payload 입력 */}
             <div className="flex flex-col">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-300">
+                <label className="text-sm font-medium text-on-surface-secondary">
                   Payload (페이로드)
                 </label>
                 <ActionButton
@@ -183,7 +183,7 @@ export function JwtEncoderClient() {
             {/* 출력 영역 (JWT) */}
             <div className="flex flex-col">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-300">
+                <label className="text-sm font-medium text-on-surface-secondary">
                   JWT 토큰
                 </label>
                 <ActionButton
@@ -201,8 +201,8 @@ export function JwtEncoderClient() {
                   value={output}
                 />
                 {error && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-90 rounded-lg">
-                    <div className="text-red-400 text-center">
+                  <div className="absolute inset-0 flex items-center justify-center bg-surface bg-opacity-90 rounded-lg">
+                    <div className="text-danger text-center">
                       <div className="mb-2">❌</div>
                       <div>{error}</div>
                     </div>
@@ -247,7 +247,7 @@ export function JwtEncoderClient() {
             {/* 입력 영역 (JWT) */}
             <div className="flex flex-col">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-300">
+                <label className="text-sm font-medium text-on-surface-secondary">
                   JWT 토큰 입력
                 </label>
                 <ActionButton
@@ -271,7 +271,7 @@ export function JwtEncoderClient() {
             {/* 출력 영역 (Decoded JSON) */}
             <div className="flex flex-col">
               <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-300">
+                <label className="text-sm font-medium text-on-surface-secondary">
                   디코딩 결과 (Header + Payload)
                 </label>
                 <ActionButton
@@ -289,8 +289,8 @@ export function JwtEncoderClient() {
                   value={output}
                 />
                 {error && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-90 rounded-lg">
-                    <div className="text-red-400 text-center">
+                  <div className="absolute inset-0 flex items-center justify-center bg-surface bg-opacity-90 rounded-lg">
+                    <div className="text-danger text-center">
                       <div className="mb-2">❌</div>
                       <div>{error}</div>
                     </div>
@@ -303,12 +303,10 @@ export function JwtEncoderClient() {
       )}
 
       {/* 샘플 데이터 */}
-      <div className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
-        <h3 className="text-sm font-medium text-gray-300 mb-2">
+      <div className="mt-6 bg-surface rounded-lg p-4 border border-border">
+        <h3 className="text-sm font-medium text-on-surface-secondary mb-2">
           샘플 입력{' '}
-          <span className="text-xs text-blue-400">
-            (버튼을 누르면 자동 입력)
-          </span>
+          <span className="text-xs text-accent">(버튼을 누르면 자동 입력)</span>
         </h3>
         <div className="flex flex-wrap gap-2">
           {SAMPLE_DATA.map((sample) => (

@@ -25,11 +25,11 @@ export function CodeTextarea({
 }: CodeTextareaProps) {
   const baseClasses = `
     flex-1
-    bg-gray-800
-    border border-gray-700
+    bg-surface
+    border border-border
     rounded-lg
     p-4
-    text-white
+    text-on-surface
     font-mono
     text-sm
     focus:outline-none
@@ -39,7 +39,7 @@ export function CodeTextarea({
 
   const interactiveClasses = readOnly
     ? ''
-    : 'focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+    : 'focus:ring-2 focus:ring-accent focus:border-transparent';
 
   const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : '';
 

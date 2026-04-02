@@ -34,17 +34,17 @@ export function Accordion({
   };
 
   return (
-    <div className={`border border-gray-700 rounded-lg ${className}`}>
+    <div className={`border border-border rounded-lg ${className}`}>
       {/* ===== 아코디언 헤더 ===== */}
       <button
         aria-controls={`accordion-content-${title}`}
         aria-expanded={isOpen}
-        className="w-full p-4 text-left flex items-center justify-between hover:bg-gray-800/50 transition-colors"
+        className="w-full p-4 text-left flex items-center justify-between hover:bg-surface/50 transition-colors"
         onClick={handleToggle}
       >
-        <span className="font-semibold text-gray-200">{title}</span>
+        <span className="font-semibold text-on-surface-secondary">{title}</span>
         <span
-          className={`text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`text-on-surface-muted transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         >
           ▼
         </span>
@@ -57,7 +57,7 @@ export function Accordion({
         }`}
         id={`accordion-content-${title}`}
       >
-        <div className="p-4 border-t border-gray-700">{children}</div>
+        <div className="p-4 border-t border-border">{children}</div>
       </div>
     </div>
   );

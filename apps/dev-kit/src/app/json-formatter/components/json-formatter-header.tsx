@@ -7,8 +7,12 @@
 export function JsonFormatterHeader() {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-bold text-white mb-2">JSON Formatter</h1>
-      <p className="text-gray-400">JSON 데이터를 구조화하고 최적화하세요.</p>
+      <h1 className="text-2xl font-bold text-on-surface mb-2">
+        JSON Formatter
+      </h1>
+      <p className="text-on-surface-muted">
+        JSON 데이터를 구조화하고 최적화하세요.
+      </p>
     </div>
   );
 }

@@ -348,11 +348,11 @@ export function MenuBar({
   ];
 
   const baseBtn =
-    'px-2 py-1 rounded border border-gray-300 bg-white hover:bg-blue-50 transition text-sm min-w-[32px] text-center disabled:opacity-40';
+    'px-2 py-1 rounded border border-border bg-surface-deep hover:bg-surface-elevated transition text-sm min-w-[32px] text-center disabled:opacity-40';
   return (
     <div className="flex flex-wrap gap-2 mb-2 overflow-x-auto">
       <button
-        className={`${baseBtn} cursor-pointer ${state.isBold ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isBold ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         disabled={!state.canBold}
         onClick={() => editor.chain().focus().toggleBold().run()}
         title="굵게 (Bold)"
@@ -361,7 +361,7 @@ export function MenuBar({
         <b>B</b>
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isItalic ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isItalic ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         disabled={!state.canItalic}
         onClick={() => editor.chain().focus().toggleItalic().run()}
         title="기울임 (Italic)"
@@ -370,7 +370,7 @@ export function MenuBar({
         <span className="italic">I</span>
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isStrike ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isStrike ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         disabled={!state.canStrike}
         onClick={() => editor.chain().focus().toggleStrike().run()}
         title="취소선 (Strike)"
@@ -379,7 +379,7 @@ export function MenuBar({
         <span className="line-through">S</span>
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isCode ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isCode ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         disabled={!state.canCode}
         onClick={() => editor.chain().focus().toggleCode().run()}
         title="코드 (Inline Code)"
@@ -388,7 +388,7 @@ export function MenuBar({
         {'</>'}
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isParagraph ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isParagraph ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().setParagraph().run()}
         title="문단 (Paragraph)"
         type="button"
@@ -396,7 +396,7 @@ export function MenuBar({
         P
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isHighlight ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isHighlight ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().toggleHighlight().run()}
         title="형광펜 (Highlight)"
         type="button"
@@ -413,7 +413,7 @@ export function MenuBar({
           type="button"
         >
           <span
-            className="w-4 h-4 rounded border border-gray-400"
+            className="w-4 h-4 rounded border border-border"
             style={{
               backgroundColor: state.currentColor || '#000000',
             }}
@@ -422,15 +422,15 @@ export function MenuBar({
         </button>
         {isColorPaletteOpen && (
           <div
-            className="fixed bg-white border border-gray-300 rounded-lg shadow-lg p-3 z-50 min-w-[280px]"
+            className="fixed bg-surface-deep border border-border rounded-lg shadow-lg p-3 z-50 min-w-[280px]"
             style={palettePosition}
           >
             {/* 자동 색상 */}
             <button
-              className={`w-full mb-3 px-3 py-2 text-left rounded border-2 transition-all hover:bg-gray-50 ${
+              className={`w-full mb-3 px-3 py-2 text-left rounded border-2 transition-all hover:bg-surface-elevated ${
                 state.currentColor === automaticColor.value
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200'
+                  ? 'border-accent bg-accent/10'
+                  : 'border-border-light'
               }`}
               onClick={() => {
                 editor.chain().focus().unsetColor().run();
@@ -440,14 +440,14 @@ export function MenuBar({
               onMouseLeave={() => setHoveredColorName(null)}
               type="button"
             >
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-on-surface">
                 {automaticColor.name}
               </span>
             </button>
 
             {/* 테마 색상 */}
             <div className="mb-3">
-              <div className="text-xs font-semibold text-gray-600 mb-2">
+              <div className="text-xs font-semibold text-on-surface-muted mb-2">
                 테마 색
               </div>
               <div className="grid grid-cols-10 gap-1">
@@ -456,8 +456,8 @@ export function MenuBar({
                     key={`theme-${color.value || 'default'}-${color.name}`}
                     className={`w-6 h-6 rounded border transition-all hover:scale-110 ${
                       state.currentColor === color.value
-                        ? 'border-blue-500 ring-2 ring-blue-300'
-                        : 'border-gray-300'
+                        ? 'border-accent ring-2 ring-accent/50'
+                        : 'border-border-light'
                     }`}
                     onClick={() => {
                       editor.chain().focus().setColor(color.value).run();
@@ -477,7 +477,7 @@ export function MenuBar({
 
             {/* 표준 색상 */}
             <div className="mb-3">
-              <div className="text-xs font-semibold text-gray-600 mb-2">
+              <div className="text-xs font-semibold text-on-surface-muted mb-2">
                 표준 색
               </div>
               <div className="grid grid-cols-10 gap-1">
@@ -486,8 +486,8 @@ export function MenuBar({
                     key={`standard-${color.value}-${color.name}`}
                     className={`w-6 h-6 rounded border transition-all hover:scale-110 ${
                       state.currentColor === color.value
-                        ? 'border-blue-500 ring-2 ring-blue-300'
-                        : 'border-gray-300'
+                        ? 'border-accent ring-2 ring-accent/50'
+                        : 'border-border-light'
                     }`}
                     onClick={() => {
                       editor.chain().focus().setColor(color.value).run();
@@ -506,8 +506,8 @@ export function MenuBar({
             </div>
 
             {/* 색상 이름 표시 */}
-            <div className="border-t border-gray-200 pt-2">
-              <div className="text-center text-xs text-gray-500 min-h-[20px]">
+            <div className="border-t border-border-light pt-2">
+              <div className="text-center text-xs text-on-surface-muted min-h-[20px]">
                 {hoveredColorName || '\u00A0'}
               </div>
             </div>
@@ -537,7 +537,7 @@ export function MenuBar({
         ))}
       </select>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isTextAlignLeft ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isTextAlignLeft ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().setTextAlign('left').run()}
         title="왼쪽 정렬 (Left Align)"
         type="button"
@@ -545,7 +545,7 @@ export function MenuBar({
         <AlignLeftIcon />
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isTextAlignCenter ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isTextAlignCenter ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().setTextAlign('center').run()}
         title="가운데 정렬 (Center Align)"
         type="button"
@@ -553,7 +553,7 @@ export function MenuBar({
         <AlignCenterIcon />
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isTextAlignRight ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isTextAlignRight ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().setTextAlign('right').run()}
         title="오른쪽 정렬 (Right Align)"
         type="button"
@@ -561,7 +561,7 @@ export function MenuBar({
         <AlignRightIcon />
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isTextAlignJustify ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isTextAlignJustify ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().setTextAlign('justify').run()}
         title="양쪽 정렬 (Justify)"
         type="button"
@@ -573,7 +573,7 @@ export function MenuBar({
         return (
           <button
             key={level}
-            className={`${baseBtn} cursor-pointer ${state[headingKey] ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+            className={`${baseBtn} cursor-pointer ${state[headingKey] ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
             onClick={() =>
               editor
                 .chain()
@@ -589,7 +589,7 @@ export function MenuBar({
         );
       })}
       <button
-        className={`${baseBtn} cursor-pointer ${state.isBulletList ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isBulletList ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         title="글머리 기호 (Bullet List)"
         type="button"
@@ -597,7 +597,7 @@ export function MenuBar({
         • List
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isOrderedList ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isOrderedList ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         title="번호 매기기 (Ordered List)"
         type="button"
@@ -605,7 +605,7 @@ export function MenuBar({
         1. List
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isBlockquote ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isBlockquote ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         title="인용구 (Quote)"
         type="button"
@@ -613,7 +613,7 @@ export function MenuBar({
         {`" Quote`}
       </button>
       <button
-        className={`${baseBtn} cursor-pointer ${state.isCodeBlock ? 'text-blue-600 border-blue-400 bg-blue-50 font-bold' : 'text-gray-800'}`}
+        className={`${baseBtn} cursor-pointer ${state.isCodeBlock ? 'text-accent border-accent bg-accent/10 font-bold' : 'text-on-surface'}`}
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         title="코드 블록 (Code Block)"
         type="button"

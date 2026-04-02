@@ -249,12 +249,12 @@ export function WebEditorClient() {
             />
             <span>스타일 포함 (인라인 CSS)</span>
           </label> */}
-          <div className="flex items-center gap-2 text-gray-300">
+          <div className="flex items-center gap-2 text-on-surface-secondary">
             <span className="text-sm">이미지 업로드 모드:</span>
             <label className="flex items-center gap-1 cursor-pointer">
               <input
                 checked={uploadMode === 'base64'}
-                className="rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-400"
+                className="rounded border-border bg-surface-elevated text-accent focus:ring-accent"
                 name="uploadMode"
                 onChange={() => setUploadMode('base64')}
                 type="radio"
@@ -265,7 +265,7 @@ export function WebEditorClient() {
             <label className="flex items-center gap-1 cursor-pointer">
               <input
                 checked={uploadMode === 'api'}
-                className="rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-400"
+                className="rounded border-border bg-surface-elevated text-accent focus:ring-accent"
                 name="uploadMode"
                 onChange={() => setUploadMode('api')}
                 type="radio"
@@ -294,7 +294,9 @@ export function WebEditorClient() {
       {/* ===== HTML 결과 영역 ===== */}
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-300">HTML 결과</h2>
+          <h2 className="text-lg font-semibold text-on-surface-secondary">
+            HTML 결과
+          </h2>
           <button
             className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition"
             onClick={handleApplyHtml}
@@ -304,11 +306,11 @@ export function WebEditorClient() {
           </button>
         </div>
         <div
-          className="border border-gray-600 rounded-lg overflow-hidden resize-y min-h-[200px] max-h-[600px]"
+          className="border border-border rounded-lg overflow-hidden resize-y min-h-[200px] max-h-[600px]"
           style={{ height: 400 }}
         >
           <textarea
-            className="w-full h-full p-4 bg-gray-800 text-gray-100 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-full p-4 bg-surface text-on-surface font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent"
             onChange={(e) => setHtmlValue(e.target.value)}
             placeholder="HTML 코드가 여기에 표시됩니다. 'HTML로 변환' 버튼을 클릭하세요."
             value={htmlValue}

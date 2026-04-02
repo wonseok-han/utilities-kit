@@ -218,14 +218,14 @@ export function TiptapEditor({
 
   return (
     <div
-      className="resize-y overflow-auto min-h-0 max-h-[600px] max-w-full bg-white border rounded flex flex-col text-black p-2"
+      className="resize-y overflow-auto min-h-0 max-h-[600px] max-w-full bg-surface-deep border border-border rounded flex flex-col text-on-surface p-2"
       style={style}
     >
       <MenuBar editor={editor} onFileSelect={handleFileInput} />
       {editor && (
         <div className="flex-1 min-h-0 flex flex-col overflow-auto">
           <EditorContent
-            className={`customEditor flex-1 min-h-0 h-full w-full block outline-none text-black`}
+            className={`customEditor flex-1 min-h-0 h-full w-full block outline-none text-on-surface`}
             editor={editor}
             style={{
               minHeight: 0,

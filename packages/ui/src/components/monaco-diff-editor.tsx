@@ -32,6 +32,8 @@ export const MonacoDiffEditor: FC<MonacoDiffEditorProps> = ({
 }) => {
   const diffEditorRef = useRef<Parameters<DiffOnMount>[0] | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // 내부 변경 중인지 추적하여 외부 prop 변경과 구분
+  const isInternalChange = useRef(false);
 
   const handleMount: DiffOnMount = (editor, monaco) => {
     diffEditorRef.current = editor;
@@ -61,16 +63,45 @@ export const MonacoDiffEditor: FC<MonacoDiffEditorProps> = ({
 
     if (onOriginalChange) {
       originalEditor.onDidChangeModelContent(() => {
-        onOriginalChange(originalEditor.getValue());
+        if (!isInternalChange.current) {
+          isInternalChange.current = true;
+          onOriginalChange(originalEditor.getValue());
+          isInternalChange.current = false;
+        }
       });
     }
 
     if (onModifiedChange) {
       modifiedEditor.onDidChangeModelContent(() => {
-        onModifiedChange(modifiedEditor.getValue());
+        if (!isInternalChange.current) {
+          isInternalChange.current = true;
+          onModifiedChange(modifiedEditor.getValue());
+          isInternalChange.current = false;
+        }
       });
     }
   };
+
+  // 외부에서 original/modified가 변경될 때 (좌우 교체, 샘플 입력 등) 에디터에 반영
+  useEffect(() => {
+    if (!diffEditorRef.current || isInternalChange.current) return;
+    const originalEditor = diffEditorRef.current.getOriginalEditor();
+    if (originalEditor.getValue() !== original) {
+      isInternalChange.current = true;
+      originalEditor.setValue(original);
+      isInternalChange.current = false;
+    }
+  }, [original]);
+
+  useEffect(() => {
+    if (!diffEditorRef.current || isInternalChange.current) return;
+    const modifiedEditor = diffEditorRef.current.getModifiedEditor();
+    if (modifiedEditor.getValue() !== modified) {
+      isInternalChange.current = true;
+      modifiedEditor.setValue(modified);
+      isInternalChange.current = false;
+    }
+  }, [modified]);
 
   // ResizeObserver
   useEffect(() => {
@@ -90,7 +121,6 @@ export const MonacoDiffEditor: FC<MonacoDiffEditorProps> = ({
       <DiffEditor
         height="100%"
         language={language}
-        modified={modified}
         onMount={handleMount}
         options={{
           readOnly: false,
@@ -107,7 +137,6 @@ export const MonacoDiffEditor: FC<MonacoDiffEditorProps> = ({
           renderOverviewRuler: true,
           ...options,
         }}
-        original={original}
         theme={theme}
       />
     </div>

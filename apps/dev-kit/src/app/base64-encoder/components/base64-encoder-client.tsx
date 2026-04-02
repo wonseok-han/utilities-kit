@@ -58,7 +58,7 @@ export function Base64EncoderClient() {
     setMode,
     swapMode,
   } = useBase64Store();
-  const { addEntry } = useToolHistory('base64-encoder');
+  const { addEntry } = useToolHistory('base64-encoder', setInput);
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();

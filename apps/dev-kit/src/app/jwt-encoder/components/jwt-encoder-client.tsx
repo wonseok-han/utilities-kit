@@ -3,6 +3,7 @@
 import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, Tabs, useSnackbar } from '@repo/ui';
 import { useJwtStore } from '@store';
+import { useCallback } from 'react';
 
 // ===== 샘플 데이터 정의 =====
 const SAMPLE_DATA = [
@@ -59,7 +60,23 @@ export function JwtEncoderClient() {
     setPayloadInput,
     swapMode,
   } = useJwtStore();
-  const { addEntry } = useToolHistory('jwt-encoder');
+
+  const handleHistoryRestore = useCallback(
+    (value: string) => {
+      if (value.includes('|||')) {
+        const parts = value.split('|||');
+        setHeaderInput(parts[0] ?? '');
+        setPayloadInput(parts[1] ?? '');
+        setMode('encode');
+      } else {
+        setInput(value);
+        setMode('decode');
+      }
+    },
+    [setHeaderInput, setPayloadInput, setMode, setInput]
+  );
+
+  const { addEntry } = useToolHistory('jwt-encoder', handleHistoryRestore);
 
   // ===== 현재 모드에 맞는 output 계산 =====
   const output = mode === 'encode' ? encodeOutput : decodeOutput;

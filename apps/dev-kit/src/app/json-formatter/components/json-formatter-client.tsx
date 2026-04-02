@@ -39,7 +39,7 @@ export function JsonFormatterClient() {
     output,
     setInput,
   } = useJsonStore();
-  const { addEntry } = useToolHistory('json-formatter');
+  const { addEntry } = useToolHistory('json-formatter', setInput);
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();

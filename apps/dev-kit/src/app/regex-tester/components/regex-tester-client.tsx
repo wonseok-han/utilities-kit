@@ -3,7 +3,7 @@
 import { useToolHistory } from '@hooks/use-tool-history';
 import { ActionButton, CodeTextarea, useSnackbar } from '@repo/ui';
 import { useRegexStore } from '@store/regex-store';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 // ===== 샘플 데이터 정의 =====
 const SAMPLE_PATTERNS = [
@@ -113,7 +113,20 @@ export function RegexTesterClient() {
     testString,
   } = useRegexStore();
 
-  const { addEntry } = useToolHistory('regex-tester');
+  const handleHistoryRestore = useCallback(
+    (value: string) => {
+      const separatorIndex = value.indexOf(' / ');
+      if (separatorIndex !== -1) {
+        setPattern(value.slice(0, separatorIndex));
+        setTestString(value.slice(separatorIndex + 3));
+      } else {
+        setPattern(value);
+      }
+    },
+    [setPattern, setTestString]
+  );
+
+  const { addEntry } = useToolHistory('regex-tester', handleHistoryRestore);
 
   // ===== 스낵바 훅 사용 =====
   const { showSnackbar } = useSnackbar();

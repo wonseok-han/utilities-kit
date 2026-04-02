@@ -1,12 +1,11 @@
 'use client';
 
-import { useToolHistory } from '@hooks/use-tool-history';
+import { dispatchRestore, useToolHistory } from '@hooks/use-tool-history';
 import { usePathname } from 'next/navigation';
 
 export interface HistoryPanelProps {
   isOpen?: boolean;
   onClose?: () => void;
-  onRestore?: (input: string) => void;
 }
 
 const TOOL_ID_MAP: Record<string, string> = {
@@ -55,13 +54,7 @@ function truncate(text: string, max: number): string {
   return `${text.slice(0, max)}...`;
 }
 
-function HistoryPanelContent({
-  onClose,
-  onRestore,
-}: {
-  onClose?: () => void;
-  onRestore?: (input: string) => void;
-}) {
+function HistoryPanelContent({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const toolId = TOOL_ID_MAP[pathname] || '';
   const toolName = TOOL_NAME_MAP[toolId] || '';
@@ -139,7 +132,7 @@ function HistoryPanelContent({
                 >
                   <button
                     className="flex-1 min-w-0 text-left cursor-pointer"
-                    onClick={() => onRestore?.(entry.input)}
+                    onClick={() => dispatchRestore(toolId, entry.input)}
                     title="클릭하여 복원"
                   >
                     <p className="text-sm font-mono text-on-surface truncate">
@@ -178,11 +171,7 @@ function HistoryPanelContent({
   );
 }
 
-export function HistoryPanel({
-  isOpen = false,
-  onClose,
-  onRestore,
-}: HistoryPanelProps) {
+export function HistoryPanel({ isOpen = false, onClose }: HistoryPanelProps) {
   return (
     <>
       {/* 모바일 오버레이 */}
@@ -199,7 +188,7 @@ export function HistoryPanel({
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
       >
-        <HistoryPanelContent onClose={onClose} onRestore={onRestore} />
+        <HistoryPanelContent onClose={onClose} />
       </div>
 
       {/* 데스크톱: push 방식 */}
@@ -211,7 +200,7 @@ export function HistoryPanel({
         }}
       >
         <div className="w-80 h-full bg-surface border-l border-border">
-          <HistoryPanelContent onClose={onClose} onRestore={onRestore} />
+          <HistoryPanelContent onClose={onClose} />
         </div>
       </div>
     </>

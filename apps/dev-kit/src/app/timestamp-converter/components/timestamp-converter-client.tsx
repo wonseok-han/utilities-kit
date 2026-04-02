@@ -107,7 +107,7 @@ export function TimestampConverterClient() {
     setSelectedFormats,
     setSelectedTimezones,
   } = useTimestampConverterStore();
-  const { addEntry } = useToolHistory('timestamp-converter');
+  const { addEntry } = useToolHistory('timestamp-converter', setInput);
   const [parsed, setParsed] = useState<Dayjs | null>(null);
   const [inputType, setInputType] = useState<ParsedDateType>('invalid');
   const [error, setError] = useState<string | null>(null);

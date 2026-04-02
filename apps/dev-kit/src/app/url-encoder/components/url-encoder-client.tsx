@@ -83,7 +83,7 @@ export function UrlEncoderClient() {
   const [error, setError] = useState('');
   const [parsedParams, setParsedParams] = useState<ParsedParam[]>([]);
   const { showSnackbar } = useSnackbar();
-  const { addEntry } = useToolHistory('url-encoder');
+  const { addEntry } = useToolHistory('url-encoder', setInput);
 
   const process = useCallback(() => {
     if (!input.trim()) {

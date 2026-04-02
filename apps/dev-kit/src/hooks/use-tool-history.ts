@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 const MAX_ENTRIES = 5;
-const EVENT_NAME = 'tool-history-update';
+const UPDATE_EVENT = 'tool-history-update';
+const RESTORE_EVENT = 'tool-history-restore';
 
 export interface ToolHistoryEntry {
   id: string;
@@ -28,14 +29,23 @@ function loadEntries(toolId: string): ToolHistoryEntry[] {
 function saveEntries(toolId: string, entries: ToolHistoryEntry[]) {
   try {
     localStorage.setItem(getStorageKey(toolId), JSON.stringify(entries));
-    // 다른 훅 인스턴스에 변경 알림
-    window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: { toolId } }));
+    window.dispatchEvent(new CustomEvent(UPDATE_EVENT, { detail: { toolId } }));
   } catch {
     // localStorage full or unavailable
   }
 }
 
-export function useToolHistory(toolId: string) {
+/** 히스토리 복원 이벤트 발행 (패널 → 도구) */
+export function dispatchRestore(toolId: string, input: string) {
+  window.dispatchEvent(
+    new CustomEvent(RESTORE_EVENT, { detail: { input, toolId } })
+  );
+}
+
+export function useToolHistory(
+  toolId: string,
+  onRestore?: (input: string) => void
+) {
   const [entries, setEntries] = useState<ToolHistoryEntry[]>([]);
 
   // 마운트 시 + toolId 변경 시 로드
@@ -51,9 +61,25 @@ export function useToolHistory(toolId: string) {
         setEntries(loadEntries(toolId));
       }
     };
-    window.addEventListener(EVENT_NAME, handler);
-    return () => window.removeEventListener(EVENT_NAME, handler);
+    window.addEventListener(UPDATE_EVENT, handler);
+    return () => window.removeEventListener(UPDATE_EVENT, handler);
   }, [toolId]);
+
+  // 패널에서 복원 요청을 수신
+  useEffect(() => {
+    if (!onRestore) return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as {
+        input: string;
+        toolId: string;
+      };
+      if (detail.toolId === toolId) {
+        onRestore(detail.input);
+      }
+    };
+    window.addEventListener(RESTORE_EVENT, handler);
+    return () => window.removeEventListener(RESTORE_EVENT, handler);
+  }, [toolId, onRestore]);
 
   const addEntry = useCallback(
     (input: string, label?: string) => {

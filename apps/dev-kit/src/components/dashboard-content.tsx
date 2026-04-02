@@ -7,12 +7,22 @@ import { useCallback, useEffect, useState } from 'react';
 const RECENT_TOOLS_KEY = 'dev-kit-recent-tools';
 const MAX_RECENT = 3;
 
-const toolCards = [
+interface ToolDef {
+  id: string;
+  title: string;
+  description: string;
+  color: 'blue' | 'green' | 'purple' | 'orange' | 'red' | 'indigo' | 'emerald';
+  icon: React.ReactNode;
+  onboarding: string;
+}
+
+const tools: ToolDef[] = [
   {
     id: 'json-formatter',
     title: 'JSON Formatter',
     description: 'JSON 데이터를 예쁘게 포맷하고 검증하세요',
-    color: 'blue' as const,
+    color: 'blue',
+    onboarding: 'JSON을 정리하거나 검증하고 싶다면?',
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -33,7 +43,8 @@ const toolCards = [
     id: 'base64-encoder',
     title: 'Base64 Encoder',
     description: '텍스트와 파일을 Base64로 인코딩/디코딩',
-    color: 'green' as const,
+    color: 'green',
+    onboarding: '텍스트를 인코딩/디코딩하고 싶다면?',
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -54,7 +65,8 @@ const toolCards = [
     id: 'jwt-encoder',
     title: 'JWT Encoder',
     description: 'JWT 토큰을 생성하고 디코딩하여 분석하세요',
-    color: 'red' as const,
+    color: 'red',
+    onboarding: 'JWT 토큰을 분석하거나 생성하고 싶다면?',
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -75,7 +87,8 @@ const toolCards = [
     id: 'regex-tester',
     title: 'Regex Tester',
     description: '정규식 패턴을 테스트하고 매치 결과를 확인하세요',
-    color: 'purple' as const,
+    color: 'purple',
+    onboarding: '정규식을 테스트하고 싶다면?',
     icon: (
       <svg
         className="w-6 h-6"
@@ -96,7 +109,8 @@ const toolCards = [
     id: 'timestamp-converter',
     title: 'Timestamp Converter',
     description: 'Unix Timestamp와 날짜/시간을 상호 변환하세요',
-    color: 'orange' as const,
+    color: 'orange',
+    onboarding: '타임스탬프를 변환하고 싶다면?',
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -117,7 +131,8 @@ const toolCards = [
     id: 'diff',
     title: 'Diff Comparator',
     description: '두 텍스트의 차이점을 한눈에 비교하세요',
-    color: 'indigo' as const,
+    color: 'indigo',
+    onboarding: '두 텍스트를 비교하고 싶다면?',
     icon: (
       <svg
         className="w-5 h-5 text-white"
@@ -138,7 +153,8 @@ const toolCards = [
     id: 'web-editor',
     title: 'Web Editor',
     description: 'WYSIWYG 에디터로 손쉽게 문서를 작성하세요',
-    color: 'emerald' as const,
+    color: 'emerald',
+    onboarding: 'HTML 문서를 작성하고 싶다면?',
     icon: (
       <svg
         className="w-6 h-6"
@@ -158,14 +174,14 @@ const toolCards = [
   },
 ];
 
-const toolCardsMap = new Map(toolCards.map((t) => [t.id, t]));
+const toolsMap = new Map(tools.map((t) => [t.id, t]));
 
 function getRecentToolIds(): string[] {
   try {
     const stored = localStorage.getItem(RECENT_TOOLS_KEY);
     if (!stored) return [];
     const ids = JSON.parse(stored) as string[];
-    return ids.filter((id) => toolCardsMap.has(id));
+    return ids.filter((id) => toolsMap.has(id));
   } catch {
     return [];
   }
@@ -189,14 +205,13 @@ export function DashboardContent() {
     setRecentIds(getRecentToolIds());
   }, []);
 
-  // 다른 페이지에서 홈으로 돌아올 때 최근 사용 갱신
   useEffect(() => {
     if (pathname === '/') {
       setRecentIds(getRecentToolIds());
     }
   }, [pathname]);
 
-  const handleToolCardClick = useCallback(
+  const handleToolClick = useCallback(
     (id: string) => {
       addRecentTool(id);
       setRecentIds(getRecentToolIds());
@@ -206,60 +221,64 @@ export function DashboardContent() {
   );
 
   const recentTools = recentIds
-    .map((id) => toolCardsMap.get(id))
-    .filter(Boolean);
+    .map((id) => toolsMap.get(id))
+    .filter(Boolean) as ToolDef[];
 
   return (
     <div className="flex flex-col h-full overflow-y-auto p-6 md:p-8">
       {/* 헤더 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-on-surface mb-2">
-          Welcome to Dev Kit
-        </h1>
-        <p className="text-on-surface-muted">
-          개발자를 위한 필수 도구들을 한 곳에서
-        </p>
+        <h1 className="text-3xl font-bold text-on-surface mb-2">Dev Kit</h1>
+        <p className="text-on-surface-muted">무엇을 하고 싶으세요?</p>
       </div>
 
-      {/* 최근 사용 도구 */}
+      {/* 최근 사용 */}
       {recentTools.length > 0 && (
         <section className="mb-8">
           <h2 className="text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-3">
             최근 사용
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {recentTools.map(
-              (tool) =>
-                tool && (
-                  <ToolCard
-                    key={tool.id}
-                    color={tool.color}
-                    description={tool.description}
-                    icon={tool.icon}
-                    onClick={() => handleToolCardClick(tool.id)}
-                    title={tool.title}
-                  />
-                )
-            )}
+            {recentTools.map((tool) => (
+              <ToolCard
+                key={tool.id}
+                color={tool.color}
+                description={tool.description}
+                icon={tool.icon}
+                onClick={() => handleToolClick(tool.id)}
+                title={tool.title}
+              />
+            ))}
           </div>
         </section>
       )}
 
-      {/* 전체 도구 */}
+      {/* 온보딩 - 유스케이스 기반 도구 안내 */}
       <section>
         <h2 className="text-xs font-semibold text-on-surface-muted uppercase tracking-wider mb-3">
-          전체 도구
+          이런 일을 하고 싶다면
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {toolCards.map((tool) => (
-            <ToolCard
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {tools.map((tool) => (
+            <button
               key={tool.id}
-              color={tool.color}
-              description={tool.description}
-              icon={tool.icon}
-              onClick={() => handleToolCardClick(tool.id)}
-              title={tool.title}
-            />
+              className="group flex items-center gap-4 p-4 rounded-xl border border-border bg-surface-deep hover:border-accent/40 hover:bg-accent/5 transition-all cursor-pointer text-left"
+              onClick={() => handleToolClick(tool.id)}
+            >
+              <div
+                className={`w-10 h-10 bg-${tool.color}-600 rounded-lg flex items-center justify-center shrink-0`}
+              >
+                {tool.icon}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm text-on-surface-muted mb-0.5">
+                  {tool.onboarding}
+                </p>
+                <p className="text-sm font-semibold text-on-surface group-hover:text-accent transition-colors">
+                  {tool.title}
+                </p>
+              </div>
+            </button>
           ))}
         </div>
       </section>

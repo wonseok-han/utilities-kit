@@ -9,7 +9,7 @@ import Link from 'next/link';
 export function WebEditorHeader() {
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-bold text-accent mb-2">
+      <h1 className="text-2xl font-bold text-on-surface mb-2">
         Web Editor (Tiptap)
       </h1>
       <p className="text-on-surface-muted">

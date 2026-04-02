@@ -41,12 +41,6 @@ export const SIDEBAR_MENU_ITEMS: MenuItemType[] = [
     icon: 'webEditor',
     path: '/web-editor',
   },
-  {
-    id: 'cve-viewer',
-    label: 'CVE Viewer',
-    icon: 'security',
-    path: '/cve-viewer',
-  },
 ];
 
 // 경로별 메뉴 아이템을 빠르게 찾기 위한 맵

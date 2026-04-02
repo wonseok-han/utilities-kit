@@ -17,7 +17,7 @@ export function getApiBaseUrl(): string {
 
 /**
  * API URL을 생성합니다
- * @param path - API 경로 (예: '/api/cve')
+ * @param path - API 경로
  * @param params - 쿼리 파라미터 (선택사항)
  * @returns 완전한 API URL
  */

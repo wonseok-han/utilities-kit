@@ -1,9 +1,6 @@
 'use client';
 
-import { CVECard } from '@app/cve-viewer/components/cve-card';
 import { ToolCard } from '@repo/ui';
-import { ActionButton } from '@repo/ui';
-import { fetchRecentCVEs } from '@services/cve';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -136,9 +133,9 @@ const toolCards = [
     ),
   },
   {
-    id: 'cve-viewer',
-    title: 'CVE Viewer',
-    description: '최신 보안 취약점 정보를 확인하세요',
+    id: 'timestamp-converter',
+    title: 'Timestamp Converter',
+    description: 'Unix Timestamp와 날짜/시간을 상호 변환하세요',
     color: 'orange' as const,
     icon: (
       <svg
@@ -148,7 +145,7 @@ const toolCards = [
         viewBox="0 0 24 24"
       >
         <path
-          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2"
@@ -158,58 +155,20 @@ const toolCards = [
   },
 ];
 
-interface DashboardContentProps {
-  initialCVEs?: CVEDataType[];
-  metadata: PaginationType;
-}
-
-export function DashboardContent({
-  initialCVEs = [],
-  metadata,
-}: DashboardContentProps) {
+export function DashboardContent() {
   const router = useRouter();
-  const [cves, setCves] = useState<CVEDataType[]>(initialCVEs);
-  const [isLoading, setIsLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  // CVE 데이터 로드
-  useEffect(() => {
-    // 초기 메타데이터를 기반으로 최신순 데이터 조회
-    if (metadata) {
-      loadRecentCVEs();
-    } else if (initialCVEs.length > 0) {
-      // 서버에서 가져온 데이터가 있으면 스토어에 설정
-      setCves(initialCVEs);
-    }
-  }, [initialCVEs, metadata]);
-
-  const loadRecentCVEs = async () => {
-    setIsLoading(true);
-    try {
-      const totalPages = Math.ceil((metadata.totalResults || 1) / 10);
-      const result = await fetchRecentCVEs(totalPages, 10); // 최신 10개만
-      setCves(result.cves.reverse());
-    } catch (error) {
-      console.error('Failed to load recent CVEs:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleToolCardClick = (tool: string) => {
     router.push(`/${tool}`);
   };
 
-  const handleViewMoreCVEs = () => {
-    router.push('/cve-viewer');
-  };
-
-  // 자동 슬라이드 전환 (반응형에 따라 슬라이드 수 조정)
+  // 자동 슬라이드 전환
   useEffect(() => {
     const getSlidesPerView = () => {
-      if (window.innerWidth < 1024) return 1; // lg 미만: 1개 (basis-full)
-      if (window.innerWidth < 1280) return 2; // xl 미만: 2개 (lg:basis-1/2)
-      return 3; // xl 이상: 3개 (xl:basis-1/3)
+      if (window.innerWidth < 1024) return 1;
+      if (window.innerWidth < 1280) return 2;
+      return 3;
     };
 
     const interval = setInterval(() => {
@@ -220,121 +179,76 @@ export function DashboardContent({
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [toolCards.length]);
+  }, []);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* 메인 웰컴 섹션 */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-normal text-accent mb-4">
-            Welcome to Dev Kit
-          </h1>
-          <p className="text-on-surface-muted text-lg">
-            개발자를 위한 필수 도구들을 한 곳에서!!
-          </p>
-        </div>
-
-        {/* 도구 카드 캐러셀 */}
-        <div className="w-full mx-auto mb-8">
-          <div
-            aria-roledescription="carousel"
-            className="relative min-w-full mx-auto rounded-lg overflow-hidden max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl"
-            role="region"
-          >
-            <div
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-            >
-              {toolCards.map((tool) => (
-                <div
-                  key={tool.id}
-                  aria-roledescription="slide"
-                  className="min-w-0 shrink-0 grow-0 basis-full pl-1 lg:basis-1/2 xl:basis-1/3"
-                  role="group"
-                >
-                  <div className="p-1">
-                    <ToolCard
-                      color={tool.color}
-                      description={tool.description}
-                      icon={tool.icon}
-                      onClick={() => handleToolCardClick(tool.id)}
-                      title={tool.title}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* 인디케이터 */}
-            <div className="flex justify-center mt-4 space-x-2">
-              {(() => {
-                const getSlidesPerView = () => {
-                  if (window.innerWidth < 1024) return 1; // lg 미만: 1개
-                  if (window.innerWidth < 1280) return 2; // xl 미만: 2개
-                  return 3; // xl 이상: 3개
-                };
-                const slidesPerView = getSlidesPerView();
-                return Array.from(
-                  { length: Math.ceil(toolCards.length / slidesPerView) },
-                  (_, index) => (
-                    <button
-                      key={index}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        index === currentSlide
-                          ? 'bg-accent'
-                          : 'bg-surface-skeleton'
-                      }`}
-                      onClick={() => setCurrentSlide(index)}
-                    />
-                  )
-                );
-              })()}
-            </div>
-          </div>
-        </div>
+    <div className="flex flex-col h-full items-center justify-center p-8">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-normal text-accent mb-4">
+          Welcome to Dev Kit
+        </h1>
+        <p className="text-on-surface-muted text-lg">
+          개발자를 위한 필수 도구들을 한 곳에서!!
+        </p>
       </div>
 
-      {/* 최신 CVE 섹션 */}
-      <div className="p-8 border-t border-border">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-medium text-on-surface-secondary">
-            최신 CVE 보안 취약점
-          </h3>
-          <ActionButton onClick={handleViewMoreCVEs} variant="secondary">
-            더보기
-          </ActionButton>
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }, (_, i) => (
+      {/* 도구 카드 캐러셀 */}
+      <div className="w-full mx-auto mb-8">
+        <div
+          aria-roledescription="carousel"
+          className="relative min-w-full mx-auto rounded-lg overflow-hidden max-w-xs sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl"
+          role="region"
+        >
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          >
+            {toolCards.map((tool) => (
               <div
-                key={i}
-                className="bg-surface border border-border rounded-lg p-4 animate-pulse"
+                key={tool.id}
+                aria-roledescription="slide"
+                className="min-w-0 shrink-0 grow-0 basis-full pl-1 lg:basis-1/2 xl:basis-1/3"
+                role="group"
               >
-                <div className="h-4 bg-surface-elevated rounded mb-2" />
-                <div className="h-3 bg-surface-elevated rounded mb-4" />
-                <div className="h-3 bg-surface-elevated rounded" />
+                <div className="p-1">
+                  <ToolCard
+                    color={tool.color}
+                    description={tool.description}
+                    icon={tool.icon}
+                    onClick={() => handleToolCardClick(tool.id)}
+                    title={tool.title}
+                  />
+                </div>
               </div>
             ))}
           </div>
-        ) : cves.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {cves.slice(0, 6).map((cve) => (
-              <CVECard
-                key={`${cve.id}-${cve.publishedDate}-${cve.lastModifiedDate || Date.now()}`}
-                cve={cve}
-              />
-            ))}
+
+          {/* 인디케이터 */}
+          <div className="flex justify-center mt-4 space-x-2">
+            {(() => {
+              const getSlidesPerView = () => {
+                if (window.innerWidth < 1024) return 1;
+                if (window.innerWidth < 1280) return 2;
+                return 3;
+              };
+              const slidesPerView = getSlidesPerView();
+              return Array.from(
+                { length: Math.ceil(toolCards.length / slidesPerView) },
+                (_, index) => (
+                  <button
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentSlide
+                        ? 'bg-accent'
+                        : 'bg-surface-skeleton'
+                    }`}
+                    onClick={() => setCurrentSlide(index)}
+                  />
+                )
+              );
+            })()}
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-on-surface-muted">
-              최신 CVE 데이터를 불러오는 중...
-            </p>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
